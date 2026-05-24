@@ -12,7 +12,6 @@
 <style>
   * { font-family: 'Sarabun', sans-serif; }
   h1,h2,.font-display { font-family: 'Kanit', sans-serif; }
-
   :root {
     --blue-primary: #1d4ed8;
     --blue-light:   #eff6ff;
@@ -21,16 +20,11 @@
     --glass-bg:     rgba(255,255,255,0.7);
     --glass-border: rgba(255,255,255,0.9);
   }
-
   body { background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 40%, #e0f2fe 100%); min-height: 100vh; }
-
-  /* Sidebar */
   .sidebar { background: linear-gradient(180deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%); }
   .nav-item { transition: all .2s ease; border-radius: 12px; }
   .nav-item:hover { background: rgba(255,255,255,.15); transform: translateX(4px); }
   .nav-item.active { background: rgba(255,255,255,.2); box-shadow: 0 4px 15px rgba(0,0,0,.2); }
-
-  /* Cards */
   .glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -38,8 +32,6 @@
     border-radius: 20px;
     box-shadow: 0 8px 32px rgba(31,38,135,.1);
   }
-
-  /* Drag-and-drop zone */
   .drop-zone {
     border: 2.5px dashed #93c5fd;
     background: linear-gradient(135deg, rgba(239,246,255,.8), rgba(219,234,254,.6));
@@ -53,34 +45,21 @@
     transform: scale(1.01);
     box-shadow: 0 0 0 4px rgba(59,130,246,.15);
   }
-
-  /* Status badges */
   .badge-approved  { background:#dcfce7; color:#166534; }
   .badge-pending   { background:#fef9c3; color:#854d0e; }
   .badge-revision  { background:#fee2e2; color:#991b1b; }
-
-  /* Animations */
   @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
   .page { animation: fadeIn .35s ease; }
   .section-hidden { display:none!important; }
-
-  /* Custom select */
   select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
-
-  /* Scrollbar */
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:3px; }
-
-  /* Progress bar animation */
-  @keyframes progress { from{width:0} to{width:100%} }
-  .progress-bar { animation: progress 2.5s ease forwards; }
 </style>
 </head>
 <body>
 <div class="flex h-screen overflow-hidden">
 
-  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <!-- SIDEBAR -->
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 text-white overflow-y-auto">
-    <!-- Logo -->
     <div class="mb-8 mt-2">
       <div class="flex items-center gap-3 mb-1">
         <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -94,16 +73,15 @@
       <p class="text-xs text-blue-300 mt-1 ml-1">ระบบตรวจแผนการสอน</p>
     </div>
 
-    <!-- User info -->
+    <!-- ✅ User info โหลดจาก sessionStorage -->
     <div class="glass-card bg-white/10 border-white/20 p-3 mb-6 flex items-center gap-3">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center font-bold text-sm">ปย</div>
+      <div id="avatarInitials" class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center font-bold text-sm">--</div>
       <div class="flex-1 min-w-0">
-        <p class="font-semibold text-sm truncate">นายประยุทธ์ สอนเก่ง</p>
-        <p class="text-xs text-blue-300 truncate">วิทยาศาสตร์และเทคโนโลยี</p>
+        <p id="teacherName" class="font-semibold text-sm truncate">กำลังโหลด...</p>
+        <p id="teacherGroup" class="text-xs text-blue-300 truncate">—</p>
       </div>
     </div>
 
-    <!-- Nav items -->
     <nav class="space-y-1 flex-1">
       <button onclick="showPage('upload')" id="nav-upload" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
         <i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i> ส่งแผนการสอน
@@ -113,24 +91,24 @@
       </button>
     </nav>
 
-    <!-- Term info -->
     <div class="mt-auto pt-4 border-t border-white/20">
-      <button onclick="logout()" class="nav-item w-full flex items-center gap-3 px-4 py-2 text-left text-sm font-medium text-red-200 hover:text-white hover:bg-red-500/50 mb-4">
+      <!-- ✅ logout เรียก signOut จริงๆ ผ่าน supabase_integration.js -->
+      <button onclick="window._signOut()" class="nav-item w-full flex items-center gap-3 px-4 py-2 text-left text-sm font-medium text-red-200 hover:text-white hover:bg-red-500/50 mb-4">
         <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> ออกจากระบบ
       </button>
       <p class="text-xs text-blue-300 mb-1">ภาคเรียนปัจจุบัน</p>
-      <p class="font-semibold text-sm">ภาคเรียนที่ 1/2567</p>
-      <div class="flex items-center gap-2 mt-2">
+      <p id="currentTerm" class="font-semibold text-sm">—</p>
+      <div id="uploadStatusBadge" class="flex items-center gap-2 mt-2">
         <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
         <p class="text-xs text-blue-300">เปิดรับการส่งแผน</p>
       </div>
     </div>
   </aside>
 
-  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <!-- MAIN -->
   <main class="flex-1 overflow-y-auto p-6">
 
-    <!-- ─── PAGE: Upload ─────────────────────── -->
+    <!-- PAGE: Upload -->
     <section id="page-upload" class="page">
       <div class="mb-6">
         <h1 class="font-display text-2xl font-bold text-blue-900">ส่งแผนการสอน</h1>
@@ -140,15 +118,15 @@
       <!-- Stats row -->
       <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="glass-card p-4 text-center">
-          <p class="text-3xl font-display font-bold text-blue-700">3</p>
+          <p id="statTotal" class="text-3xl font-display font-bold text-blue-700">—</p>
           <p class="text-xs text-gray-500 mt-1">ส่งแล้วทั้งหมด</p>
         </div>
         <div class="glass-card p-4 text-center">
-          <p class="text-3xl font-display font-bold text-green-600">1</p>
+          <p id="statApproved" class="text-3xl font-display font-bold text-green-600">—</p>
           <p class="text-xs text-gray-500 mt-1">อนุมัติแล้ว</p>
         </div>
         <div class="glass-card p-4 text-center">
-          <p class="text-3xl font-display font-bold text-yellow-600">1</p>
+          <p id="statPending" class="text-3xl font-display font-bold text-yellow-600">—</p>
           <p class="text-xs text-gray-500 mt-1">รอการตรวจ</p>
         </div>
       </div>
@@ -183,7 +161,8 @@
         </div>
 
         <!-- Drag & Drop zone -->
-        <div id="dropZone" class="drop-zone p-10 text-center mb-5" onclick="document.getElementById('fileInput').click()"
+        <div id="dropZone" class="drop-zone p-10 text-center mb-5"
+             onclick="document.getElementById('fileInput').click()"
              ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
           <input type="file" id="fileInput" accept=".pdf" class="hidden" onchange="handleFileSelect(event)"/>
           <div id="dropContent">
@@ -203,13 +182,13 @@
           </div>
         </div>
 
-        <button onclick="submitPlan()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all duration-200 flex items-center justify-center gap-2">
+        <button id="btnSubmit" onclick="submitPlan()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all duration-200 flex items-center justify-center gap-2">
           <i class="fa-solid fa-paper-plane"></i> ส่งแผนการสอน
         </button>
       </div>
     </section>
 
-    <!-- ─── PAGE: History ─────────────────────── -->
+    <!-- PAGE: History -->
     <section id="page-history" class="page section-hidden">
       <div class="mb-6">
         <h1 class="font-display text-2xl font-bold text-blue-900">ประวัติการส่งแผนการสอน</h1>
@@ -217,15 +196,14 @@
       </div>
 
       <div class="glass-card p-6">
-        <!-- Filter -->
         <div class="flex items-center justify-between mb-4">
           <div class="flex gap-2">
-            <button onclick="filterTable('all')" id="filter-all" class="filter-btn active-filter px-4 py-2 text-sm rounded-lg bg-blue-600 text-white font-medium">ทั้งหมด</button>
-            <button onclick="filterTable('Pending')" id="filter-pending" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">รอตรวจ</button>
-            <button onclick="filterTable('Approved')" id="filter-approved" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">อนุมัติ</button>
-            <button onclick="filterTable('Revision Needed')" id="filter-revision" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">แก้ไข</button>
+            <button onclick="filterTable('all')"              id="filter-all"      class="filter-btn px-4 py-2 text-sm rounded-lg bg-blue-600 text-white font-medium">ทั้งหมด</button>
+            <button onclick="filterTable('Pending')"          id="filter-pending"  class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">รอตรวจ</button>
+            <button onclick="filterTable('Approved')"         id="filter-approved" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">อนุมัติ</button>
+            <button onclick="filterTable('Revision Needed')"  id="filter-revision" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">แก้ไข</button>
           </div>
-          <span class="text-xs text-gray-500">ภาคเรียน 1/2567</span>
+          <button onclick="loadHistory()" class="text-xs text-blue-500 hover:text-blue-700"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
         </div>
 
         <div class="overflow-x-auto">
@@ -241,6 +219,7 @@
               </tr>
             </thead>
             <tbody id="historyTable">
+              <tr><td colspan="6" class="py-8 text-center text-gray-400">กำลังโหลด...</td></tr>
             </tbody>
           </table>
         </div>
@@ -249,123 +228,217 @@
   </main>
 </div>
 
-<!-- ================= เพิ่มโค้ดเชื่อม Backend ตรงนี้ ================= -->
-<!-- 1. ดึง Library ของ Supabase มาใช้งาน -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- 2. ดึงไฟล์ตั้งค่าของคุณมา (ถ้ายังไม่มีไฟล์นี้ ให้จำลองไปก่อนได้ครับ) -->
 <script src="supabase_integration.js"></script>
 
 <script>
-// ── Mock data ────────────────────────────────────────────────
-const mockPlans = [
-  { week:1, subject:'วิทยาศาสตร์ ม.1', date:'1 มิ.ย. 2567', status:'Approved',        feedback:'ดีมาก ผ่านการอนุมัติ',                       url:'#' },
-  { week:2, subject:'วิทยาศาสตร์ ม.1', date:'8 มิ.ย. 2567', status:'Pending',         feedback:'-',                                          url:'#' },
-  { week:3, subject:'วิทยาศาสตร์ ม.1', date:'15 มิ.ย. 2567',status:'Revision Needed', feedback:'กรุณาเพิ่มกิจกรรม Active Learning',          url:'#' },
-];
+'use strict';
 
+// ── โหลด Profile และ Settings ────────────────────────────────
+let allPlans = [];
 let selectedFile = null;
 
-// ── Tab navigation ───────────────────────────────────────────
+(async function init() {
+  // โหลด profile จาก sessionStorage (auth guard ใน supabase_integration.js จัดการ redirect แล้ว)
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (profile.name) {
+    document.getElementById('teacherName').textContent = profile.name;
+    document.getElementById('teacherGroup').textContent = profile.subject_group || 'ครูผู้สอน';
+    const initials = profile.name.replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0, 2);
+    document.getElementById('avatarInitials').textContent = initials || '--';
+  }
+
+  // โหลด current_term และ upload_open จาก system_settings
+  try {
+    const term       = await getSystemSetting('current_term');
+    const uploadOpen = await getSystemSetting('upload_open');
+    if (term) document.getElementById('currentTerm').textContent = `ภาคเรียนที่ ${term}`;
+    if (uploadOpen === 'false') {
+      document.getElementById('uploadStatusBadge').innerHTML =
+        `<div class="w-2 h-2 bg-red-400 rounded-full"></div><p class="text-xs text-red-300">ปิดรับการส่งแผนชั่วคราว</p>`;
+      document.getElementById('btnSubmit').disabled = true;
+      document.getElementById('btnSubmit').classList.add('opacity-50', 'cursor-not-allowed');
+    }
+  } catch (_) {}
+
+  // โหลดสถิติ
+  await loadStats();
+})();
+
+// ── Stats ─────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const plans = await getMyPlans();
+    allPlans = plans;
+    document.getElementById('statTotal').textContent    = plans.length;
+    document.getElementById('statApproved').textContent = plans.filter(p => p.status === 'Approved').length;
+    document.getElementById('statPending').textContent  = plans.filter(p => p.status === 'Pending').length;
+  } catch (err) {
+    console.error('loadStats error:', err);
+  }
+}
+
+// ── Tab navigation ────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
   document.querySelectorAll('button[id^="nav-"]').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + name).classList.remove('section-hidden');
   document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'history') renderTable(mockPlans);
+  if (name === 'history') loadHistory();
 }
 
-// ── Table rendering ──────────────────────────────────────────
+// ── History ───────────────────────────────────────────────────
+async function loadHistory() {
+  const tbody = document.getElementById('historyTable');
+  tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
+  try {
+    allPlans = await getMyPlans();
+    renderTable(allPlans);
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
+  }
+}
+
 function renderTable(data) {
   const tbody = document.getElementById('historyTable');
-  tbody.innerHTML = data.map(p => `
-    <tr class="border-b border-blue-50 hover:bg-blue-50/40 transition-colors">
-      <td class="py-3 px-2 font-medium text-blue-900">สัปดาห์ที่ ${p.week}</td>
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ยังไม่มีประวัติการส่งแผน</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(p => {
+    const date = p.submitted_at
+      ? new Date(p.submitted_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
+      : '—';
+    const fileLink = p.drive_url
+      ? `<a href="${p.drive_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>`
+      : `<span class="text-gray-400 text-xs">—</span>`;
+    return `<tr class="border-b border-blue-50 hover:bg-blue-50/40 transition-colors">
+      <td class="py-3 px-2 font-medium text-blue-900">สัปดาห์ที่ ${p.week_number}</td>
       <td class="py-3 px-2 text-gray-700">${p.subject}</td>
-      <td class="py-3 px-2 text-gray-500">${p.date}</td>
+      <td class="py-3 px-2 text-gray-500">${date}</td>
       <td class="py-3 px-2">${badgeHTML(p.status)}</td>
-      <td class="py-3 px-2 text-gray-600 max-w-xs truncate">${p.feedback}</td>
-      <td class="py-3 px-2">
-        <a href="${p.url}" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>
-      </td>
-    </tr>`).join('');
+      <td class="py-3 px-2 text-gray-600 max-w-xs truncate">${p.feedback || '—'}</td>
+      <td class="py-3 px-2">${fileLink}</td>
+    </tr>`;
+  }).join('');
 }
 
 function badgeHTML(status) {
   const map = {
-    'Approved':       ['badge-approved','fa-circle-check','อนุมัติแล้ว'],
-    'Pending':        ['badge-pending', 'fa-clock',        'รอตรวจ'],
-    'Revision Needed':['badge-revision','fa-rotate-left',  'ต้องแก้ไข'],
+    'Approved':        ['badge-approved', 'fa-circle-check', 'อนุมัติแล้ว'],
+    'Pending':         ['badge-pending',  'fa-clock',        'รอตรวจ'],
+    'Revision Needed': ['badge-revision', 'fa-rotate-left',  'ต้องแก้ไข'],
   };
-  const [cls, icon, label] = map[status] || ['badge-pending','fa-question','ไม่ทราบ'];
+  const [cls, icon, label] = map[status] || ['badge-pending', 'fa-question', 'ไม่ทราบ'];
   return `<span class="${cls} px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1"><i class="fa-solid ${icon}"></i>${label}</span>`;
 }
 
 function filterTable(key) {
-  document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('bg-blue-600','text-white'); b.classList.add('bg-white/80','text-gray-600'); });
-  const active = key === 'all' ? document.getElementById('filter-all') : document.getElementById('filter-'+key.replace(' ','-').toLowerCase());
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('bg-blue-600','text-white');
+    b.classList.add('bg-white/80','text-gray-600');
+  });
+  const btnId = key === 'all' ? 'filter-all' : `filter-${key.replace(' Needed','').toLowerCase()}`;
+  const active = document.getElementById(btnId);
   if (active) { active.classList.add('bg-blue-600','text-white'); active.classList.remove('bg-white/80','text-gray-600'); }
-  renderTable(key === 'all' ? mockPlans : mockPlans.filter(p => p.status === key));
+  renderTable(key === 'all' ? allPlans : allPlans.filter(p => p.status === key));
 }
 
-// ── File handling ────────────────────────────────────────────
+// ── File handling ─────────────────────────────────────────────
 function handleDragOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
 function handleDragLeave(e) { document.getElementById('dropZone').classList.remove('drag-over'); }
-function handleDrop(e)      { e.preventDefault(); document.getElementById('dropZone').classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
-function handleFileSelect(e){ const f = e.target.files[0]; if (f) setFile(f); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f) setFile(f);
+}
+function handleFileSelect(e) { const f = e.target.files[0]; if (f) setFile(f); }
 
 function setFile(f) {
-  if (f.type !== 'application/pdf') { Swal.fire({icon:'error',title:'ไฟล์ไม่ถูกต้อง',text:'กรุณาเลือกไฟล์ PDF เท่านั้น',confirmButtonColor:'#3b82f6'}); return; }
-  if (f.size > 10*1024*1024) { Swal.fire({icon:'error',title:'ไฟล์ใหญ่เกินไป',text:'ขนาดไฟล์ต้องไม่เกิน 10 MB',confirmButtonColor:'#3b82f6'}); return; }
+  if (f.type !== 'application/pdf') {
+    Swal.fire({ icon:'error', title:'ไฟล์ไม่ถูกต้อง', text:'กรุณาเลือกไฟล์ PDF เท่านั้น', confirmButtonColor:'#3b82f6' });
+    return;
+  }
+  if (f.size > 10 * 1024 * 1024) {
+    Swal.fire({ icon:'error', title:'ไฟล์ใหญ่เกินไป', text:'ขนาดไฟล์ต้องไม่เกิน 10 MB', confirmButtonColor:'#3b82f6' });
+    return;
+  }
   selectedFile = f;
   document.getElementById('dropContent').classList.add('hidden');
   document.getElementById('fileSelected').classList.remove('hidden');
   document.getElementById('fileName').textContent = f.name;
-  document.getElementById('fileSize').textContent = (f.size/1024).toFixed(1) + ' KB';
+  document.getElementById('fileSize').textContent  = (f.size / 1024).toFixed(1) + ' KB';
 }
 
 function clearFile(e) {
-  if(e && e.stopPropagation) e.stopPropagation();
+  if (e && e.stopPropagation) e.stopPropagation();
   selectedFile = null;
   document.getElementById('fileInput').value = '';
   document.getElementById('dropContent').classList.remove('hidden');
   document.getElementById('fileSelected').classList.add('hidden');
 }
 
-// ── Submit (Async สำหรับเชื่อมต่อของจริง) ───────────────────────────────────────────────────
+// ── Submit (✅ เชื่อมกับ uploadPlanViaGAS จริงๆ) ─────────────
 async function submitPlan() {
   const subject = document.getElementById('subject').value;
   const weekNum = document.getElementById('week').value;
-  
-  if (!subject || !weekNum) { Swal.fire({icon:'warning',title:'กรุณากรอกข้อมูลให้ครบ',text:'เลือกวิชาและสัปดาห์ก่อนส่ง',confirmButtonColor:'#3b82f6'}); return; }
-  if (!selectedFile)    { Swal.fire({icon:'warning',title:'ยังไม่ได้เลือกไฟล์',text:'กรุณาอัปโหลดไฟล์ PDF ก่อนส่ง',confirmButtonColor:'#3b82f6'}); return; }
+
+  if (!subject || !weekNum) {
+    Swal.fire({ icon:'warning', title:'กรุณากรอกข้อมูลให้ครบ', text:'เลือกวิชาและสัปดาห์ก่อนส่ง', confirmButtonColor:'#3b82f6' });
+    return;
+  }
+  if (!selectedFile) {
+    Swal.fire({ icon:'warning', title:'ยังไม่ได้เลือกไฟล์', text:'กรุณาอัปโหลดไฟล์ PDF ก่อนส่ง', confirmButtonColor:'#3b82f6' });
+    return;
+  }
 
   Swal.fire({
     title: '<span style="font-family:Kanit">กำลังส่งและวิเคราะห์แผนการสอน...</span>',
-    html: `
-      <div style="font-family:Sarabun;font-size:14px;color:#6b7280">
-        <div class="mb-4"><i class="fa-solid fa-robot text-blue-500 text-3xl"></i></div>
-        <p class="mb-2">AI กำลังตรวจสอบแผนการสอนของคุณ</p>
-        <p class="text-xs text-gray-400">กระบวนการนี้อาจใช้เวลาสักครู่...</p>
-      </div>`,
+    html: `<div style="font-family:Sarabun;font-size:14px;color:#6b7280">
+      <div class="mb-4"><i class="fa-solid fa-robot text-blue-500 text-3xl"></i></div>
+      <p class="mb-2">AI กำลังตรวจสอบแผนการสอนของคุณ</p>
+      <p class="text-xs text-gray-400">กระบวนการนี้อาจใช้เวลาสักครู่...</p>
+    </div>`,
     allowOutsideClick: false,
     showConfirmButton: false,
     didOpen: () => Swal.showLoading()
   });
 
-  try {
-    // ---------------------------------------------------------------------------------
-    // TODO: ใส่ URL ของ Google Apps Script (GAS) ของคุณที่ได้จากการ Deploy ใน Phase 2
-    // ---------------------------------------------------------------------------------
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzFYXeTLt0donEwycgTyw9ZJkgfmxjdpazqm3GvB8EwqNhrzjcuxRHvWPD08Pu-tAL3/exec";
-     
-  } catch (error) {
-    Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
-  }
-}
+  // ✅ URL ของ Google Apps Script (GAS)
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzFYXeTLt0donEwycgTyw9ZJkgfmxjdpazqm3GvB8EwqNhrzjcuxRHvWPD08Pu-tAL3/exec';
 
-// ── Logout ───────────────────────────────────────────────────
-function logout() {
-  window.location.href = 'index.html';
+  try {
+    // ✅ เรียก uploadPlanViaGAS จาก supabase_integration.js
+    const result = await uploadPlanViaGAS(subject, weekNum, selectedFile, GAS_URL);
+
+    await Swal.fire({
+      icon: 'success',
+      title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>',
+      html: result.aiSummary
+        ? `<div style="font-family:Sarabun;font-size:14px;color:#6b7280;text-align:left">
+            <p class="font-semibold text-gray-700 mb-2">สรุป AI:</p>
+            <p>${result.aiSummary}</p>
+          </div>`
+        : '<p style="font-family:Sarabun;font-size:14px">แผนของคุณถูกส่งและรอการตรวจสอบแล้ว</p>',
+      confirmButtonColor: '#3b82f6',
+      confirmButtonText: 'ดูประวัติการส่ง',
+    });
+
+    clearFile(null);
+    document.getElementById('subject').value = '';
+    document.getElementById('week').value    = '';
+    await loadStats();
+    showPage('history');
+
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: error.message,
+      confirmButtonColor: '#3b82f6',
+    });
+  }
 }
 </script>
 </body>
