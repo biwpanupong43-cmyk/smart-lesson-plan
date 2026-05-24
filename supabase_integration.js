@@ -1,379 +1,406 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Admin Dashboard — Smart Lesson Plan</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  * { font-family:'Sarabun',sans-serif; }
-  h1,h2,.kn { font-family:'Kanit',sans-serif; }
-  body { background:#09090b; color:#e4e4e7; min-height:100vh; }
-  .sidebar { background:linear-gradient(180deg,#18181b 0%,#09090b 100%); border-right:1px solid rgba(139,92,246,.15); }
-  .nav-item { transition:all .2s; border-radius:10px; }
-  .nav-item:hover { background:rgba(139,92,246,.1); }
-  .nav-item.active { background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(109,40,217,.15)); border-left:3px solid #a78bfa; color:#a78bfa!important; }
-  .nav-item.active i { color:#a78bfa!important; }
-  .card { background:rgba(24,24,27,.9); border:1px solid rgba(63,63,70,.8); border-radius:16px; }
-  .badge-admin    { background:rgba(139,92,246,.15); color:#a78bfa; border:1px solid rgba(139,92,246,.3); }
-  .badge-director { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
-  .badge-teacher  { background:rgba(34,197,94,.15);  color:#4ade80; border:1px solid rgba(34,197,94,.3); }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
-  .page { animation:fadeIn .3s ease; }
-  .section-hidden { display:none!important; }
-  table thead th { color:#71717a; font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
-  table tbody tr { border-bottom:1px solid rgba(63,63,70,.5); transition:background .15s; }
-  table tbody tr:hover { background:rgba(139,92,246,.05); }
-  input,select,textarea { background:#09090b!important; color:#e4e4e7!important; border-color:rgba(63,63,70,.8)!important; outline:none!important; }
-  input:focus,select:focus,textarea:focus { border-color:rgba(139,92,246,.6)!important; box-shadow:0 0 0 3px rgba(139,92,246,.1)!important; }
-  /* Toggle */
-  .toggle-checkbox:checked { right:0; border-color:#7c3aed; background:#7c3aed; }
-  .toggle-checkbox:checked + .toggle-label { background:#7c3aed; }
-  .toggle-checkbox { transition:.2s; }
-  /* Log timeline */
-  .log-item::before { content:''; position:absolute; left:-1px; top:50%; width:8px; height:8px; border-radius:50%; transform:translate(-50%,-50%); }
-  .log-info::before  { background:#60a5fa; }
-  .log-warn::before  { background:#fbbf24; }
-  .log-ok::before    { background:#4ade80; }
-  ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#3f3f46; border-radius:2px; }
-</style>
-</head>
-<body>
-<div class="flex h-screen overflow-hidden">
+/**
+ * supabase_integration.js
+ * ──────────────────────────────────────────────────────────────
+ * ไฟล์กลางสำหรับเชื่อมต่อ Supabase ทุกหน้าในระบบ Smart Lesson Plan
+ * โหลดหลังจาก <script src="@supabase/supabase-js@2"> เสมอ
+ * ──────────────────────────────────────────────────────────────
+ */
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 overflow-y-auto">
-    <div class="mb-8 mt-2 flex items-center gap-3">
-      <div class="w-10 h-10 bg-violet-900/50 border border-violet-500/30 rounded-xl flex items-center justify-center">
-        <i class="fa-solid fa-shield-halved text-violet-400"></i>
-      </div>
-      <div>
-        <p class="kn font-bold text-white text-sm">Admin Console</p>
-        <p class="text-xs text-zinc-500">Smart Lesson Plan</p>
-      </div>
-    </div>
-    <div class="card p-3 mb-5 flex items-center gap-3">
-      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white">สช</div>
-      <div>
-        <p class="text-sm font-semibold text-white">นายสมชาย ใจดี</p>
-        <span class="badge-admin text-xs px-2 py-0.5 rounded-full font-medium">Administrator</span>
-      </div>
-    </div>
-    <nav class="space-y-1 flex-1">
-      <button onclick="showPage('overview')"  id="nav-overview"  class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-server w-4 text-center text-violet-400"></i> System Overview</button>
-      <button onclick="showPage('users')"     id="nav-users"     class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-users-gear w-4 text-center text-zinc-500"></i> User Management</button>
-      <button onclick="showPage('integrate')" id="nav-integrate" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-plug-circle-bolt w-4 text-center text-zinc-500"></i> Integrations</button>
-      <button onclick="showPage('settings')"  id="nav-settings"  class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-sliders w-4 text-center text-zinc-500"></i> Settings</button>
-    </nav>
-    <div class="pt-4 border-t border-zinc-800">
-      <div class="flex items-center gap-2">
-        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-        <p class="text-xs text-zinc-500">All systems operational</p>
-      </div>
-      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2 mt-2 text-left text-sm text-red-400 hover:bg-red-500/20 hover:text-white rounded-lg transition-colors">
-        <i class="fa-solid fa-power-off"></i> ออกจากระบบ
-      </button>
-    </div>
-  </aside>
+'use strict';
 
-  <!-- MAIN -->
-  <main class="flex-1 overflow-y-auto p-6">
+// ═══════════════════════════════════════════════════════════════
+//  1. CONFIG — แก้ไขค่าตรงนี้ให้ตรงกับโปรเจกต์ Supabase ของคุณ
+// ═══════════════════════════════════════════════════════════════
+const SUPABASE_URL      = 'https://aamnvfnhtvmxwypgiorq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhbW52Zm5odHZteHd5cGdpb3JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTYwNDAsImV4cCI6MjA5NTE5MjA0MH0.dkvN9FVrz_ekrmvOUFOgGZxewG0S_tQyTJTp_kZeTVI';
 
-    <!-- ─── OVERVIEW ─── -->
-    <section id="page-overview" class="page">
-      <div class="mb-6">
-        <h1 class="kn text-2xl font-bold text-white">System Overview</h1>
-        <p class="text-zinc-500 text-sm mt-1">สถานะระบบและกิจกรรมล่าสุด</p>
-      </div>
-      <div class="grid grid-cols-4 gap-4 mb-6">
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-9 h-9 bg-violet-900/40 rounded-lg flex items-center justify-center"><i class="fa-solid fa-users text-violet-400"></i></div>
-            <p class="text-zinc-400 text-xs">Total Users</p>
-          </div>
-          <p class="kn text-3xl font-bold text-white">4</p>
-        </div>
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-9 h-9 bg-green-900/30 rounded-lg flex items-center justify-center"><i class="fa-solid fa-robot text-green-400"></i></div>
-            <p class="text-zinc-400 text-xs">Gemini API</p>
-          </div>
-          <p class="text-green-400 font-semibold text-sm flex items-center gap-1"><i class="fa-solid fa-circle-check text-xs"></i> Connected</p>
-        </div>
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-9 h-9 bg-blue-900/30 rounded-lg flex items-center justify-center"><i class="fa-solid fa-database text-blue-400"></i></div>
-            <p class="text-zinc-400 text-xs">Database</p>
-          </div>
-          <p class="text-green-400 font-semibold text-sm flex items-center gap-1"><i class="fa-solid fa-circle-check text-xs"></i> Healthy</p>
-        </div>
-        <div class="card p-4">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-9 h-9 bg-amber-900/30 rounded-lg flex items-center justify-center"><i class="fa-brands fa-google-drive text-amber-400"></i></div>
-            <p class="text-zinc-400 text-xs">Google Drive</p>
-          </div>
-          <p class="text-green-400 font-semibold text-sm flex items-center gap-1"><i class="fa-solid fa-circle-check text-xs"></i> Connected</p>
-        </div>
-      </div>
-      <!-- System Log -->
-      <div class="card p-5">
-        <h2 class="kn font-semibold text-white mb-4"><i class="fa-solid fa-terminal text-violet-400 mr-2"></i>System Log</h2>
-        <div class="relative border-l border-zinc-700/60 ml-4 space-y-4 pl-6">
-          <div class="log-item log-ok relative"><span class="text-xs text-zinc-500 mr-3">10:32</span><span class="text-zinc-300 text-sm">User <strong>teacher01</strong> uploaded lesson plan (week 2)</span></div>
-          <div class="log-item log-info relative"><span class="text-xs text-zinc-500 mr-3">10:31</span><span class="text-zinc-300 text-sm">Gemini API called — ai_summary generated successfully</span></div>
-          <div class="log-item log-ok relative"><span class="text-xs text-zinc-500 mr-3">09:15</span><span class="text-zinc-300 text-sm">director01 approved lesson plan (week 1 — วิทย์ ม.1)</span></div>
-          <div class="log-item log-warn relative"><span class="text-xs text-zinc-500 mr-3">08:54</span><span class="text-zinc-300 text-sm">Gemini API latency high: 4.2s response time</span></div>
-          <div class="log-item log-info relative"><span class="text-xs text-zinc-500 mr-3">08:00</span><span class="text-zinc-300 text-sm">System startup — all services initialized</span></div>
-        </div>
-      </div>
-    </section>
+// เส้นทาง redirect ตาม role (ปรับตามโครงสร้างโฟลเดอร์ของคุณ)
+const ROLE_ROUTES = {
+  teacher:  'teacher_dashboard.html',
+  director: 'director_dashboard.html',
+  admin:    'admin_dashboard.html',
+};
 
-    <!-- ─── USERS ─── -->
-    <section id="page-users" class="page section-hidden">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="kn text-2xl font-bold text-white">User Management</h1>
-          <p class="text-zinc-500 text-sm">จัดการบัญชีผู้ใช้งานทั้งหมด</p>
-        </div>
-        <button onclick="openAddUserModal()" class="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl flex items-center gap-2 transition-colors">
-          <i class="fa-solid fa-plus"></i> เพิ่มผู้ใช้
-        </button>
-      </div>
-      <div class="card p-5">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead><tr>
-              <th class="text-left py-3 px-3">ชื่อ</th>
-              <th class="text-left py-3 px-3">บทบาท</th>
-              <th class="text-left py-3 px-3">กลุ่มสาระ</th>
-              <th class="text-left py-3 px-3">Username</th>
-              <th class="text-left py-3 px-3">วันที่สร้าง</th>
-              <th class="text-left py-3 px-3">Action</th>
-            </tr></thead>
-            <tbody>
-              <tr><td class="py-3 px-3 font-medium text-white">นายสมชาย ใจดี</td><td class="py-3 px-3"><span class="badge-admin text-xs px-2 py-0.5 rounded-full">admin</span></td><td class="py-3 px-3 text-zinc-500">—</td><td class="py-3 px-3 text-zinc-400 font-mono text-xs">admin01</td><td class="py-3 px-3 text-zinc-500 text-xs">1 มิ.ย. 67</td><td class="py-3 px-3"><button class="text-zinc-600 text-xs cursor-not-allowed" disabled><i class="fa-solid fa-lock"></i> Protected</button></td></tr>
-              <tr><td class="py-3 px-3 font-medium text-white">นางสาวอาภา วิชาการ</td><td class="py-3 px-3"><span class="badge-director text-xs px-2 py-0.5 rounded-full">director</span></td><td class="py-3 px-3 text-zinc-500">—</td><td class="py-3 px-3 text-zinc-400 font-mono text-xs">director01</td><td class="py-3 px-3 text-zinc-500 text-xs">1 มิ.ย. 67</td><td class="py-3 px-3"><button onclick="editUser('director01')" class="text-violet-400 hover:text-violet-300 text-xs"><i class="fa-solid fa-pen-to-square mr-1"></i>แก้ไข</button></td></tr>
-              <tr><td class="py-3 px-3 font-medium text-white">นายประยุทธ์ สอนเก่ง</td><td class="py-3 px-3"><span class="badge-teacher text-xs px-2 py-0.5 rounded-full">teacher</span></td><td class="py-3 px-3 text-zinc-400 text-xs">วิทยาศาสตร์</td><td class="py-3 px-3 text-zinc-400 font-mono text-xs">teacher01</td><td class="py-3 px-3 text-zinc-500 text-xs">1 มิ.ย. 67</td><td class="py-3 px-3"><button onclick="editUser('teacher01')" class="text-violet-400 hover:text-violet-300 text-xs"><i class="fa-solid fa-pen-to-square mr-1"></i>แก้ไข</button></td></tr>
-              <tr><td class="py-3 px-3 font-medium text-white">นางมาลี รักเรียน</td><td class="py-3 px-3"><span class="badge-teacher text-xs px-2 py-0.5 rounded-full">teacher</span></td><td class="py-3 px-3 text-zinc-400 text-xs">ภาษาไทย</td><td class="py-3 px-3 text-zinc-400 font-mono text-xs">teacher02</td><td class="py-3 px-3 text-zinc-500 text-xs">1 มิ.ย. 67</td><td class="py-3 px-3"><button onclick="editUser('teacher02')" class="text-violet-400 hover:text-violet-300 text-xs"><i class="fa-solid fa-pen-to-square mr-1"></i>แก้ไข</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
+// ═══════════════════════════════════════════════════════════════
+//  2. สร้าง Supabase Client (singleton — ใช้ร่วมกันทุกหน้า)
+// ═══════════════════════════════════════════════════════════════
+// ป้องกันการสร้างซ้ำถ้าหน้า index.html สร้างไว้แล้ว
+const db = (typeof window._supabaseClient !== 'undefined')
+  ? window._supabaseClient
+  : (() => {
+      const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      window._supabaseClient = client;
+      return client;
+    })();
 
-    <!-- ─── INTEGRATIONS ─── -->
-    <section id="page-integrate" class="page section-hidden">
-      <div class="mb-6">
-        <h1 class="kn text-2xl font-bold text-white">Integrations</h1>
-        <p class="text-zinc-500 text-sm">ตั้งค่าการเชื่อมต่อ API ภายนอก</p>
-      </div>
-      <div class="space-y-4">
-        <div class="card p-6">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 bg-blue-900/30 rounded-xl flex items-center justify-center"><i class="fa-solid fa-robot text-blue-400 text-lg"></i></div>
-            <div><p class="font-semibold text-white">Gemini API</p><p class="text-zinc-500 text-xs">Google AI Studio</p></div>
-            <span class="ml-auto bg-green-900/30 text-green-400 text-xs px-3 py-1 rounded-full border border-green-500/30">Connected</span>
-          </div>
-          <label class="block text-xs text-zinc-400 mb-2">API Key</label>
-          <div class="flex gap-2">
-            <input type="password" id="geminiKey" value="AIzaSyMockKeyXXXXXXXXXXXXXXXXXXXXXXXXXX" class="flex-1 bg-black/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm font-mono"/>
-            <button onclick="toggleVisibility('geminiKey',this)" class="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-400 hover:text-white text-sm"><i class="fa-solid fa-eye"></i></button>
-            <button onclick="saveKey('gemini')" class="px-4 py-2 bg-violet-700 hover:bg-violet-600 text-white text-sm rounded-lg font-medium transition-colors">บันทึก</button>
-          </div>
-        </div>
-        <div class="card p-6">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 bg-amber-900/30 rounded-xl flex items-center justify-center"><i class="fa-brands fa-google-drive text-amber-400 text-lg"></i></div>
-            <div><p class="font-semibold text-white">Google Drive</p><p class="text-zinc-500 text-xs">Storage folder for lesson plans</p></div>
-            <span class="ml-auto bg-green-900/30 text-green-400 text-xs px-3 py-1 rounded-full border border-green-500/30">Connected</span>
-          </div>
-          <label class="block text-xs text-zinc-400 mb-2">Folder ID</label>
-          <div class="flex gap-2">
-            <input type="text" id="driveFolder" value="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs" class="flex-1 bg-black/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm font-mono"/>
-            <button onclick="saveKey('drive')" class="px-4 py-2 bg-violet-700 hover:bg-violet-600 text-white text-sm rounded-lg font-medium transition-colors">บันทึก</button>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ─── SETTINGS ─── -->
-    <section id="page-settings" class="page section-hidden">
-      <div class="mb-6">
-        <h1 class="kn text-2xl font-bold text-white">Settings</h1>
-        <p class="text-zinc-500 text-sm">ตั้งค่าทั่วไปของระบบ</p>
-      </div>
-      <div class="space-y-4">
-        <div class="card p-6">
-          <h2 class="font-semibold text-white mb-4">ภาคเรียนปัจจุบัน</h2>
-          <div class="flex gap-3">
-            <select id="termSelect" class="bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm">
-              <option>1/2567</option><option>2/2567</option><option>1/2568</option><option>2/2568</option>
-            </select>
-            <button onclick="saveTerm()" class="px-5 py-2 bg-violet-700 hover:bg-violet-600 text-white text-sm rounded-lg font-medium transition-colors">บันทึก</button>
-          </div>
-        </div>
-        <div class="card p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-semibold text-white">เปิด/ปิด การส่งแผนการสอน</p>
-              <p class="text-zinc-500 text-sm mt-1">เมื่อปิด ครูจะไม่สามารถอัปโหลดแผนใหม่ได้</p>
-            </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input id="uploadToggle" type="checkbox" checked class="sr-only peer toggle-checkbox"/>
-              <div id="toggleTrack" onclick="toggleUpload()" class="w-12 h-6 bg-zinc-700 peer-checked:bg-violet-600 rounded-full relative transition-colors cursor-pointer">
-                <div id="toggleThumb" class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-6"></div>
-              </div>
-            </label>
-          </div>
-        </div>
-        <!-- Danger Zone -->
-        <div class="card p-6 border-red-900/40">
-          <h2 class="kn font-semibold text-red-400 mb-1"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Danger Zone</h2>
-          <p class="text-zinc-500 text-sm mb-4">การกระทำเหล่านี้ไม่สามารถยกเลิกได้</p>
-          <button onclick="factoryReset()" class="border border-red-800 text-red-400 hover:bg-red-950 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors">
-            <i class="fa-solid fa-bomb mr-2"></i>Factory Reset — ล้างข้อมูลทั้งหมด
-          </button>
-        </div>
-      </div>
-    </section>
+// ═══════════════════════════════════════════════════════════════
+//  3. AUTH GUARD — ป้องกันหน้า Dashboard ถ้ายังไม่ได้ login
+//     ใส่ไว้ท้ายสุดของไฟล์ (auto-run)
+// ═══════════════════════════════════════════════════════════════
+(async () => {
+  const currentPage = window.location.pathname.split('/').pop();
+  const protectedPages = [
+    'admin_dashboard.html',
+    'teacher_dashboard.html',
+    'director_dashboard.html',
+  ];
 
-  </main>
-</div>
+  if (!protectedPages.includes(currentPage)) return; // index.html ข้ามไป
 
-<!-- ================= เพิ่มโค้ดเชื่อม Backend สำหรับ Admin ตรงนี้ ================= -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase_integration.js"></script>
+  const { data: { session } } = await db.auth.getSession();
 
-<script>
-// ── Navigation ───────────────────────────────────────────────
-function showPage(name) {
-  document.querySelectorAll('section[id^="page-"]').forEach(s=>s.classList.add('section-hidden'));
-  document.querySelectorAll('button[id^="nav-"]').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+name).classList.remove('section-hidden');
-  document.getElementById('nav-'+name).classList.add('active');
-}
+  if (!session) {
+    // ไม่มี session → กลับหน้า login
+    window.location.href = 'index.html';
+    return;
+  }
 
-// ── Toggle upload open/close ─────────────────────────────────
-let uploadOpen = true;
-function toggleUpload() {
-  uploadOpen = !uploadOpen;
-  const track = document.getElementById('toggleTrack');
-  const thumb = document.getElementById('toggleThumb');
-  if (uploadOpen) { track.classList.add('bg-violet-600'); track.classList.remove('bg-zinc-700'); thumb.style.transform='translateX(0)'; }
-  else { track.classList.remove('bg-violet-600'); track.classList.add('bg-zinc-700'); thumb.style.transform='translateX(24px)'; }
-  Swal.fire({ toast:true, position:'bottom-end', icon:'success', title: uploadOpen ? 'เปิดรับการส่งแผนแล้ว' : 'ปิดรับการส่งแผนแล้ว', showConfirmButton:false, timer:2000, background:'#18181b', color:'#e4e4e7' });
-}
+  // โหลด profile จาก sessionStorage ก่อน (เร็วกว่า)
+  let profile = JSON.parse(sessionStorage.getItem('userProfile') || 'null');
 
-// ── Integrations ─────────────────────────────────────────────
-function toggleVisibility(id, btn) {
-  const input = document.getElementById(id);
-  const show = input.type === 'password';
-  input.type = show ? 'text' : 'password';
-  btn.innerHTML = show ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
-}
-function saveKey(type) {
-  Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:`บันทึก ${type==='gemini'?'Gemini API Key':'Drive Folder ID'} เรียบร้อย`, showConfirmButton:false, timer:2500, background:'#18181b', color:'#e4e4e7' });
-}
-function saveTerm() {
-  const term = document.getElementById('termSelect').value;
-  Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:`บันทึกภาคเรียน ${term} เรียบร้อย`, showConfirmButton:false, timer:2500, background:'#18181b', color:'#e4e4e7' });
-}
+  if (!profile) {
+    // ถ้าไม่มีใน sessionStorage → ดึงจาก DB แล้วบันทึก
+    const { data, error } = await db
+      .from('users')
+      .select('id, name, role, subject_group')
+      .eq('id', session.user.id)
+      .single();
 
-// ── Add User Modal (อัปเดตใส่ async/await สำหรับ Phase 6) ────────
-function openAddUserModal() {
-  Swal.fire({
-    width:520, background:'#18181b', color:'#e4e4e7',
-    title:'<span style="font-family:Kanit">เพิ่มผู้ใช้งานใหม่</span>',
-    html:`<div style="font-family:Sarabun;text-align:left;font-size:14px;display:grid;gap:12px">
-      <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">ชื่อ-นามสกุล *</label>
-        <input id="su-name" type="text" placeholder="นายตัวอย่าง ชื่อนี้" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:Sarabun;font-size:13px"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">บทบาท *</label>
-          <select id="su-role" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:Sarabun;font-size:13px">
-            <option value="teacher">teacher</option><option value="director">director</option></select></div>
-        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">กลุ่มสาระ</label>
-          <input id="su-group" type="text" placeholder="วิทยาศาสตร์..." style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:Sarabun;font-size:13px"/></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">Username *</label>
-          <input id="su-username" type="text" placeholder="teacher03" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:Sarabun;font-size:13px;font-family:monospace"/></div>
-        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">Temp Password *</label>
-          <input id="su-pass" type="text" placeholder="Teacher@0000" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-size:13px;font-family:monospace"/></div>
-      </div>
-    </div>`,
-    showCancelButton:true, cancelButtonText:'ยกเลิก', confirmButtonText:'<i class="fa-solid fa-plus mr-1"></i>สร้างบัญชี',
-    confirmButtonColor:'#7c3aed', cancelButtonColor:'#3f3f46',
-    
-    preConfirm: async () => {
-      const name = document.getElementById('su-name').value;
-      const username = document.getElementById('su-username').value;
-      const pass = document.getElementById('su-pass').value;
-      
-      if (!name||!username||!pass) { 
-        Swal.showValidationMessage('กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); 
-        return false; 
-      }
-      
-      const newUser = { 
-        name: name, 
-        role: document.getElementById('su-role').value, 
-        subject_group: document.getElementById('su-group').value, 
-        username: username, 
-        temp_password: pass 
-      };
-      
-      // ส่งข้อมูลผู้ใช้ใหม่ไปบันทึกลง Supabase ทันที!
-      await addNewUser(newUser);
-
-      return newUser;
+    if (error || !data) {
+      await db.auth.signOut();
+      window.location.href = 'index.html';
+      return;
     }
-  }).then(result => {
-    if (result.isConfirmed) {
-      Swal.fire({icon:'success',background:'#18181b',color:'#e4e4e7',title:'<span style="font-family:Kanit">สร้างบัญชีสำเร็จ</span>',text:`บัญชี ${result.value.username} ถูกสร้างแล้ว`,confirmButtonColor:'#7c3aed'});
-    }
+
+    profile = data;
+    sessionStorage.setItem('userProfile', JSON.stringify(profile));
+  }
+
+  // ตรวจสอบว่าอยู่หน้าที่ตรงกับ role หรือเปล่า
+  const expectedPage = ROLE_ROUTES[profile.role];
+  if (expectedPage && currentPage !== expectedPage) {
+    window.location.href = expectedPage;
+  }
+})();
+
+
+// ═══════════════════════════════════════════════════════════════
+//  4. ADMIN FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * addNewUser — สร้างบัญชีผู้ใช้ใหม่ใน Supabase Auth + ตาราง users
+ *
+ * @param {{ name:string, role:string, subject_group:string,
+ *           username:string, temp_password:string }} userData
+ *
+ * ⚠️  ต้องการให้ปิด "Email Confirmation" ใน Supabase Dashboard
+ *     Authentication → Settings → Email → Confirm email: OFF
+ *
+ * ถ้าต้องการสร้างโดยไม่ให้ผู้ใช้ต้อง confirm email ควรใช้
+ * Supabase Edge Function + service_role key แทน (แนะนำสำหรับ production)
+ */
+async function addNewUser({ name, role, subject_group, username, temp_password }) {
+  // แปลง username เป็น email (รูปแบบเดียวกับ login)
+  const email = `${username}@school.local`;
+
+  // ── ขั้นที่ 1: สร้าง Auth user ──────────────────────────────
+  const { data: authData, error: authErr } = await db.auth.signUp({
+    email,
+    password: temp_password,
+    options: {
+      // ฝัง username ไว้ใน user_metadata ด้วย (สะดวกเวลาดึงข้อมูล)
+      data: { username, role },
+    },
   });
-}
 
-function editUser(username) {
-  Swal.fire({ toast:true, position:'bottom-end', icon:'info', title:`แก้ไขผู้ใช้: ${username}`, showConfirmButton:false, timer:2000, background:'#18181b', color:'#e4e4e7' });
-}
-
-// ── Factory Reset (อัปเดตใส่ async/await สำหรับ Phase 6) ────────
-function factoryReset() {
-  Swal.fire({
-    background:'#18181b', color:'#e4e4e7',
-    icon:'warning', iconColor:'#ef4444',
-    title:'<span style="font-family:Kanit;color:#f87171">⚠️ Factory Reset</span>',
-    html:`<div style="font-family:Sarabun;font-size:14px">
-      <p style="color:#a1a1aa;margin-bottom:12px">การกระทำนี้จะ<strong style="color:#f87171">ลบข้อมูลทั้งหมด</strong>ออกจากระบบ รวมถึงผู้ใช้ แผนการสอน และการตั้งค่าทั้งหมด</p>
-      <p style="color:#a1a1aa;margin-bottom:16px">พิมพ์ <code style="background:#09090b;padding:2px 6px;border-radius:4px;color:#f87171;font-size:12px">RESET CONFIRM</code> เพื่อยืนยัน</p>
-      <input id="resetConfirm" type="text" placeholder="RESET CONFIRM" style="width:100%;background:#09090b;border:1px solid rgba(239,68,68,.4);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:monospace;font-size:13px;text-align:center"/>
-    </div>`,
-    showCancelButton:true, cancelButtonText:'ยกเลิก', confirmButtonText:'ล้างข้อมูล',
-    confirmButtonColor:'#dc2626', cancelButtonColor:'#3f3f46',
-    
-    preConfirm: async () => { 
-      if (document.getElementById('resetConfirm').value !== 'RESET CONFIRM') { 
-        Swal.showValidationMessage('ข้อความยืนยันไม่ถูกต้อง'); 
-        return false; 
-      } 
-
-      // TODO: เอาคอมเมนต์ (//) ด้านล่างออก เมื่อไฟล์ supabase_integration.js พร้อม
-      // await resetDatabase();
-
-      return true; 
+  if (authErr) {
+    // แปลงข้อความ error เป็นภาษาไทย
+    if (authErr.message.includes('already registered')) {
+      throw new Error(`Username "${username}" ถูกใช้งานไปแล้ว`);
     }
-  }).then(r => { 
-    if (r.isConfirmed) Swal.fire({ icon:'success', background:'#18181b', color:'#e4e4e7', title:'Reset เสร็จสิ้น', text:'ระบบถูกรีเซ็ตเรียบร้อยแล้ว', confirmButtonColor:'#7c3aed' }); 
+    throw new Error(`สร้าง Auth user ไม่สำเร็จ: ${authErr.message}`);
+  }
+
+  const userId = authData.user?.id;
+  if (!userId) throw new Error('ไม่ได้รับ user ID จาก Supabase Auth');
+
+  // ── ขั้นที่ 2: บันทึกลงตาราง users ─────────────────────────
+  const { error: insertErr } = await db.from('users').insert({
+    id:            userId,
+    name:          name,
+    role:          role,
+    subject_group: subject_group || null,
+    username:      username,
+    created_at:    new Date().toISOString(),
   });
+
+  if (insertErr) {
+    throw new Error(`บันทึก profile ไม่สำเร็จ: ${insertErr.message}`);
+  }
+
+  console.log(`✅ สร้างบัญชี ${username} (${role}) สำเร็จ`);
+  return { id: userId, username, role };
 }
 
-function logout() {
+
+/**
+ * resetDatabase — ลบข้อมูล lesson_plans ทั้งหมด
+ * (ไม่ลบบัญชีผู้ใช้ เพื่อความปลอดภัย — ถ้าต้องการลบผู้ใช้ด้วย
+ *  ต้องใช้ service_role key ผ่าน Edge Function)
+ */
+async function resetDatabase() {
+  // ลบแผนการสอนทั้งหมด
+  const { error: plansErr } = await db
+    .from('lesson_plans')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000'); // trick ลบทุก row
+
+  if (plansErr) throw new Error(`ล้าง lesson_plans ไม่สำเร็จ: ${plansErr.message}`);
+
+  console.log('✅ Factory reset เสร็จสิ้น');
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  5. TEACHER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * uploadPlanViaGAS — ส่งไฟล์ PDF ไปยัง Google Apps Script
+ * แล้วบันทึก metadata ลง Supabase
+ *
+ * @param {string} subject    วิชา เช่น "วิทยาศาสตร์ ม.1"
+ * @param {string} weekLabel  สัปดาห์ เช่น "สัปดาห์ที่ 2"
+ * @param {File}   file       ไฟล์ PDF
+ * @param {string} gasUrl     URL ของ Google Apps Script Web App
+ */
+async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
+  // ── ดึง profile ของครูที่ login อยู่ ──
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) throw new Error('ไม่พบข้อมูลผู้ใช้ กรุณา login ใหม่');
+
+  // ── แปลงไฟล์เป็น Base64 ──────────────────────────────────────
+  const base64 = await _fileToBase64(file);
+
+  // ── ส่ง request ไปยัง GAS ────────────────────────────────────
+  const payload = {
+    fileName:    file.name,
+    fileBase64:  base64,
+    mimeType:    file.type,
+    subject:     subject,
+    week:        weekLabel,
+    teacherId:   profile.id,
+    teacherName: profile.name,
+  };
+
+  const response = await fetch(gasUrl, {
+    method: 'POST',
+    body:   JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`GAS ตอบกลับ ${response.status}: ${response.statusText}`);
+  }
+
+  const result = await response.json();
+  if (!result.success) {
+    throw new Error(result.message || 'GAS ส่งไฟล์ไม่สำเร็จ');
+  }
+
+  const driveUrl  = result.fileUrl  || null;
+  const driveId   = result.fileId   || null;
+  const aiSummary = result.summary  || null;
+
+  // ── บันทึก metadata ลง Supabase ─────────────────────────────
+  const weekNumber = parseInt(weekLabel.replace(/[^0-9]/g, '')) || 0;
+
+  const { error: insertErr } = await db.from('lesson_plans').insert({
+    teacher_id:    profile.id,
+    subject:       subject,
+    week_number:   weekNumber,
+    file_name:     file.name,
+    drive_url:     driveUrl,
+    drive_file_id: driveId,
+    ai_summary:    aiSummary,
+    status:        'Pending',
+    submitted_at:  new Date().toISOString(),
+  });
+
+  if (insertErr) {
+    throw new Error(`บันทึกข้อมูลแผนไม่สำเร็จ: ${insertErr.message}`);
+  }
+
+  console.log(`✅ ส่งแผน "${subject}" สัปดาห์ที่ ${weekNumber} สำเร็จ`);
+  return { driveUrl, aiSummary };
+}
+
+
+/**
+ * getMyPlans — ดึงประวัติแผนการสอนของครูที่ login อยู่
+ * @returns {Array} รายการแผนการสอน เรียงจากใหม่ไปเก่า
+ */
+async function getMyPlans() {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) throw new Error('ไม่พบข้อมูลผู้ใช้');
+
+  const { data, error } = await db
+    .from('lesson_plans')
+    .select('*')
+    .eq('teacher_id', profile.id)
+    .order('submitted_at', { ascending: false });
+
+  if (error) throw new Error(`ดึงข้อมูลแผนไม่สำเร็จ: ${error.message}`);
+  return data || [];
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  6. DIRECTOR FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * getAllPendingPlans — ดึงแผนที่รอการอนุมัติทั้งหมด (director ใช้)
+ */
+async function getAllPendingPlans() {
+  const { data, error } = await db
+    .from('lesson_plans')
+    .select(`
+      *,
+      users ( name, subject_group )
+    `)
+    .eq('status', 'Pending')
+    .order('submitted_at', { ascending: true });
+
+  if (error) throw new Error(`ดึงข้อมูลแผนไม่สำเร็จ: ${error.message}`);
+  return data || [];
+}
+
+/**
+ * updatePlanStatus — อนุมัติหรือส่งกลับแก้ไขแผนการสอน
+ *
+ * @param {string} planId   UUID ของแผน
+ * @param {'Approved'|'Revision Needed'} status
+ * @param {string} feedback ความคิดเห็น
+ */
+async function updatePlanStatus(planId, status, feedback = '') {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+
+  const { error } = await db
+    .from('lesson_plans')
+    .update({
+      status:       status,
+      feedback:     feedback,
+      reviewed_by:  profile.id,
+      reviewed_at:  new Date().toISOString(),
+    })
+    .eq('id', planId);
+
+  if (error) throw new Error(`อัปเดตสถานะไม่สำเร็จ: ${error.message}`);
+  console.log(`✅ แผน ${planId} → ${status}`);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  7. SETTINGS FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * getSystemSetting / saveSystemSetting
+ * ใช้ตาราง system_settings (key TEXT PRIMARY KEY, value TEXT)
+ */
+async function getSystemSetting(key) {
+  const { data, error } = await db
+    .from('system_settings')
+    .select('value')
+    .eq('key', key)
+    .single();
+
+  if (error) return null;
+  return data?.value ?? null;
+}
+
+async function saveSystemSetting(key, value) {
+  const { error } = await db
+    .from('system_settings')
+    .upsert({ key, value }, { onConflict: 'key' });
+
+  if (error) throw new Error(`บันทึกการตั้งค่าไม่สำเร็จ: ${error.message}`);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  8. USER MANAGEMENT (Admin)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * getAllUsers — ดึงรายชื่อผู้ใช้ทั้งหมด (ยกเว้น admin เอง)
+ */
+async function getAllUsers() {
+  const { data, error } = await db
+    .from('users')
+    .select('id, name, role, subject_group, username, created_at')
+    .order('created_at', { ascending: true });
+
+  if (error) throw new Error(`ดึงข้อมูลผู้ใช้ไม่สำเร็จ: ${error.message}`);
+  return data || [];
+}
+
+/**
+ * updateUser — แก้ไขข้อมูลผู้ใช้ (ชื่อ, role, กลุ่มสาระ)
+ */
+async function updateUser(userId, { name, role, subject_group }) {
+  const { error } = await db
+    .from('users')
+    .update({ name, role, subject_group })
+    .eq('id', userId);
+
+  if (error) throw new Error(`แก้ไขผู้ใช้ไม่สำเร็จ: ${error.message}`);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+//  9. LOGOUT (ใช้ร่วมกัน)
+// ═══════════════════════════════════════════════════════════════
+
+async function signOut() {
+  await db.auth.signOut();
+  sessionStorage.removeItem('userProfile');
   window.location.href = 'index.html';
 }
-</script>
-</body>
-</html>
+
+// ── Override ฟังก์ชัน logout() ที่แต่ละหน้าเรียก ──
+// (แต่ละหน้า define logout() ไว้แล้ว ฟังก์ชันนี้ทำหน้าที่ backup)
+window._signOut = signOut;
+
+
+// ═══════════════════════════════════════════════════════════════
+//  10. UTILITIES (private)
+// ═══════════════════════════════════════════════════════════════
+
+/** แปลง File object เป็น base64 string */
+function _fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('อ่านไฟล์ไม่สำเร็จ'));
+    reader.readAsDataURL(file);
+  });
+}
+
+/** แสดง toast สำเร็จ (SweetAlert2) */
+function _toastOk(msg) {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:msg,
+      showConfirmButton:false, timer:2500, background:'#18181b', color:'#e4e4e7' });
+  }
+}
+
+/** แสดง toast error (SweetAlert2) */
+function _toastErr(msg) {
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({ toast:true, position:'bottom-end', icon:'error', title:msg,
+      showConfirmButton:false, timer:3500, background:'#18181b', color:'#e4e4e7' });
+  }
+}
