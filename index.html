@@ -1,392 +1,170 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เข้าสู่ระบบ — ระบบแผนการสอน</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>เข้าสู่ระบบ — ระบบแผนการสอน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --navy:       #0f2547;
+    --navy-mid:   #1a3a6b;
+    --blue:       #2563eb;
+    --blue-light: #3b82f6;
+    --gold:       #f59e0b;
+    --gold-light: #fbbf24;
+    --bg:         #f0f4fb;
+    --white:      #ffffff;
+    --gray-50:    #f8fafc;
+    --gray-200:   #e2e8f0;
+    --gray-400:   #94a3b8;
+    --gray-600:   #475569;
+    --gray-800:   #1e293b;
+    --danger:     #ef4444;
+    --radius:     14px;
+    --shadow-lg:  0 20px 60px rgba(15,37,71,0.20);
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Sarabun',sans-serif;
+    background:var(--bg);
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; position:relative;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 800px 600px at 0% 0%,   rgba(37,99,235,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 600px 500px at 100% 100%,rgba(245,158,11,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 700px 700px at 50% 50%,  rgba(15,37,71,0.04)  0%, transparent 70%);
+    pointer-events:none; z-index:0;
+  }
+  .card-wrapper {
+    position:relative; z-index:1;
+    width:min(900px,96vw);
+    display:grid; grid-template-columns:1fr 1fr;
+    border-radius:24px; overflow:hidden;
+    box-shadow:var(--shadow-lg);
+    animation:slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:none} }
 
-  <!-- ── Google Fonts: Sarabun (Thai support) ── -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  /* ── Left Panel ── */
+  .left-panel {
+    background:linear-gradient(145deg,var(--navy) 0%,var(--navy-mid) 50%,#1d4ed8 100%);
+    padding:56px 44px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    position:relative; overflow:hidden;
+  }
+  .left-panel::before {
+    content:''; position:absolute;
+    width:400px; height:400px; border-radius:50%;
+    background:rgba(255,255,255,0.04);
+    bottom:-160px; right:-120px;
+  }
+  .left-panel::after {
+    content:''; position:absolute;
+    width:200px; height:200px; border-radius:50%;
+    background:rgba(245,158,11,0.12);
+    top:-60px; left:-60px;
+  }
+  .brand-logo { display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+  .logo-icon {
+    width:52px; height:52px;
+    background:linear-gradient(135deg,var(--gold),var(--gold-light));
+    border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px; box-shadow:0 4px 20px rgba(245,158,11,0.4);
+  }
+  .brand-text h1 { color:var(--white); font-size:18px; font-weight:700; line-height:1.2; }
+  .brand-text p  { color:rgba(255,255,255,0.55); font-size:12.5px; font-weight:400; margin-top:2px; }
+  .left-content  { position:relative; z-index:1; }
+  .left-content h2 { color:var(--white); font-size:30px; font-weight:800; line-height:1.3; margin-bottom:16px; }
+  .left-content h2 span { color:var(--gold-light); }
+  .left-content p  { color:rgba(255,255,255,0.65); font-size:15px; line-height:1.7; }
+  .role-badges { display:flex; flex-direction:column; gap:10px; margin-top:28px; position:relative; z-index:1; }
+  .role-badge {
+    display:flex; align-items:center; gap:12px;
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:12px; padding:10px 16px; transition:background 0.2s;
+  }
+  .role-badge:hover { background:rgba(255,255,255,0.11); }
+  .role-badge-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; }
+  .role-badge-icon.teacher  { background:rgba(59,130,246,0.3); }
+  .role-badge-icon.director { background:rgba(245,158,11,0.3); }
+  .role-badge-icon.admin    { background:rgba(16,185,129,0.3); }
+  .role-badge-info strong { display:block; color:var(--white); font-size:13.5px; font-weight:600; }
+  .role-badge-info span   { color:rgba(255,255,255,0.5); font-size:12px; }
 
-  <!-- ── SweetAlert2 ── -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <!-- ── Supabase JS v2 ── -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    /* ═══════════════════════════════════════════════
-       CSS VARIABLES & RESET
-    ═══════════════════════════════════════════════ */
-    :root {
-      --navy:       #0f2547;
-      --navy-mid:   #1a3a6b;
-      --blue:       #2563eb;
-      --blue-light: #3b82f6;
-      --gold:       #f59e0b;
-      --gold-light: #fbbf24;
-      --bg:         #f0f4fb;
-      --white:      #ffffff;
-      --gray-50:    #f8fafc;
-      --gray-200:   #e2e8f0;
-      --gray-400:   #94a3b8;
-      --gray-600:   #475569;
-      --gray-800:   #1e293b;
-      --danger:     #ef4444;
-      --success:    #10b981;
-      --radius:     14px;
-      --shadow-sm:  0 2px 8px rgba(15,37,71,0.08);
-      --shadow-md:  0 8px 32px rgba(15,37,71,0.14);
-      --shadow-lg:  0 20px 60px rgba(15,37,71,0.20);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Sarabun', sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* ── Animated background blobs ── */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background:
-        radial-gradient(ellipse 800px 600px at 0% 0%,   rgba(37,99,235,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 600px 500px at 100% 100%, rgba(245,158,11,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 700px 700px at 50% 50%,  rgba(15,37,71,0.04) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ═══════════════════════════════════════════════
-       MAIN CARD LAYOUT
-    ═══════════════════════════════════════════════ */
-    .card-wrapper {
-      position: relative; z-index: 1;
-      width: min(900px, 96vw);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-      animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── Left Panel (Branding) ── */
-    .left-panel {
-      background: linear-gradient(145deg, var(--navy) 0%, var(--navy-mid) 50%, #1d4ed8 100%);
-      padding: 56px 44px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .left-panel::before {
-      content: '';
-      position: absolute;
-      width: 400px; height: 400px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.04);
-      bottom: -160px; right: -120px;
-    }
-    .left-panel::after {
-      content: '';
-      position: absolute;
-      width: 200px; height: 200px;
-      border-radius: 50%;
-      background: rgba(245,158,11,0.12);
-      top: -60px; left: -60px;
-    }
-
-    .brand-logo {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      position: relative; z-index: 1;
-    }
-
-    .logo-icon {
-      width: 52px; height: 52px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-light));
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      box-shadow: 0 4px 20px rgba(245,158,11,0.4);
-    }
-
-    .brand-text h1 {
-      color: var(--white);
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-    .brand-text p {
-      color: rgba(255,255,255,0.55);
-      font-size: 12.5px;
-      font-weight: 400;
-      margin-top: 2px;
-    }
-
-    .left-content {
-      position: relative; z-index: 1;
-    }
-
-    .left-content h2 {
-      color: var(--white);
-      font-size: 30px;
-      font-weight: 800;
-      line-height: 1.3;
-      margin-bottom: 16px;
-    }
-    .left-content h2 span {
-      color: var(--gold-light);
-    }
-    .left-content p {
-      color: rgba(255,255,255,0.65);
-      font-size: 15px;
-      line-height: 1.7;
-    }
-
-    .role-badges {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 28px;
-      position: relative; z-index: 1;
-    }
-
-    .role-badge {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 12px;
-      padding: 10px 16px;
-      transition: background 0.2s;
-    }
-    .role-badge:hover { background: rgba(255,255,255,0.11); }
-
-    .role-badge-icon {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
-    }
-    .role-badge-icon.teacher  { background: rgba(59,130,246,0.3); }
-    .role-badge-icon.director { background: rgba(245,158,11,0.3); }
-    .role-badge-icon.admin    { background: rgba(16,185,129,0.3); }
-
-    .role-badge-info strong {
-      display: block;
-      color: var(--white);
-      font-size: 13.5px;
-      font-weight: 600;
-    }
-    .role-badge-info span {
-      color: rgba(255,255,255,0.5);
-      font-size: 12px;
-    }
-
-    /* ── Right Panel (Form) ── */
-    .right-panel {
-      background: var(--white);
-      padding: 56px 44px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .form-header {
-      margin-bottom: 36px;
-    }
-    .form-header .welcome {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--blue);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 8px;
-    }
-    .form-header h2 {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--gray-800);
-      margin-bottom: 6px;
-    }
-    .form-header p {
-      font-size: 14px;
-      color: var(--gray-400);
-    }
-
-    /* ── Form Fields ── */
-    .field-group {
-      margin-bottom: 20px;
-    }
-
-    .field-group label {
-      display: block;
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--gray-600);
-      margin-bottom: 8px;
-    }
-
-    .input-wrap {
-      position: relative;
-    }
-
-    .input-wrap .input-icon {
-      position: absolute;
-      left: 14px; top: 50%;
-      transform: translateY(-50%);
-      font-size: 17px;
-      color: var(--gray-400);
-      pointer-events: none;
-      transition: color 0.2s;
-    }
-
-    .input-wrap input {
-      width: 100%;
-      padding: 13px 14px 13px 44px;
-      border: 1.5px solid var(--gray-200);
-      border-radius: var(--radius);
-      font-family: 'Sarabun', sans-serif;
-      font-size: 15px;
-      color: var(--gray-800);
-      background: var(--gray-50);
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-      outline: none;
-    }
-    .input-wrap input:focus {
-      border-color: var(--blue-light);
-      background: var(--white);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-    }
-    .input-wrap input:focus ~ .input-icon,
-    .input-wrap input:focus + .input-icon {
-      color: var(--blue);
-    }
-
-    /* Eye toggle for password */
-    .toggle-password {
-      position: absolute;
-      right: 14px; top: 50%;
-      transform: translateY(-50%);
-      background: none; border: none;
-      cursor: pointer;
-      font-size: 17px;
-      color: var(--gray-400);
-      padding: 0;
-      transition: color 0.2s;
-    }
-    .toggle-password:hover { color: var(--blue); }
-
-    /* ── Error message ── */
-    .field-error {
-      display: none;
-      font-size: 12px;
-      color: var(--danger);
-      margin-top: 5px;
-      padding-left: 4px;
-    }
-    .field-group.has-error .input-wrap input {
-      border-color: var(--danger);
-    }
-    .field-group.has-error .field-error {
-      display: block;
-    }
-
-    /* ── Submit Button ── */
-    #btnLogin {
-      width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, var(--navy-mid), var(--blue));
-      color: var(--white);
-      border: none;
-      border-radius: var(--radius);
-      font-family: 'Sarabun', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-      margin-top: 8px;
-      box-shadow: 0 4px 20px rgba(37,99,235,0.35);
-      position: relative;
-      overflow: hidden;
-    }
-    #btnLogin::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: rgba(255,255,255,0);
-      transition: background 0.2s;
-    }
-    #btnLogin:hover:not(:disabled)::after { background: rgba(255,255,255,0.08); }
-    #btnLogin:active:not(:disabled) { transform: scale(0.985); }
-    #btnLogin:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-    }
-
-    .btn-spinner {
-      display: none;
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin: 0 auto;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #btnLogin.loading .btn-text  { display: none; }
-    #btnLogin.loading .btn-spinner { display: block; }
-
-    /* ── Footer Note ── */
-    .form-footer {
-      margin-top: 28px;
-      padding-top: 20px;
-      border-top: 1px solid var(--gray-200);
-      text-align: center;
-    }
-    .form-footer p {
-      font-size: 12.5px;
-      color: var(--gray-400);
-    }
-    .form-footer strong {
-      color: var(--navy);
-    }
-
-    /* ═══════════════════════════════════════════════
-       RESPONSIVE
-    ═══════════════════════════════════════════════ */
-    @media (max-width: 680px) {
-      .card-wrapper { grid-template-columns: 1fr; }
-      .left-panel { display: none; }
-      .right-panel { padding: 40px 28px; }
-    }
-  </style>
+  /* ── Right Panel ── */
+  .right-panel { background:var(--white); padding:56px 44px; display:flex; flex-direction:column; justify-content:center; }
+  .form-header { margin-bottom:36px; }
+  .form-header .welcome { font-size:13px; font-weight:600; color:var(--blue); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
+  .form-header h2 { font-size:26px; font-weight:800; color:var(--gray-800); margin-bottom:6px; }
+  .form-header p  { font-size:14px; color:var(--gray-400); }
+  .field-group { margin-bottom:20px; }
+  .field-group label { display:block; font-size:13.5px; font-weight:600; color:var(--gray-600); margin-bottom:8px; }
+  .input-wrap { position:relative; }
+  .input-wrap .input-icon {
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    font-size:17px; color:var(--gray-400); pointer-events:none; transition:color 0.2s;
+  }
+  .input-wrap input {
+    width:100%; padding:13px 14px 13px 44px;
+    border:1.5px solid var(--gray-200); border-radius:var(--radius);
+    font-family:'Sarabun',sans-serif; font-size:15px; color:var(--gray-800);
+    background:var(--gray-50); transition:border-color 0.2s,box-shadow 0.2s,background 0.2s; outline:none;
+  }
+  .input-wrap input:focus { border-color:var(--blue-light); background:var(--white); box-shadow:0 0 0 3px rgba(59,130,246,0.12); }
+  .toggle-password {
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    background:none; border:none; cursor:pointer;
+    font-size:17px; color:var(--gray-400); padding:0; transition:color 0.2s;
+  }
+  .toggle-password:hover { color:var(--blue); }
+  .field-error { display:none; font-size:12px; color:var(--danger); margin-top:5px; padding-left:4px; }
+  .field-group.has-error .input-wrap input { border-color:var(--danger); }
+  .field-group.has-error .field-error { display:block; }
+  #btnLogin {
+    width:100%; padding:14px;
+    background:linear-gradient(135deg,var(--navy-mid),var(--blue));
+    color:var(--white); border:none; border-radius:var(--radius);
+    font-family:'Sarabun',sans-serif; font-size:16px; font-weight:700;
+    cursor:pointer; transition:transform 0.15s,box-shadow 0.15s,opacity 0.15s;
+    margin-top:8px; box-shadow:0 4px 20px rgba(37,99,235,0.35);
+    position:relative; overflow:hidden;
+  }
+  #btnLogin::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0); transition:background 0.2s; }
+  #btnLogin:hover:not(:disabled)::after { background:rgba(255,255,255,0.08); }
+  #btnLogin:active:not(:disabled) { transform:scale(0.985); }
+  #btnLogin:disabled { opacity:0.65; cursor:not-allowed; }
+  .btn-spinner {
+    display:none; width:18px; height:18px;
+    border:2px solid rgba(255,255,255,0.3); border-top-color:white;
+    border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #btnLogin.loading .btn-text    { display:none; }
+  #btnLogin.loading .btn-spinner { display:block; }
+  .form-footer { margin-top:28px; padding-top:20px; border-top:1px solid var(--gray-200); text-align:center; }
+  .form-footer p { font-size:12.5px; color:var(--gray-400); }
+  .form-footer strong { color:var(--navy); }
+  @media (max-width:680px) {
+    .card-wrapper { grid-template-columns:1fr; }
+    .left-panel { display:none; }
+    .right-panel { padding:40px 28px; }
+  }
+</style>
 </head>
 <body>
-
 <div class="card-wrapper">
 
-  <!-- ══════════════ LEFT PANEL ══════════════ -->
+  <!-- LEFT PANEL -->
   <div class="left-panel">
     <div class="brand-logo">
       <div class="logo-icon">📚</div>
@@ -395,228 +173,148 @@
         <p>ระบบแผนการสอนออนไลน์</p>
       </div>
     </div>
-
     <div class="left-content">
       <h2>จัดการ<span>แผนการสอน</span><br/>ได้ทุกที่ ทุกเวลา</h2>
       <p>ระบบบริหารจัดการแผนการสอนที่ครบวงจร<br/>ตั้งแต่ครูผู้สอน จนถึงผู้บริหาร</p>
-
       <div class="role-badges">
         <div class="role-badge">
           <div class="role-badge-icon teacher">👨‍🏫</div>
-          <div class="role-badge-info">
-            <strong>ครูผู้สอน</strong>
-            <span>ส่งและติดตามแผนการสอน</span>
-          </div>
+          <div class="role-badge-info"><strong>ครูผู้สอน</strong><span>ส่งและติดตามแผนการสอน</span></div>
         </div>
         <div class="role-badge">
           <div class="role-badge-icon director">🏫</div>
-          <div class="role-badge-info">
-            <strong>ผู้อำนวยการ</strong>
-            <span>ตรวจสอบและอนุมัติแผน</span>
-          </div>
+          <div class="role-badge-info"><strong>ผู้อำนวยการ</strong><span>ตรวจสอบและอนุมัติแผน</span></div>
         </div>
         <div class="role-badge">
           <div class="role-badge-icon admin">⚙️</div>
-          <div class="role-badge-info">
-            <strong>ผู้ดูแลระบบ</strong>
-            <span>จัดการผู้ใช้และระบบ</span>
-          </div>
+          <div class="role-badge-info"><strong>ผู้ดูแลระบบ</strong><span>จัดการผู้ใช้และระบบ</span></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════ RIGHT PANEL (FORM) ══════════════ -->
+  <!-- RIGHT PANEL -->
   <div class="right-panel">
     <div class="form-header">
       <p class="welcome">ยินดีต้อนรับ</p>
       <h2>เข้าสู่ระบบ</h2>
       <p>กรอกชื่อผู้ใช้และรหัสผ่านเพื่อดำเนินการต่อ</p>
     </div>
-
     <form id="loginForm" novalidate>
-
-      <!-- ── Username ── -->
       <div class="field-group" id="grpUsername">
         <label for="username">ชื่อผู้ใช้งาน</label>
         <div class="input-wrap">
           <span class="input-icon">👤</span>
-          <input
-            type="text"
-            id="username"
-            placeholder="กรอกชื่อผู้ใช้งาน"
-            autocomplete="username"
-            autocapitalize="none"
-          />
+          <input type="text" id="username" placeholder="กรอกชื่อผู้ใช้งาน" autocomplete="username" autocapitalize="none"/>
         </div>
         <span class="field-error" id="errUsername">กรุณากรอกชื่อผู้ใช้งาน</span>
       </div>
-
-      <!-- ── Password ── -->
       <div class="field-group" id="grpPassword">
         <label for="password">รหัสผ่าน</label>
         <div class="input-wrap">
           <span class="input-icon">🔒</span>
-          <input
-            type="password"
-            id="password"
-            placeholder="กรอกรหัสผ่าน"
-            autocomplete="current-password"
-          />
-          <button type="button" class="toggle-password" id="togglePwd" title="แสดง/ซ่อนรหัสผ่าน">
-            👁
-          </button>
+          <input type="password" id="password" placeholder="กรอกรหัสผ่าน" autocomplete="current-password"/>
+          <button type="button" class="toggle-password" id="togglePwd" title="แสดง/ซ่อนรหัสผ่าน">👁</button>
         </div>
         <span class="field-error" id="errPassword">กรุณากรอกรหัสผ่าน</span>
       </div>
-
-      <!-- ── Submit ── -->
       <button type="submit" id="btnLogin">
         <span class="btn-text">เข้าสู่ระบบ</span>
         <div class="btn-spinner"></div>
       </button>
-
     </form>
-
     <div class="form-footer">
       <p>หากลืมรหัสผ่าน ติดต่อ <strong>ผู้ดูแลระบบ</strong> เพื่อรีเซ็ต</p>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     JAVASCRIPT — Supabase Login Logic
-══════════════════════════════════════════════════ -->
+<script src="supabase_integration.js"></script>
 <script>
 'use strict';
 
-// ─────────────────────────────────────────────────
-// การตั้งค่า Supabase
-// แก้ไข URL และ ANON_KEY ให้ตรงกับโปรเจกต์ของคุณ
-// ─────────────────────────────────────────────────
-const SUPABASE_URL      = 'https://aamnvfnhtvmxwypgiorq.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhbW52Zm5odHZteHd5cGdpb3JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTYwNDAsImV4cCI6MjA5NTE5MjA0MH0.dkvN9FVrz_ekrmvOUFOgGZxewG0S_tQyTJTp_kZeTVI';
-
-// กำหนดเส้นทางของหน้าแต่ละ role
-// แก้ไข path ให้ตรงกับโครงสร้างโฟลเดอร์ของคุณ
 const ROLE_ROUTES = {
   teacher:  'teacher_dashboard.html',
   director: 'director_dashboard.html',
   admin:    'admin_dashboard.html',
 };
 
-// ─────────────────────────────────────────────────
-// เริ่มต้น Supabase Client (singleton)
-// ─────────────────────────────────────────────────
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// ─────────────────────────────────────────────────
-// ตรวจสอบ session ที่มีอยู่แล้ว (ถ้า login แล้ว redirect เลย)
-// ─────────────────────────────────────────────────
+// ── ตรวจ session ที่มีอยู่แล้ว ──────────────────────────────
 (async () => {
   const { data: { session } } = await db.auth.getSession();
-  if (session) {
-    // ดึง profile เพื่อรู้ role
-    const { data: profile } = await db
-      .from('users')
-      .select('role')
-      .eq('id', session.user.id)
-      .single();
+  if (!session) return;
 
-    if (profile?.role && ROLE_ROUTES[profile.role]) {
-      window.location.href = ROLE_ROUTES[profile.role];
-    }
+  let profile = JSON.parse(sessionStorage.getItem('userProfile') || 'null');
+  if (!profile) {
+    const { data } = await db.from('users').select('role').eq('id', session.user.id).single();
+    profile = data;
+  }
+  if (profile?.role && ROLE_ROUTES[profile.role]) {
+    window.location.href = ROLE_ROUTES[profile.role];
   }
 })();
 
-// ─────────────────────────────────────────────────
-// UI Elements
-// ─────────────────────────────────────────────────
-const form       = document.getElementById('loginForm');
-const inputUser  = document.getElementById('username');
-const inputPwd   = document.getElementById('password');
-const btnLogin   = document.getElementById('btnLogin');
-const togglePwd  = document.getElementById('togglePwd');
-const grpUser    = document.getElementById('grpUsername');
-const grpPwd     = document.getElementById('grpPassword');
+// ── UI Elements ──────────────────────────────────────────────
+const form      = document.getElementById('loginForm');
+const inputUser = document.getElementById('username');
+const inputPwd  = document.getElementById('password');
+const btnLogin  = document.getElementById('btnLogin');
+const togglePwd = document.getElementById('togglePwd');
+const grpUser   = document.getElementById('grpUsername');
+const grpPwd    = document.getElementById('grpPassword');
 
-// ── Toggle แสดง/ซ่อนรหัสผ่าน ──
 togglePwd.addEventListener('click', () => {
   const isHidden = inputPwd.type === 'password';
   inputPwd.type  = isHidden ? 'text' : 'password';
   togglePwd.textContent = isHidden ? '🙈' : '👁';
 });
 
-// ── ลบ error เมื่อพิมพ์ ──
 inputUser.addEventListener('input', () => grpUser.classList.remove('has-error'));
 inputPwd.addEventListener('input',  () => grpPwd.classList.remove('has-error'));
 
-// ─────────────────────────────────────────────────
-// ฟังก์ชัน Login หลัก
-// ─────────────────────────────────────────────────
+// ── Login Function ───────────────────────────────────────────
 async function login(username, password) {
-  try {
-    // แปลง username → email (รูปแบบที่ใช้ตอนสมัคร)
-    const email = `${username}@school.local`;
+  const email = `${username}@school.local`;
 
-    // เรียก Supabase Auth
-    const { data, error } = await db.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+  if (error) throw error;
 
-    // ดึงข้อมูลโปรไฟล์จากตาราง users
-    const { data: profile, error: profileErr } = await db
-      .from('users')
-      .select('id, name, role, subject_group')
-      .eq('id', data.user.id)
-      .single();
+  const { data: profile, error: profileErr } = await db
+    .from('users')
+    .select('id, name, role, subject_group')
+    .eq('id', data.user.id)
+    .single();
 
-    if (profileErr) throw profileErr;
+  if (profileErr) throw profileErr;
 
-    // บันทึก profile ลง sessionStorage (ใช้ใน dashboard)
-    sessionStorage.setItem('userProfile', JSON.stringify(profile));
-
-    return profile;
-
-  } catch (err) {
-    throw err;
-  }
+  sessionStorage.setItem('userProfile', JSON.stringify(profile));
+  return profile;
 }
 
-// ─────────────────────────────────────────────────
-// Submit Form
-// ─────────────────────────────────────────────────
+// ── Submit ───────────────────────────────────────────────────
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const username = inputUser.value.trim();
   const password = inputPwd.value;
 
-  // ── Validation ──
   let valid = true;
   if (!username) { grpUser.classList.add('has-error'); valid = false; }
   if (!password) { grpPwd.classList.add('has-error');  valid = false; }
   if (!valid) return;
 
-  // ── Loading state ──
   btnLogin.classList.add('loading');
   btnLogin.disabled = true;
 
   try {
     const profile = await login(username, password);
 
-    // แสดง toast แจ้งสำเร็จ
     await Swal.fire({
-      toast: true,
-      position: 'bottom-end',
-      icon: 'success',
-      title: `ยินดีต้อนรับ, ${profile.name} 👋`,
-      showConfirmButton: false,
-      timer: 1800,
-      timerProgressBar: true,
+      toast:true, position:'bottom-end', icon:'success',
+      title:`ยินดีต้อนรับ, ${profile.name} 👋`,
+      showConfirmButton:false, timer:1800, timerProgressBar:true,
     });
 
-    // Redirect ตาม role
     const route = ROLE_ROUTES[profile.role];
     if (route) {
       window.location.href = route;
@@ -625,24 +323,14 @@ form.addEventListener('submit', async (e) => {
     }
 
   } catch (err) {
-    // จัดการข้อความ error เป็นภาษาไทย
     let msg = err.message;
-    if (msg.includes('Invalid login credentials')) {
-      msg = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-    } else if (msg.includes('Email not confirmed')) {
-      msg = 'บัญชียังไม่ได้รับการยืนยัน กรุณาติดต่อผู้ดูแลระบบ';
-    }
+    if (msg.includes('Invalid login credentials')) msg = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+    else if (msg.includes('Email not confirmed'))  msg = 'บัญชียังไม่ได้รับการยืนยัน กรุณาติดต่อผู้ดูแลระบบ';
 
     Swal.fire({
-      icon: 'error',
-      title: 'เข้าสู่ระบบไม่สำเร็จ',
-      text: msg,
-      confirmButtonColor: '#2563eb',
-      confirmButtonText: 'ลองอีกครั้ง',
-      customClass: { popup: 'swal-thai' },
+      icon:'error', title:'เข้าสู่ระบบไม่สำเร็จ', text:msg,
+      confirmButtonColor:'#2563eb', confirmButtonText:'ลองอีกครั้ง',
     });
-
-    // ให้ focus กลับไปที่ username
     inputUser.focus();
 
   } finally {
