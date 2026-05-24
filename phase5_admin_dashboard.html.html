@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Teacher Dashboard — Smart Lesson Plan</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { font-family: 'Sarabun', sans-serif; }
+  h1,h2,.font-display { font-family: 'Kanit', sans-serif; }
+
+  :root {
+    --blue-primary: #1d4ed8;
+    --blue-light:   #eff6ff;
+    --blue-mid:     #3b82f6;
+    --blue-dark:    #1e3a8a;
+    --glass-bg:     rgba(255,255,255,0.7);
+    --glass-border: rgba(255,255,255,0.9);
+  }
+
+  body { background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 40%, #e0f2fe 100%); min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar { background: linear-gradient(180deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%); }
+  .nav-item { transition: all .2s ease; border-radius: 12px; }
+  .nav-item:hover { background: rgba(255,255,255,.15); transform: translateX(4px); }
+  .nav-item.active { background: rgba(255,255,255,.2); box-shadow: 0 4px 15px rgba(0,0,0,.2); }
+
+  /* Cards */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31,38,135,.1);
+  }
+
+  /* Drag-and-drop zone */
+  .drop-zone {
+    border: 2.5px dashed #93c5fd;
+    background: linear-gradient(135deg, rgba(239,246,255,.8), rgba(219,234,254,.6));
+    border-radius: 16px;
+    transition: all .25s ease;
+    cursor: pointer;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, rgba(219,234,254,.9), rgba(191,219,254,.7));
+    transform: scale(1.01);
+    box-shadow: 0 0 0 4px rgba(59,130,246,.15);
+  }
+
+  /* Status badges */
+  .badge-approved  { background:#dcfce7; color:#166534; }
+  .badge-pending   { background:#fef9c3; color:#854d0e; }
+  .badge-revision  { background:#fee2e2; color:#991b1b; }
+
+  /* Animations */
+  @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+  .page { animation: fadeIn .35s ease; }
+  .section-hidden { display:none!important; }
+
+  /* Custom select */
+  select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:3px; }
+
+  /* Progress bar animation */
+  @keyframes progress { from{width:0} to{width:100%} }
+  .progress-bar { animation: progress 2.5s ease forwards; }
+</style>
+</head>
+<body>
+<div class="flex h-screen overflow-hidden">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 text-white overflow-y-auto">
+    <!-- Logo -->
+    <div class="mb-8 mt-2">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+          <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+        </div>
+        <div>
+          <p class="font-display font-bold text-base leading-tight">Smart</p>
+          <p class="font-display font-bold text-base leading-tight text-blue-200">Lesson Plan</p>
+        </div>
+      </div>
+      <p class="text-xs text-blue-300 mt-1 ml-1">ระบบตรวจแผนการสอน</p>
+    </div>
+
+    <!-- User info -->
+    <div class="glass-card bg-white/10 border-white/20 p-3 mb-6 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center font-bold text-sm">ปย</div>
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm truncate">นายประยุทธ์ สอนเก่ง</p>
+        <p class="text-xs text-blue-300 truncate">วิทยาศาสตร์และเทคโนโลยี</p>
+      </div>
+    </div>
+
+    <!-- Nav items -->
+    <nav class="space-y-1 flex-1">
+      <button onclick="showPage('upload')" id="nav-upload" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
+        <i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i> ส่งแผนการสอน
+      </button>
+      <button onclick="showPage('history')" id="nav-history" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
+        <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> ประวัติและสถานะ
+      </button>
+    </nav>
+
+    <!-- Term info -->
+    <div class="mt-auto pt-4 border-t border-white/20">
+      <p class="text-xs text-blue-300 mb-1">ภาคเรียนปัจจุบัน</p>
+      <p class="font-semibold text-sm">ภาคเรียนที่ 1/2567</p>
+      <div class="flex items-center gap-2 mt-2">
+        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+        <p class="text-xs text-blue-300">เปิดรับการส่งแผน</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main class="flex-1 overflow-y-auto p-6">
+
+    <!-- ─── PAGE: Upload ─────────────────────── -->
+    <section id="page-upload" class="page">
+      <div class="mb-6">
+        <h1 class="font-display text-2xl font-bold text-blue-900">ส่งแผนการสอน</h1>
+        <p class="text-gray-500 text-sm mt-1">อัปโหลด PDF แผนการสอนของคุณเพื่อรับการตรวจสอบ</p>
+      </div>
+
+      <!-- Stats row -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="glass-card p-4 text-center">
+          <p class="text-3xl font-display font-bold text-blue-700">3</p>
+          <p class="text-xs text-gray-500 mt-1">ส่งแล้วทั้งหมด</p>
+        </div>
+        <div class="glass-card p-4 text-center">
+          <p class="text-3xl font-display font-bold text-green-600">1</p>
+          <p class="text-xs text-gray-500 mt-1">อนุมัติแล้ว</p>
+        </div>
+        <div class="glass-card p-4 text-center">
+          <p class="text-3xl font-display font-bold text-yellow-600">1</p>
+          <p class="text-xs text-gray-500 mt-1">รอการตรวจ</p>
+        </div>
+      </div>
+
+      <!-- Upload Form -->
+      <div class="glass-card p-6">
+        <h2 class="font-display font-semibold text-lg text-blue-900 mb-5">
+          <i class="fa-solid fa-file-circle-plus text-blue-500 mr-2"></i>แบบฟอร์มส่งแผนการสอน
+        </h2>
+
+        <div class="grid grid-cols-2 gap-5 mb-5">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">วิชา <span class="text-red-500">*</span></label>
+            <select id="subject" class="w-full px-4 py-2.5 bg-white/80 border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="">-- เลือกวิชา --</option>
+              <option>วิทยาศาสตร์ ม.1</option>
+              <option>วิทยาศาสตร์ ม.2</option>
+              <option>วิทยาศาสตร์ ม.3</option>
+              <option>คณิตศาสตร์ ม.1</option>
+              <option>ภาษาไทย ม.1</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">สัปดาห์ที่ <span class="text-red-500">*</span></label>
+            <select id="week" class="w-full px-4 py-2.5 bg-white/80 border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="">-- เลือกสัปดาห์ --</option>
+              <option>สัปดาห์ที่ 1</option><option>สัปดาห์ที่ 2</option><option>สัปดาห์ที่ 3</option>
+              <option>สัปดาห์ที่ 4</option><option>สัปดาห์ที่ 5</option><option>สัปดาห์ที่ 6</option>
+              <option>สัปดาห์ที่ 7</option><option>สัปดาห์ที่ 8</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Drag & Drop zone -->
+        <div id="dropZone" class="drop-zone p-10 text-center mb-5" onclick="document.getElementById('fileInput').click()"
+             ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+          <input type="file" id="fileInput" accept=".pdf" class="hidden" onchange="handleFileSelect(event)"/>
+          <div id="dropContent">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-file-pdf text-blue-400 text-3xl"></i>
+            </div>
+            <p class="font-semibold text-blue-800 mb-1">ลากไฟล์มาวาง หรือคลิกเพื่อเลือก</p>
+            <p class="text-sm text-gray-500">รองรับเฉพาะไฟล์ PDF ขนาดไม่เกิน 10 MB</p>
+          </div>
+          <div id="fileSelected" class="hidden">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fa-solid fa-circle-check text-green-500 text-3xl"></i>
+            </div>
+            <p id="fileName" class="font-semibold text-green-700 mb-1"></p>
+            <p id="fileSize" class="text-sm text-gray-500"></p>
+            <button onclick="clearFile(event)" class="mt-2 text-xs text-red-400 hover:text-red-600"><i class="fa-solid fa-xmark mr-1"></i>ลบไฟล์</button>
+          </div>
+        </div>
+
+        <!-- Progress bar (hidden) -->
+        <div id="progressContainer" class="hidden mb-4">
+          <div class="flex justify-between text-xs text-gray-600 mb-1">
+            <span>กำลังอัปโหลด...</span><span id="progressPct">0%</span>
+          </div>
+          <div class="h-2 bg-blue-100 rounded-full overflow-hidden">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style="width:0%"></div>
+          </div>
+        </div>
+
+        <button onclick="submitPlan()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all duration-200 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> ส่งแผนการสอน
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── PAGE: History ─────────────────────── -->
+    <section id="page-history" class="page section-hidden">
+      <div class="mb-6">
+        <h1 class="font-display text-2xl font-bold text-blue-900">ประวัติการส่งแผนการสอน</h1>
+        <p class="text-gray-500 text-sm mt-1">ติดตามสถานะแผนการสอนทั้งหมดของคุณ</p>
+      </div>
+
+      <div class="glass-card p-6">
+        <!-- Filter -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex gap-2">
+            <button onclick="filterTable('all')" id="filter-all" class="filter-btn active-filter px-4 py-2 text-sm rounded-lg bg-blue-600 text-white font-medium">ทั้งหมด</button>
+            <button onclick="filterTable('Pending')" id="filter-pending" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">รอตรวจ</button>
+            <button onclick="filterTable('Approved')" id="filter-approved" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">อนุมัติ</button>
+            <button onclick="filterTable('Revision Needed')" id="filter-revision" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">แก้ไข</button>
+          </div>
+          <span class="text-xs text-gray-500">ภาคเรียน 1/2567</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-blue-100">
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">สัปดาห์</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">วิชา</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">วันที่ส่ง</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">สถานะ</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">ความเห็น</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">ไฟล์</th>
+              </tr>
+            </thead>
+            <tbody id="historyTable">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ── Mock data ────────────────────────────────────────────────
+const mockPlans = [
+  { week:1, subject:'วิทยาศาสตร์ ม.1', date:'1 มิ.ย. 2567', status:'Approved',        feedback:'ดีมาก ผ่านการอนุมัติ',                              url:'#' },
+  { week:2, subject:'วิทยาศาสตร์ ม.1', date:'8 มิ.ย. 2567', status:'Pending',         feedback:'-',                                                  url:'#' },
+  { week:3, subject:'วิทยาศาสตร์ ม.1', date:'15 มิ.ย. 2567',status:'Revision Needed', feedback:'กรุณาเพิ่มกิจกรรม Active Learning',                    url:'#' },
+];
+
+let selectedFile = null;
+
+// ── Tab navigation ───────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
+  document.querySelectorAll('button[id^="nav-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.remove('section-hidden');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'history') renderTable(mockPlans);
+}
+
+// ── Table rendering ──────────────────────────────────────────
+function renderTable(data) {
+  const tbody = document.getElementById('historyTable');
+  tbody.innerHTML = data.map(p => `
+    <tr class="border-b border-blue-50 hover:bg-blue-50/40 transition-colors">
+      <td class="py-3 px-2 font-medium text-blue-900">สัปดาห์ที่ ${p.week}</td>
+      <td class="py-3 px-2 text-gray-700">${p.subject}</td>
+      <td class="py-3 px-2 text-gray-500">${p.date}</td>
+      <td class="py-3 px-2">${badgeHTML(p.status)}</td>
+      <td class="py-3 px-2 text-gray-600 max-w-xs truncate">${p.feedback}</td>
+      <td class="py-3 px-2">
+        <a href="${p.url}" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>
+      </td>
+    </tr>`).join('');
+}
+
+function badgeHTML(status) {
+  const map = {
+    'Approved':       ['badge-approved','fa-circle-check','อนุมัติแล้ว'],
+    'Pending':        ['badge-pending', 'fa-clock',        'รอตรวจ'],
+    'Revision Needed':['badge-revision','fa-rotate-left',  'ต้องแก้ไข'],
+  };
+  const [cls, icon, label] = map[status] || ['badge-pending','fa-question','ไม่ทราบ'];
+  return `<span class="${cls} px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1"><i class="fa-solid ${icon}"></i>${label}</span>`;
+}
+
+function filterTable(key) {
+  document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('bg-blue-600','text-white'); b.classList.add('bg-white/80','text-gray-600'); });
+  const active = key === 'all' ? document.getElementById('filter-all') : document.getElementById('filter-'+key.replace(' ','-').toLowerCase());
+  if (active) { active.classList.add('bg-blue-600','text-white'); active.classList.remove('bg-white/80','text-gray-600'); }
+  renderTable(key === 'all' ? mockPlans : mockPlans.filter(p => p.status === key));
+}
+
+// ── File handling ────────────────────────────────────────────
+function handleDragOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('dropZone').classList.remove('drag-over'); }
+function handleDrop(e)      { e.preventDefault(); document.getElementById('dropZone').classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
+function handleFileSelect(e){ const f = e.target.files[0]; if (f) setFile(f); }
+
+function setFile(f) {
+  if (f.type !== 'application/pdf') { Swal.fire({icon:'error',title:'ไฟล์ไม่ถูกต้อง',text:'กรุณาเลือกไฟล์ PDF เท่านั้น',confirmButtonColor:'#3b82f6'}); return; }
+  if (f.size > 10*1024*1024) { Swal.fire({icon:'error',title:'ไฟล์ใหญ่เกินไป',text:'ขนาดไฟล์ต้องไม่เกิน 10 MB',confirmButtonColor:'#3b82f6'}); return; }
+  selectedFile = f;
+  document.getElementById('dropContent').classList.add('hidden');
+  document.getElementById('fileSelected').classList.remove('hidden');
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileSize').textContent = (f.size/1024).toFixed(1) + ' KB';
+}
+
+function clearFile(e) {
+  e.stopPropagation();
+  selectedFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('dropContent').classList.remove('hidden');
+  document.getElementById('fileSelected').classList.add('hidden');
+}
+
+// ── Submit ───────────────────────────────────────────────────
+function submitPlan() {
+  const subject = document.getElementById('subject').value;
+  const week    = document.getElementById('week').value;
+  if (!subject || !week) { Swal.fire({icon:'warning',title:'กรุณากรอกข้อมูลให้ครบ',text:'เลือกวิชาและสัปดาห์ก่อนส่ง',confirmButtonColor:'#3b82f6'}); return; }
+  if (!selectedFile)    { Swal.fire({icon:'warning',title:'ยังไม่ได้เลือกไฟล์',text:'กรุณาอัปโหลดไฟล์ PDF ก่อนส่ง',confirmButtonColor:'#3b82f6'}); return; }
+
+  Swal.fire({
+    title: '<span style="font-family:Kanit">กำลังส่งและวิเคราะห์แผนการสอน...</span>',
+    html: `
+      <div style="font-family:Sarabun;font-size:14px;color:#6b7280">
+        <div class="mb-4"><i class="fa-solid fa-robot text-blue-500 text-3xl"></i></div>
+        <p class="mb-2">AI กำลังตรวจสอบแผนการสอนของคุณ</p>
+        <p class="text-xs text-gray-400">กระบวนการนี้ใช้เวลาประมาณ 15-30 วินาที</p>
+      </div>`,
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  // Simulate API call
+  setTimeout(() => {
+    Swal.fire({
+      icon: 'success',
+      title: '<span style="font-family:Kanit">ส่งสำเร็จ!</span>',
+      html: `<div style="font-family:Sarabun;text-align:left;font-size:14px">
+        <p class="text-gray-700 mb-3">แผนการสอนของคุณถูกส่งเรียบร้อยแล้ว</p>
+        <div style="background:#eff6ff;border-radius:12px;padding:12px;border-left:4px solid #3b82f6">
+          <p style="font-weight:600;color:#1d4ed8;margin-bottom:6px"><i class="fa-solid fa-robot mr-1"></i>AI Summary</p>
+          <p style="color:#374151;font-size:13px">แผนการสอนมีโครงสร้างที่ดี ครอบคลุม K-P-A แต่ควรเพิ่มกิจกรรม Active Learning ในขั้นสอนให้หลากหลายมากขึ้น</p>
+        </div>
+      </div>`,
+      confirmButtonText: '<i class="fa-solid fa-check mr-1"></i>รับทราบ',
+      confirmButtonColor: '#3b82f6',
+    }).then(() => { clearFile({stopPropagation:()=>{}}); document.getElementById('subject').value=''; document.getElementById('week').value=''; });
+  }, 3000);
+}
+</script>
+</body>
+</html>

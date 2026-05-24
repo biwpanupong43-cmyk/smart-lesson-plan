@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Director Dashboard — Smart Lesson Plan</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { font-family:'Sarabun',sans-serif; }
+  h1,h2,.font-display { font-family:'Kanit',sans-serif; }
+  body { background:#0f172a; color:#e2e8f0; min-height:100vh; }
+
+  .sidebar { background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%); border-right:1px solid rgba(148,163,184,.1); }
+  .nav-item { transition:all .2s; border-radius:10px; }
+  .nav-item:hover { background:rgba(148,163,184,.1); }
+  .nav-item.active { background:linear-gradient(135deg,rgba(99,102,241,.3),rgba(79,70,229,.2)); border-left:3px solid #818cf8; }
+
+  .card { background:rgba(30,41,59,.8); border:1px solid rgba(148,163,184,.1); border-radius:16px; backdrop-filter:blur(8px); }
+  .card-blue  { background:linear-gradient(135deg,#1e3a8a,#1d4ed8); }
+  .card-green { background:linear-gradient(135deg,#064e3b,#065f46); }
+  .card-amber { background:linear-gradient(135deg,#78350f,#92400e); }
+
+  .badge-approved  { background:rgba(74,222,128,.15); color:#4ade80; border:1px solid rgba(74,222,128,.3); }
+  .badge-pending   { background:rgba(251,191,36,.15);  color:#fbbf24; border:1px solid rgba(251,191,36,.3); }
+  .badge-revision  { background:rgba(248,113,113,.15); color:#f87171; border:1px solid rgba(248,113,113,.3); }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+  .page { animation:fadeIn .3s ease; }
+  .section-hidden { display:none!important; }
+
+  table thead th { color:#94a3b8; font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+  table tbody tr { border-bottom:1px solid rgba(148,163,184,.08); transition:background .15s; }
+  table tbody tr:hover { background:rgba(148,163,184,.05); }
+
+  ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#334155; border-radius:2px; }
+  select,input { background:#1e293b!important; color:#e2e8f0!important; border-color:rgba(148,163,184,.2)!important; }
+</style>
+</head>
+<body>
+<div class="flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 overflow-y-auto">
+    <div class="mb-8 mt-2">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-indigo-600/30 border border-indigo-500/40 rounded-xl flex items-center justify-center">
+          <i class="fa-solid fa-chart-pie text-indigo-400"></i>
+        </div>
+        <div>
+          <p class="font-display font-bold text-white text-sm leading-tight">Smart Lesson Plan</p>
+          <p class="text-xs text-slate-400">Director Portal</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-3 mb-5 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center font-bold text-sm text-white">อภ</div>
+      <div>
+        <p class="text-sm font-semibold text-white">นางสาวอาภา วิชาการ</p>
+        <p class="text-xs text-slate-400">ผู้อำนวยการ</p>
+      </div>
+    </div>
+
+    <nav class="space-y-1 flex-1">
+      <button onclick="showPage('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-slate-300">
+        <i class="fa-solid fa-gauge-high w-5 text-center text-indigo-400"></i> Dashboard
+      </button>
+      <button onclick="showPage('pending')" id="nav-pending" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-slate-300">
+        <i class="fa-solid fa-hourglass-half w-5 text-center text-amber-400"></i>
+        รอการตรวจ
+        <span class="ml-auto bg-amber-500/20 text-amber-400 text-xs px-2 py-0.5 rounded-full font-semibold">2</span>
+      </button>
+      <button onclick="showPage('archive')" id="nav-archive" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-slate-300">
+        <i class="fa-solid fa-box-archive w-5 text-center text-slate-400"></i> คลังแผน
+      </button>
+    </nav>
+
+    <div class="pt-4 border-t border-slate-700/50">
+      <p class="text-xs text-slate-500">ภาคเรียน 1/2567</p>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 overflow-y-auto p-6">
+
+    <!-- ─── DASHBOARD ─── -->
+    <section id="page-dashboard" class="page">
+      <div class="mb-6">
+        <h1 class="font-display text-2xl font-bold text-white">Dashboard</h1>
+        <p class="text-slate-400 text-sm mt-1">ภาพรวมการส่งแผนการสอน ภาคเรียน 1/2567</p>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="card-blue rounded-2xl p-5">
+          <p class="text-blue-300 text-xs font-semibold uppercase tracking-wider mb-2">ทั้งหมด</p>
+          <p class="font-display text-4xl font-bold text-white">24</p>
+          <p class="text-blue-200 text-sm mt-1">แผนการสอน</p>
+        </div>
+        <div class="card-amber rounded-2xl p-5">
+          <p class="text-amber-300 text-xs font-semibold uppercase tracking-wider mb-2">รอตรวจ</p>
+          <p class="font-display text-4xl font-bold text-white">2</p>
+          <p class="text-amber-200 text-sm mt-1">แผนการสอน</p>
+        </div>
+        <div class="card-green rounded-2xl p-5">
+          <p class="text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-2">อนุมัติ</p>
+          <p class="font-display text-4xl font-bold text-white">20</p>
+          <p class="text-emerald-200 text-sm mt-1">แผนการสอน</p>
+        </div>
+      </div>
+
+      <!-- Chart row -->
+      <div class="grid grid-cols-5 gap-4">
+        <div class="card p-5 col-span-2">
+          <h2 class="font-display font-semibold text-white mb-4">สถานะรวม</h2>
+          <canvas id="doughnutChart" height="220"></canvas>
+        </div>
+        <div class="card p-5 col-span-3">
+          <h2 class="font-display font-semibold text-white mb-4">สัดส่วนตามกลุ่มสาระ</h2>
+          <canvas id="barChart" height="220"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PENDING ─── -->
+    <section id="page-pending" class="page section-hidden">
+      <div class="mb-6">
+        <h1 class="font-display text-2xl font-bold text-white">รอการตรวจสอบ</h1>
+        <p class="text-slate-400 text-sm">แผนการสอนที่รอการพิจารณาจากท่าน</p>
+      </div>
+      <div class="card p-5">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr>
+              <th class="text-left py-3 px-3">ครูผู้สอน</th>
+              <th class="text-left py-3 px-3">วิชา</th>
+              <th class="text-left py-3 px-3">สัปดาห์</th>
+              <th class="text-left py-3 px-3">วันที่ส่ง</th>
+              <th class="text-left py-3 px-3">สถานะ</th>
+              <th class="text-left py-3 px-3">Action</th>
+            </tr></thead>
+            <tbody id="pendingTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ARCHIVE ─── -->
+    <section id="page-archive" class="page section-hidden">
+      <div class="mb-6">
+        <h1 class="font-display text-2xl font-bold text-white">คลังแผนการสอน</h1>
+        <p class="text-slate-400 text-sm">แผนการสอนที่ผ่านการอนุมัติแล้ว</p>
+      </div>
+      <div class="card p-5">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr>
+              <th class="text-left py-3 px-3">ครูผู้สอน</th>
+              <th class="text-left py-3 px-3">วิชา</th>
+              <th class="text-left py-3 px-3">สัปดาห์</th>
+              <th class="text-left py-3 px-3">วันที่อนุมัติ</th>
+              <th class="text-left py-3 px-3">ไฟล์</th>
+            </tr></thead>
+            <tbody id="archiveTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const pendingPlans = [
+  { id:1, teacher:'นายประยุทธ์ สอนเก่ง', subject:'วิทยาศาสตร์ ม.1', week:2, date:'8 มิ.ย. 67', status:'Pending',
+    aiSummary:'แผนการสอนมีโครงสร้างที่ดี ระบุเนื้อหาชัดเจน แต่ยังขาดกิจกรรม Active Learning ในขั้นสอน ควรเพิ่มกิจกรรมกลุ่มหรือการทดลองเพื่อให้นักเรียนมีส่วนร่วมมากขึ้น วัตถุประสงค์ K และ A ชัดเจน แต่ P ยังไม่ระบุอย่างเป็นรูปธรรม' },
+  { id:2, teacher:'นางมาลี รักเรียน',    subject:'ภาษาไทย ม.2',    week:2, date:'9 มิ.ย. 67', status:'Pending',
+    aiSummary:'แผนการสอนมีเนื้อหาครอบคลุมมาตรฐานการเรียนรู้ กิจกรรมหลากหลาย มีทั้ง Active Learning และ K-P-A ครบถ้วน ถือเป็นแผนที่มีคุณภาพสูง ควรอนุมัติ' },
+];
+
+const archivePlans = [
+  { teacher:'นายประยุทธ์ สอนเก่ง', subject:'วิทยาศาสตร์ ม.1', week:1, approvedDate:'5 มิ.ย. 67', url:'#' },
+  { teacher:'นางมาลี รักเรียน',    subject:'ภาษาไทย ม.2',    week:1, approvedDate:'6 มิ.ย. 67', url:'#' },
+];
+
+// ── Navigation ──────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
+  document.querySelectorAll('button[id^="nav-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.remove('section-hidden');
+  document.getElementById('nav-'+name).classList.add('active');
+  if (name==='dashboard') setTimeout(initCharts,50);
+  if (name==='pending')   renderPending();
+  if (name==='archive')   renderArchive();
+}
+
+// ── Charts ───────────────────────────────────────────────────
+let chartsInit = false;
+function initCharts() {
+  if (chartsInit) return; chartsInit = true;
+  const dCtx = document.getElementById('doughnutChart').getContext('2d');
+  new Chart(dCtx, {
+    type:'doughnut',
+    data:{ labels:['อนุมัติ','รอตรวจ','ต้องแก้ไข'], datasets:[{ data:[20,2,2], backgroundColor:['#10b981','#f59e0b','#ef4444'], borderWidth:0, hoverOffset:6 }] },
+    options:{ cutout:'70%', plugins:{ legend:{ labels:{ color:'#94a3b8', font:{family:'Sarabun',size:12} } } } }
+  });
+  const bCtx = document.getElementById('barChart').getContext('2d');
+  new Chart(bCtx, {
+    type:'bar',
+    data:{
+      labels:['วิทย์/เทคโน','ภาษาไทย','คณิตศาสตร์','สังคม','ภาษาต่างประเทศ'],
+      datasets:[
+        { label:'อนุมัติ', data:[8,4,4,2,2], backgroundColor:'rgba(16,185,129,.7)', borderRadius:6 },
+        { label:'รอตรวจ',  data:[1,1,0,0,0], backgroundColor:'rgba(245,158,11,.7)',  borderRadius:6 },
+      ]
+    },
+    options:{ scales:{ x:{ ticks:{color:'#94a3b8',font:{family:'Sarabun',size:11}}, grid:{color:'rgba(148,163,184,.05)'} }, y:{ ticks:{color:'#94a3b8',font:{family:'Sarabun',size:11}}, grid:{color:'rgba(148,163,184,.05)'} } }, plugins:{ legend:{ labels:{ color:'#94a3b8', font:{family:'Sarabun',size:12} } } } }
+  });
+}
+
+// ── Pending table ────────────────────────────────────────────
+function renderPending() {
+  document.getElementById('pendingTable').innerHTML = pendingPlans.map(p=>`
+    <tr>
+      <td class="py-3 px-3 font-medium text-white">${p.teacher}</td>
+      <td class="py-3 px-3 text-slate-300">${p.subject}</td>
+      <td class="py-3 px-3 text-slate-300">สัปดาห์ ${p.week}</td>
+      <td class="py-3 px-3 text-slate-400 text-xs">${p.date}</td>
+      <td class="py-3 px-3"><span class="badge-pending px-3 py-1 rounded-full text-xs font-semibold">รอตรวจ</span></td>
+      <td class="py-3 px-3">
+        <button onclick="openReviewModal(${p.id})" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg font-medium transition-colors"><i class="fa-solid fa-magnifying-glass mr-1"></i>ตรวจสอบ</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderArchive() {
+  document.getElementById('archiveTable').innerHTML = archivePlans.map(p=>`
+    <tr>
+      <td class="py-3 px-3 font-medium text-white">${p.teacher}</td>
+      <td class="py-3 px-3 text-slate-300">${p.subject}</td>
+      <td class="py-3 px-3 text-slate-300">สัปดาห์ ${p.week}</td>
+      <td class="py-3 px-3 text-slate-400 text-xs">${p.approvedDate}</td>
+      <td class="py-3 px-3"><a href="${p.url}" class="text-indigo-400 hover:text-indigo-300 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a></td>
+    </tr>`).join('');
+}
+
+// ── Review Modal ─────────────────────────────────────────────
+function openReviewModal(id) {
+  const plan = pendingPlans.find(p=>p.id===id);
+  if (!plan) return;
+  Swal.fire({
+    width: 620,
+    background: '#1e293b',
+    color: '#e2e8f0',
+    title: `<span style="font-family:Kanit;color:#f1f5f9">ตรวจสอบแผนการสอน</span>`,
+    html: `
+      <div style="font-family:Sarabun;text-align:left;font-size:14px">
+        <div style="background:#0f172a;border-radius:12px;padding:14px;margin-bottom:14px">
+          <p style="color:#94a3b8;font-size:12px;margin-bottom:6px">ข้อมูลแผนการสอน</p>
+          <p style="color:#e2e8f0;font-weight:600">${plan.teacher}</p>
+          <p style="color:#94a3b8">${plan.subject} — สัปดาห์ที่ ${plan.week}</p>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(79,70,229,.1));border:1px solid rgba(99,102,241,.3);border-radius:12px;padding:14px;margin-bottom:14px">
+          <p style="color:#818cf8;font-weight:600;margin-bottom:8px"><i class="fa-solid fa-robot" style="margin-right:6px"></i>AI Summary</p>
+          <p style="color:#cbd5e1;line-height:1.7">${plan.aiSummary}</p>
+        </div>
+        <div>
+          <label style="color:#94a3b8;font-size:12px;display:block;margin-bottom:6px">ความเห็นผู้อำนวยการ (ถ้ามี)</label>
+          <textarea id="dirFeedback" rows="3" placeholder="ระบุความเห็น..." style="width:100%;background:#0f172a;border:1px solid rgba(148,163,184,.2);border-radius:8px;padding:10px;color:#e2e8f0;font-family:Sarabun;font-size:13px;resize:none;outline:none"></textarea>
+        </div>
+      </div>`,
+    showCancelButton: false,
+    showConfirmButton: false,
+    footer: `
+      <div style="display:flex;gap:10px;width:100%;justify-content:flex-end">
+        <button onclick="handleReview(${id},'Revision Needed')" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;padding:10px 20px;border-radius:10px;font-family:Sarabun;font-size:14px;cursor:pointer;font-weight:600"><i class="fa-solid fa-rotate-left" style="margin-right:6px"></i>ส่งกลับแก้ไข</button>
+        <button onclick="handleReview(${id},'Approved')" style="background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4);color:#34d399;padding:10px 20px;border-radius:10px;font-family:Sarabun;font-size:14px;cursor:pointer;font-weight:600"><i class="fa-solid fa-circle-check" style="margin-right:6px"></i>อนุมัติ</button>
+      </div>`
+  });
+}
+
+function handleReview(id, decision) {
+  const feedback = document.getElementById('dirFeedback')?.value || '';
+  Swal.fire({
+    icon: decision==='Approved' ? 'success' : 'info',
+    background:'#1e293b', color:'#e2e8f0',
+    title: `<span style="font-family:Kanit">${decision==='Approved'?'อนุมัติเรียบร้อย':'ส่งกลับแก้ไขแล้ว'}</span>`,
+    text: decision==='Approved' ? 'แผนการสอนได้รับการอนุมัติเรียบร้อย' : 'แจ้งให้ครูปรับแก้แผนการสอนแล้ว',
+    confirmButtonColor:'#6366f1'
+  });
+}
+
+// Init
+setTimeout(initCharts, 100);
+renderPending();
+renderArchive();
+</script>
+</body>
+</html>
