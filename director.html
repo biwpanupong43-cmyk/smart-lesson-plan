@@ -320,8 +320,6 @@ function openAddUserModal() {
       
       const userData = { name, role:document.getElementById('su-role').value, group:document.getElementById('su-group').value, username, temp_password:pass };
       
-      // TODO: เปิดคอมเมนต์บรรทัดล่างนี้ เมื่อไฟล์ supabase_integration.js สร้างฟังก์ชัน addNewUser แล้ว
-      // await addNewUser(userData);
 
       return userData;
     }
@@ -357,8 +355,6 @@ function factoryReset() {
         return false; 
       } 
 
-      // TODO: เปิดคอมเมนต์ เมื่อไฟล์ supabase_integration.js สร้างฟังก์ชัน resetDatabase() แล้ว
-      // await resetDatabase();
 
       return true; 
     }
