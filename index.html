@@ -232,12 +232,6 @@
 <script>
 'use strict';
 
-const ROLE_ROUTES = {
-  teacher:  'teacher_dashboard.html',
-  director: 'director_dashboard.html',
-  admin:    'admin_dashboard.html',
-};
-
 // ── ตรวจ session ที่มีอยู่แล้ว ──────────────────────────────
 (async () => {
   const { data: { session } } = await db.auth.getSession();
