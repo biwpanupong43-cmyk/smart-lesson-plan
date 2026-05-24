@@ -357,10 +357,7 @@ async function submitPlan() {
     // TODO: ใส่ URL ของ Google Apps Script (GAS) ของคุณที่ได้จากการ Deploy ใน Phase 2
     // ---------------------------------------------------------------------------------
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzFYXeTLt0donEwycgTyw9ZJkgfmxjdpazqm3GvB8EwqNhrzjcuxRHvWPD08Pu-tAL3/exec";
-    
-    // ** เมื่อไฟล์ supabase_integration.js พร้อมใช้งาน ให้เปิดคอมเมนต์บรรทัดล่างนี้ **
-    // await uploadPlanViaGAS(subject, weekNum, selectedFile, GAS_URL);
-
+     
   } catch (error) {
     Swal.fire('เกิดข้อผิดพลาด', error.message, 'error');
   }
