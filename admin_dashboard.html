@@ -71,10 +71,6 @@
   /* ── Log table ── */
   .log-row { border-bottom:1px solid #f3f4f6; }
   .log-row:last-child { border-bottom:none; }
-  .status-success { color:#16a34a; font-weight:600; font-size:12px; }
-  .status-update  { color:#7c3aed; font-weight:600; font-size:12px; }
-  .status-warning { color:#d97706; font-weight:600; font-size:12px; }
-  .status-error   { color:#dc2626; font-weight:600; font-size:12px; }
 
   /* ── Scrollbar ── */
   ::-webkit-scrollbar { width:4px; }
@@ -111,7 +107,7 @@
 
   /* ── Drive usage bar ── */
   .drive-bar { height:6px; border-radius:3px; background:#e5e7eb; overflow:hidden; }
-  .drive-fill { height:100%; background:linear-gradient(90deg,#3b82f6,#06b6d4); border-radius:3px; }
+  .drive-fill { height:100%; background:linear-gradient(90deg,#3b82f6,#06b6d4); border-radius:3px; transition: width 0.5s; }
 </style>
 </head>
 <body>
@@ -196,13 +192,28 @@
             <div class="flex items-start justify-between">
               <div>
                 <p class="text-gray-500 text-xs font-medium mb-1">บัญชีผู้ใช้งานทั้งหมด</p>
-                <p id="totalUsers" class="kn text-3xl font-bold text-gray-900 mt-1">—</p>
+                <p id="totalUsers" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p class="text-green-600 text-xs mt-2 flex items-center gap-1">
-                  <i class="fa-solid fa-arrow-trend-up text-xs"></i> เพิ่มขึ้น 2 คนในเดือนนี้
+                  ดึงข้อมูลจริงจากระบบ
                 </p>
               </div>
               <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
                 <i class="fa-solid fa-users text-violet-500 text-base"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Lesson Plans -->
+          <div class="stat-card p-5">
+            <div style="height:4px;background:linear-gradient(90deg,#f59e0b,#fbbf24);margin:-20px -20px 16px"></div>
+            <div class="flex items-start justify-between">
+              <div>
+                <p class="text-gray-500 text-xs font-medium mb-1">แผนการสอนในระบบ</p>
+                <p id="totalPlans" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
+                <p class="text-gray-400 text-xs mt-2">รวมทุกสถานะ</p>
+              </div>
+              <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-file-pdf text-amber-500 text-base"></i>
               </div>
             </div>
           </div>
@@ -213,11 +224,11 @@
             <div class="flex items-start justify-between">
               <div>
                 <p class="text-gray-500 text-xs font-medium mb-1">สถานะ API (Gemini)</p>
-                <p class="kn text-xl font-bold text-gray-900 mt-1">พร้อมใช้งาน</p>
-                <p class="text-gray-400 text-xs mt-2">Response time: 1.2s</p>
+                <p id="geminiStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
+                <p id="geminiSubtext" class="text-gray-400 text-xs mt-2">กำลังตรวจสอบ...</p>
               </div>
               <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-circle-half-stroke text-green-500 text-base"></i>
+                <i class="fa-solid fa-brain text-green-500 text-base"></i>
               </div>
             </div>
           </div>
@@ -227,10 +238,11 @@
             <div style="height:4px;background:linear-gradient(90deg,#3b82f6,#60a5fa);margin:-20px -20px 16px"></div>
             <div class="flex items-start justify-between">
               <div class="flex-1 mr-3">
-                <p class="text-gray-500 text-xs font-medium mb-1">พื้นที่ Google Drive</p>
-                <p class="kn text-xl font-bold text-gray-900 mt-1">15 GB / 100 GB</p>
+                <p class="text-gray-500 text-xs font-medium mb-1">สถานะ Google Drive</p>
+                <p id="driveStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
+                <p id="driveSubtext" class="text-gray-400 text-[10px] mt-1 break-all font-mono leading-tight">กำลังตรวจสอบ...</p>
                 <div class="drive-bar mt-2">
-                  <div class="drive-fill" style="width:15%"></div>
+                  <div id="driveBarFill" class="drive-fill" style="width:0%"></div>
                 </div>
               </div>
               <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -238,43 +250,17 @@
               </div>
             </div>
           </div>
-
-          <!-- Database -->
-          <div class="stat-card p-5">
-            <div style="height:4px;background:linear-gradient(90deg,#10b981,#34d399);margin:-20px -20px 16px"></div>
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-gray-500 text-xs font-medium mb-1">สถานะฐานข้อมูล</p>
-                <p class="kn text-xl font-bold text-gray-900 mt-1">Supabase DB</p>
-                <p class="text-gray-400 text-xs mt-2">Latency: 45ms</p>
-              </div>
-              <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-database text-emerald-500 text-base"></i>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- System Logs -->
         <div class="card p-6">
-          <h2 class="kn font-semibold text-gray-800 text-base mb-4">บันทึกระบบล่าสุด (System Logs)</h2>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="kn font-semibold text-gray-800 text-base">บันทึกกิจกรรมล่าสุด (Real-time Logs)</h2>
+            <button onclick="loadOverviewStats()" class="text-xs text-gray-500 hover:text-indigo-600"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
+          </div>
           <table class="w-full text-sm">
             <tbody id="logTableBody">
-              <tr class="log-row">
-                <td class="py-3 pr-4 text-gray-400 text-xs whitespace-nowrap w-24">10:42 AM</td>
-                <td class="py-3 pr-5 w-24"><span class="status-success">SUCCESS</span></td>
-                <td class="py-3 text-gray-700">เชื่อมต่อ Supabase Database สำเร็จ</td>
-              </tr>
-              <tr class="log-row">
-                <td class="py-3 pr-4 text-gray-400 text-xs whitespace-nowrap">09:15 AM</td>
-                <td class="py-3 pr-5"><span class="status-update">UPDATE</span></td>
-                <td class="py-3 text-gray-700">Admin เพิ่มผู้ใช้งานใหม่: ครูสมหมาย สอนเก่ง</td>
-              </tr>
-              <tr class="log-row">
-                <td class="py-3 pr-4 text-gray-400 text-xs whitespace-nowrap">08:00 AM</td>
-                <td class="py-3 pr-5"><span class="status-warning">WARNING</span></td>
-                <td class="py-3 text-gray-700">ตรวจพบการตั้งรหัสผ่านชั่วคราวซ้ำกันหลายบัญชี</td>
-              </tr>
+              <tr><td colspan="3" class="py-4 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>
             </tbody>
           </table>
         </div>
@@ -307,7 +293,7 @@
                   <th class="text-left py-3 px-3">ชื่อ-สกุล</th>
                   <th class="text-left py-3 px-3">ตำแหน่ง / สิทธิ์</th>
                   <th class="text-left py-3 px-3">กลุ่มสาระฯ</th>
-                  <th class="text-left py-3 px-3">ใช้งานล่าสุด</th>
+                  <th class="text-left py-3 px-3">สร้างเมื่อ</th>
                   <th class="text-left py-3 px-3">จัดการ</th>
                 </tr>
               </thead>
@@ -345,10 +331,7 @@
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="text-xs text-gray-500">สถานะการเชื่อมต่อ:</span>
-                <span class="text-xs font-semibold text-green-600 flex items-center gap-1">
-                  <i class="fa-solid fa-circle-check"></i> Connected
-                </span>
+                <span class="text-xs text-gray-500">ใส่คีย์เพื่อให้ AI ทำงานได้</span>
               </div>
               <button onclick="saveKey('gemini')"
                 class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs rounded-lg font-medium transition-colors">
@@ -380,7 +363,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <span class="text-xs text-gray-500">รูปแบบการบันทึก:</span>
-                <span class="text-xs font-semibold text-gray-800 ml-1">แยกโฟลเดอร์ตามกลุ่มสาระฯ</span>
+                <span class="text-xs font-semibold text-gray-800 ml-1">รวมในโฟลเดอร์เดียว</span>
               </div>
               <button onclick="saveKey('drive')"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-medium transition-colors">
@@ -444,7 +427,7 @@
               </div>
               <button onclick="archiveData()"
                 class="px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ml-4">
-                รับคำสั่ง
+                รันคำสั่ง
               </button>
             </div>
 
@@ -503,6 +486,7 @@ function showPage(name) {
   if (name === 'users') loadUserTable();
   if (name === 'settings') loadSettings();
   if (name === 'integrate') loadIntegrations();
+  if (name === 'overview') loadOverviewStats();
 }
 
 // ── Load User Table ───────────────────────────────────────────
@@ -512,7 +496,6 @@ async function loadUserTable() {
   tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
   try {
     allUsers = await getAllUsers();
-    document.getElementById('totalUsers').textContent = allUsers.length;
     renderUserTable(allUsers);
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
@@ -528,11 +511,9 @@ function renderUserTable(users) {
   tbody.innerHTML = users.map(u => {
     const badgeClass = u.role === 'admin' ? 'badge-admin' : u.role === 'director' ? 'badge-director' : 'badge-teacher';
     const roleLabel  = u.role === 'admin' ? 'Admin' : u.role === 'director' ? 'Director' : 'Teacher';
-    const lastSeen   = u.last_login
-      ? new Date(u.last_login).toLocaleDateString('th-TH', { year:'2-digit', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
-      : (u.created_at ? new Date(u.created_at).toLocaleDateString('th-TH', { year:'2-digit', month:'short', day:'numeric' }) : '—');
+    const createdAt  = u.created_at ? new Date(u.created_at).toLocaleDateString('th-TH', { year:'2-digit', month:'short', day:'numeric' }) : '—';
     const initials   = u.name.trim().split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    const idLabel    = u.username ? `ID: ${u.username.toUpperCase()}` : '';
+    const idLabel    = u.username ? `ID: ${u.username.toLowerCase()}` : '';
 
     let actions = '';
     if (u.role === 'admin') {
@@ -565,7 +546,7 @@ function renderUserTable(users) {
       </td>
       <td class="py-3.5 px-3"><span class="${badgeClass} text-xs px-2.5 py-1 rounded-full font-medium">${roleLabel}</span></td>
       <td class="py-3.5 px-3 text-gray-500 text-sm">${u.subject_group || '—'}</td>
-      <td class="py-3.5 px-3 text-gray-500 text-xs">${lastSeen}</td>
+      <td class="py-3.5 px-3 text-gray-500 text-xs">${createdAt}</td>
       <td class="py-3.5 px-3"><div class="flex items-center gap-1.5">${actions}</div></td>
     </tr>`;
   }).join('');
@@ -582,12 +563,98 @@ function filterUsers() {
   renderUserTable(filtered);
 }
 
-// ── Overview stats ────────────────────────────────────────────
+// ── Overview stats (ดึงข้อมูลจริง) ───────────────────────────────
 async function loadOverviewStats() {
   try {
+    // 1. โหลดจำนวนผู้ใช้
     const users = await getAllUsers();
     document.getElementById('totalUsers').textContent = users.length;
-  } catch (_) {}
+
+    // 2. โหลดจำนวนแผนการสอน
+    const { data: plans } = await db.from('lesson_plans').select('id, status, submitted_at, users(name)');
+    if (plans) {
+        document.getElementById('totalPlans').textContent = plans.length;
+    } else {
+        document.getElementById('totalPlans').textContent = "0";
+    }
+
+    // 3. ตรวจสอบ API Keys จาก Setting
+    const gKey = await getSystemSetting('gemini_api_key');
+    const dKey = await getSystemSetting('drive_folder_id');
+
+    const geminiStatus = document.getElementById('geminiStatus');
+    const geminiSub    = document.getElementById('geminiSubtext');
+    if (gKey) {
+        geminiStatus.innerHTML = `<span class="text-emerald-500">เชื่อมต่อแล้ว</span>`;
+        geminiSub.textContent  = "พร้อมใช้งาน";
+    } else {
+        geminiStatus.innerHTML = `<span class="text-amber-500">รอการเชื่อมต่อ</span>`;
+        geminiSub.textContent  = "กรุณาใส่ API Key";
+    }
+
+    const driveStatus = document.getElementById('driveStatus');
+    const driveSub    = document.getElementById('driveSubtext');
+    if (dKey) {
+        driveStatus.innerHTML = `<span class="text-blue-500">เชื่อมต่อแล้ว</span>`;
+        driveSub.textContent  = `Folder ID: ${dKey}`;
+        document.getElementById('driveBarFill').style.width = '100%';
+        document.getElementById('driveBarFill').classList.add('bg-blue-500');
+    } else {
+        driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
+        driveSub.textContent  = "กรุณาใส่ Folder ID";
+        document.getElementById('driveBarFill').style.width = '0%';
+    }
+
+    // 4. สร้างบันทึกกิจกรรมล่าสุดแบบ Real-time (ดึงจากผู้ใช้และแผน)
+    let logs = [];
+    users.forEach(u => {
+        logs.push({
+            time: new Date(u.created_at || Date.now()),
+            typeText: 'NEW USER', color: 'text-blue-500',
+            msg: `เพิ่มผู้ใช้ใหม่: ${u.name} (${u.role})`
+        });
+    });
+
+    if (plans) {
+        plans.forEach(p => {
+            let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
+            if (p.status === 'Pending') {
+                msg = `ครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งแผนการสอนใหม่เข้าสู่ระบบ`;
+            } else if (p.status === 'Approved') {
+                msg = `ผู้อำนวยการ อนุมัติแผนการสอนของ ${p.users?.name || 'ไม่ทราบชื่อ'}`;
+                color = 'text-purple-500'; typeText = 'APPROVE';
+            } else {
+                msg = `ผู้อำนวยการ ส่งแผนของ ${p.users?.name || 'ไม่ทราบชื่อ'} กลับไปแก้ไข`;
+                color = 'text-amber-500'; typeText = 'REVISION';
+            }
+            logs.push({
+                time: new Date(p.submitted_at || Date.now()),
+                typeText: typeText, color: color, msg: msg
+            });
+        });
+    }
+
+    logs.sort((a,b) => b.time - a.time);
+    const topLogs = logs.slice(0, 6);
+    const logBody = document.getElementById('logTableBody');
+
+    if (topLogs.length > 0) {
+        logBody.innerHTML = topLogs.map(l => `
+          <tr class="log-row">
+            <td class="py-3 pr-4 text-gray-400 text-[11px] whitespace-nowrap w-24">
+              ${l.time.toLocaleDateString('th-TH', {day:'numeric', month:'short'})} ${l.time.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}
+            </td>
+            <td class="py-3 pr-5 w-24"><span class="${l.color} font-bold text-[10px] tracking-wider">${l.typeText}</span></td>
+            <td class="py-3 text-gray-700 text-sm">${l.msg}</td>
+          </tr>
+        `).join('');
+    } else {
+        logBody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400">ยังไม่มีบันทึกระบบ</td></tr>`;
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
 }
 loadOverviewStats();
 
@@ -797,6 +864,7 @@ function factoryReset() {
   }).then(r => {
     if (r.isConfirmed) {
       Swal.fire({ icon:'success', title:'Reset เสร็จสิ้น', text:'ระบบถูกรีเซ็ตเรียบร้อยแล้ว', confirmButtonColor:'#7c3aed' });
+      loadOverviewStats();
     }
   });
 }
