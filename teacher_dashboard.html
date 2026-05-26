@@ -393,13 +393,10 @@ async function submitPlan() {
     return;
   }
 
+  // ✅ แก้ไข: ลบ popup วิเคราะห์ AI ออก ใช้แค่ loading ธรรมดา
   Swal.fire({
-    title: '<span style="font-family:Kanit">กำลังส่งและวิเคราะห์แผนการสอน...</span>',
-    html: `<div style="font-family:Sarabun;font-size:14px;color:#6b7280">
-      <div class="mb-4"><i class="fa-solid fa-robot text-blue-500 text-3xl"></i></div>
-      <p class="mb-2">AI กำลังตรวจสอบแผนการสอนของคุณ</p>
-      <p class="text-xs text-gray-400">กระบวนการนี้อาจใช้เวลาสักครู่...</p>
-    </div>`,
+    title: '<span style="font-family:Kanit">กำลังส่งแผนการสอน...</span>',
+    html: `<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่</p>`,
     allowOutsideClick: false,
     showConfirmButton: false,
     didOpen: () => Swal.showLoading()
@@ -415,12 +412,7 @@ async function submitPlan() {
     await Swal.fire({
       icon: 'success',
       title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>',
-      html: result.aiSummary
-        ? `<div style="font-family:Sarabun;font-size:14px;color:#6b7280;text-align:left">
-            <p class="font-semibold text-gray-700 mb-2">สรุป AI:</p>
-            <p>${result.aiSummary}</p>
-          </div>`
-        : '<p style="font-family:Sarabun;font-size:14px">แผนของคุณถูกส่งและรอการตรวจสอบแล้ว</p>',
+      html: '<p style="font-family:Sarabun;font-size:14px">แผนของคุณถูกส่งและรอการตรวจสอบแล้ว</p>',
       confirmButtonColor: '#3b82f6',
       confirmButtonText: 'ดูประวัติการส่ง',
     });
