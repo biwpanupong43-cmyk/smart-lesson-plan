@@ -218,17 +218,17 @@
             </div>
           </div>
 
-          <!-- Gemini API -->
+          <!-- Supabase DB Status -->
           <div class="stat-card p-5">
             <div style="height:4px;background:linear-gradient(90deg,#22c55e,#4ade80);margin:-20px -20px 16px"></div>
             <div class="flex items-start justify-between">
               <div>
-                <p class="text-gray-500 text-xs font-medium mb-1">สถานะ API (Gemini)</p>
-                <p id="geminiStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
-                <p id="geminiSubtext" class="text-gray-400 text-xs mt-2">กำลังตรวจสอบ...</p>
+                <p class="text-gray-500 text-xs font-medium mb-1">สถานะ Database</p>
+                <p id="dbStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
+                <p id="dbSubtext" class="text-gray-400 text-xs mt-2">กำลังตรวจสอบ...</p>
               </div>
               <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-brain text-green-500 text-base"></i>
+                <i class="fa-solid fa-database text-green-500 text-base"></i>
               </div>
             </div>
           </div>
@@ -309,35 +309,22 @@
       <section id="page-integrate" class="page section-hidden">
         <div class="grid grid-cols-2 gap-5">
 
-          <!-- Gemini API -->
-          <div class="card integ-gemini p-6">
+          <!-- Supabase DB -->
+          <div class="card p-6" style="border:2px solid #a7f3d0">
             <div class="flex items-center gap-3 mb-4">
-              <div class="w-11 h-11 bg-violet-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-circle-half-stroke text-violet-500 text-lg"></i>
+              <div class="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-database text-green-600 text-lg"></i>
               </div>
               <div>
-                <p class="font-semibold text-gray-800">Google Gemini API</p>
-                <p class="text-gray-500 text-xs">ระบบประมวลผลและวิเคราะห์แผนการสอน</p>
+                <p class="font-semibold text-gray-800">Supabase Database</p>
+                <p class="text-gray-500 text-xs">ฐานข้อมูลหลักของระบบ</p>
               </div>
             </div>
-            <label class="block text-xs text-gray-500 mb-2 font-medium">API Key</label>
-            <div class="relative mb-4">
-              <input type="password" id="geminiKey" value=""
-                class="w-full border rounded-xl px-4 py-2.5 text-sm font-mono pr-10" placeholder="AIzaSy..."/>
-              <button onclick="toggleVisibility('geminiKey',this)"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-pen-to-square text-sm"></i>
-              </button>
+            <div id="dbIntegStatus" class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-4">
+              <i class="fa-solid fa-spinner fa-spin text-gray-400"></i>
+              <span class="text-sm text-gray-400">กำลังตรวจสอบการเชื่อมต่อ...</span>
             </div>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-gray-500">ใส่คีย์เพื่อให้ AI ทำงานได้</span>
-              </div>
-              <button onclick="saveKey('gemini')"
-                class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs rounded-lg font-medium transition-colors">
-                บันทึก
-              </button>
-            </div>
+            <div class="text-xs text-gray-400">การเชื่อมต่อจัดการผ่านไฟล์ <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">supabase_integration.js</code></div>
           </div>
 
           <!-- Google Drive -->
@@ -573,26 +560,25 @@ async function loadOverviewStats() {
     document.getElementById('totalUsers').textContent = users.length;
 
     // 2. โหลดจำนวนแผนการสอน
-    const { data: plans } = await db.from('lesson_plans').select('id, status, submitted_at, users(name)');
-    if (plans) {
-        document.getElementById('totalPlans').textContent = plans.length;
-    } else {
-        document.getElementById('totalPlans').textContent = "0";
+    const { data: plans, error: planErr } = await db.from('lesson_plans').select('id, status, submitted_at, users(name)');
+    document.getElementById('totalPlans').textContent = plans ? plans.length : 0;
+
+    // 3. ตรวจสอบสถานะ Supabase Database
+    const dbStatusEl  = document.getElementById('dbStatus');
+    const dbSubtextEl = document.getElementById('dbSubtext');
+    try {
+      // ping ด้วย query เบา ๆ
+      const { error: dbErr } = await db.from('users').select('id', { count: 'exact', head: true });
+      if (dbErr) throw dbErr;
+      dbStatusEl.innerHTML = `<span class="text-emerald-500">เชื่อมต่อแล้ว</span>`;
+      dbSubtextEl.textContent = "Supabase Online";
+    } catch (_) {
+      dbStatusEl.innerHTML = `<span class="text-red-500">เชื่อมต่อไม่ได้</span>`;
+      dbSubtextEl.textContent = "ตรวจสอบ URL / Key";
     }
 
-    // 3. ตรวจสอบ API Keys จาก Setting
-    const gKey = await getSystemSetting('gemini_api_key');
+    // 4. Google Drive
     const dKey = await getSystemSetting('drive_folder_id');
-
-    const geminiStatus = document.getElementById('geminiStatus');
-    const geminiSub    = document.getElementById('geminiSubtext');
-    if (gKey) {
-        geminiStatus.innerHTML = `<span class="text-emerald-500">เชื่อมต่อแล้ว</span>`;
-        geminiSub.textContent  = "พร้อมใช้งาน";
-    } else {
-        geminiStatus.innerHTML = `<span class="text-amber-500">รอการเชื่อมต่อ</span>`;
-        geminiSub.textContent  = "กรุณาใส่ API Key";
-    }
 
     const driveStatus = document.getElementById('driveStatus');
     const driveSub    = document.getElementById('driveSubtext');
@@ -701,10 +687,20 @@ async function loadSettings() {
 // ── Load Integrations ─────────────────────────────────────────
 async function loadIntegrations() {
   try {
-    const gKey = await getSystemSetting('gemini_api_key');
     const dKey = await getSystemSetting('drive_folder_id');
-    if (gKey) document.getElementById('geminiKey').value = gKey;
     if (dKey) document.getElementById('driveFolder').value = dKey;
+
+    // แสดงสถานะ DB connection ใน card
+    const dbIntegEl = document.getElementById('dbIntegStatus');
+    try {
+      const { error: dbErr } = await db.from('users').select('id', { count: 'exact', head: true });
+      if (dbErr) throw dbErr;
+      dbIntegEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i><span class="text-sm text-emerald-600 font-medium">เชื่อมต่อ Supabase สำเร็จ — Online</span>`;
+      dbIntegEl.className = 'flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mb-4';
+    } catch (_) {
+      dbIntegEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-500"></i><span class="text-sm text-red-600 font-medium">เชื่อมต่อไม่ได้ — ตรวจสอบ Config</span>`;
+      dbIntegEl.className = 'flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4';
+    }
   } catch (_) {}
 }
 
@@ -729,13 +725,9 @@ function toggleVisibility(id, btn) {
 
 async function saveKey(type) {
   try {
-    if (type === 'gemini') {
-      await saveSystemSetting('gemini_api_key', document.getElementById('geminiKey').value);
-    } else {
-      await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
-    }
+    await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
     Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-      title:`บันทึก ${type === 'gemini' ? 'Gemini API Key' : 'Drive Folder ID'} เรียบร้อย`,
+      title:'บันทึก Drive Folder ID เรียบร้อย',
       showConfirmButton:false, timer:2500 });
   } catch (err) {
     Swal.fire({ toast:true, position:'bottom-end', icon:'error', title:err.message, showConfirmButton:false, timer:3000 });
