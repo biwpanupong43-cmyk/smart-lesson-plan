@@ -186,29 +186,27 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   }
 
   const result = await response.json();
-  // ✅ แก้ไข: GAS ส่งกลับ { status: 'success' } ไม่ใช่ { success: true }
-  if (result.status !== 'success') {
+  if (!result.success) {
     throw new Error(result.message || 'GAS ส่งไฟล์ไม่สำเร็จ');
   }
 
-  const driveUrl  = result.fileUrl   || null;
-  const driveId   = result.fileId    || null;
-  // ✅ แก้ไข: GAS ส่งกลับ aiSummary ไม่ใช่ summary
-  const aiSummary = result.aiSummary || null;
+  const driveUrl  = result.fileUrl  || null;
+  const driveId   = result.fileId   || null;
+  const aiSummary = result.summary  || null;
 
   // ── บันทึก metadata ลง Supabase ─────────────────────────────
   const weekNumber = parseInt(weekLabel.replace(/[^0-9]/g, '')) || 0;
 
+  // ✅ แก้ไข: ลบ drive_file_id ออก (ไม่มีใน schema) และเปลี่ยน submitted_at → created_at
   const { error: insertErr } = await db.from('lesson_plans').insert({
-    teacher_id:    profile.id,
-    subject:       subject,
-    week_number:   weekNumber,
-    file_name:     file.name,
-    drive_url:     driveUrl,
-    drive_file_id: driveId,
-    ai_summary:    aiSummary,
-    status:        'Pending',
-    submitted_at:  new Date().toISOString(),
+    teacher_id:  profile.id,
+    subject:     subject,
+    week_number: weekNumber,
+    file_name:   file.name,
+    drive_url:   driveUrl,
+    ai_summary:  aiSummary,
+    status:      'Pending',
+    created_at:  new Date().toISOString(),
   });
 
   if (insertErr) {
@@ -231,7 +229,8 @@ async function getMyPlans() {
     .from('lesson_plans')
     .select('*')
     .eq('teacher_id', profile.id)
-    .order('submitted_at', { ascending: false });
+    // ✅ แก้ไข: submitted_at → created_at
+    .order('created_at', { ascending: false });
 
   if (error) throw new Error(`ดึงข้อมูลแผนไม่สำเร็จ: ${error.message}`);
   return data || [];
@@ -253,7 +252,8 @@ async function getAllPendingPlans() {
       users ( name, subject_group )
     `)
     .eq('status', 'Pending')
-    .order('submitted_at', { ascending: true });
+    // ✅ แก้ไข: submitted_at → created_at
+    .order('created_at', { ascending: true });
 
   if (error) throw new Error(`ดึงข้อมูลแผนไม่สำเร็จ: ${error.message}`);
   return data || [];
