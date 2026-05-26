@@ -306,8 +306,9 @@ function renderTable(data) {
     return;
   }
   tbody.innerHTML = data.map(p => {
-    const date = p.submitted_at
-      ? new Date(p.submitted_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
+    // ✅ แก้ไข: submitted_at → created_at
+    const date = p.created_at
+      ? new Date(p.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
       : '—';
     const fileLink = p.drive_url
       ? `<a href="${p.drive_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>`
@@ -379,7 +380,7 @@ function clearFile(e) {
   document.getElementById('fileSelected').classList.add('hidden');
 }
 
-// ── Submit (✅ เชื่อมกับ uploadPlanViaGAS จริงๆ) ─────────────
+// ── Submit ────────────────────────────────────────────────────
 async function submitPlan() {
   const subject = document.getElementById('subject').value;
   const weekNum = document.getElementById('week').value;
@@ -393,22 +394,22 @@ async function submitPlan() {
     return;
   }
 
-  // ✅ แก้ไข: ลบ popup วิเคราะห์ AI ออก ใช้แค่ loading ธรรมดา
+  // ✅ แก้ไข: loading ธรรมดา ไม่ขึ้น AI กำลังวิเคราะห์
   Swal.fire({
     title: '<span style="font-family:Kanit">กำลังส่งแผนการสอน...</span>',
-    html: `<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่</p>`,
+    html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่</p>',
     allowOutsideClick: false,
     showConfirmButton: false,
     didOpen: () => Swal.showLoading()
   });
 
-  // ✅ URL ของ Google Apps Script (GAS)
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbz48PJjLCKcfrSv_IwXfBCnoQkoosOZVhDnp8mhLP3HBsQGPBHcK3WVJ0aFzkJANcgt/exec';
+  // URL ของ Google Apps Script (GAS)
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyi3mrOYV5o-47ITAQosbXNDklhgMu43bwNakoT7bH1QT4P-ThwxXRQp9PkbY5xPl_N/exec';
 
   try {
-    // ✅ เรียก uploadPlanViaGAS จาก supabase_integration.js
-    const result = await uploadPlanViaGAS(subject, weekNum, selectedFile, GAS_URL);
+    await uploadPlanViaGAS(subject, weekNum, selectedFile, GAS_URL);
 
+    // ✅ แก้ไข: ไม่แสดง AI summary (ผู้อำนวยการใช้เอง)
     await Swal.fire({
       icon: 'success',
       title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>',
