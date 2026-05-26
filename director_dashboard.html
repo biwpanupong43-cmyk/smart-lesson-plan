@@ -20,7 +20,11 @@
   .nav-item.active { background: rgba(99,102,241,.25); border: 1px solid rgba(99,102,241,.4); }
 
   /* ── Cards ── */
-  .dark-card { background: #1a2540; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; }
+  .dark-card {
+    background: #1a2540;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 16px;
+  }
   .stat-card { border-radius: 14px; }
 
   /* ── Table ── */
@@ -91,7 +95,16 @@
   .sig-display img { max-height: 90px; object-fit: contain; }
 
   /* Canvas for drawing */
-  #sigCanvas { background: #0d1526; border: 1px dashed rgba(255,255,255,.2); border-radius: 10px; cursor: crosshair; touch-action: none; display: block; width: 100%; height: 150px; }
+  #sigCanvas {
+    background: #0d1526;
+    border: 1px dashed rgba(255,255,255,.2);
+    border-radius: 10px;
+    cursor: crosshair;
+    touch-action: none;
+    display: block;
+    width: 100%;
+    height: 150px;
+  }
 
   /* Action buttons */
   .btn-revision { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #f87171; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
@@ -103,10 +116,11 @@
   /* Textarea */
   .dark-textarea { background: #0d1526; border: 1px solid rgba(255,255,255,.1); color: #e2e8f0; border-radius: 10px; padding: 12px; font-family: 'Sarabun', sans-serif; font-size: 14px; width: 100%; resize: vertical; outline: none; transition: border .2s; }
   .dark-textarea:focus { border-color: rgba(99,102,241,.5); }
+  .dark-textarea::placeholder { color: #475569; }
 
   /* PDF button */
-  .btn-pdf { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
-  .btn-pdf:hover { background: rgba(255,255,255,.12); color: white; }
+  .btn-pdf { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap-8: 8px; }
+  .btn-pdf:hover { background: rgba(255,255,255,.12); }
 
   /* Progress bars (Dashboard) */
   .prog-bar { background: #1e2d45; border-radius: 99px; height: 8px; overflow: hidden; }
@@ -548,7 +562,7 @@ async function loadPendingPlans() {
         <td class="text-slate-400">${date}</td>
         <td><span class="badge-pending">รอตรวจ</span></td>
         <td>
-          <button onclick='openReviewModal(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="btn-review">
+          <button onclick='openReviewModal(${JSON.stringify(p)})' class="btn-review">
             <i class="fa-solid fa-magnifying-glass mr-1"></i>ตรวจสอบ
           </button>
         </td>
@@ -681,19 +695,11 @@ function switchSigMode(mode) {
 
 // ─── Load E-Signature ──────────────────────────────────────────
 async function loadESignatureDisplay() {
-  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-  if (!profile.id) return;
-
-  const ph = document.getElementById('esigPlaceholder');
-  const img = document.getElementById('esigImg');
-  
   if (!_cachedEsig) {
-    try { 
-      // ใช้ saveSystemSetting ดึงลายเซ็นที่ผูกกับ ID ผอ. 
-      _cachedEsig = await getSystemSetting('esig_' + profile.id); 
-    } catch (_) {}
+    try { _cachedEsig = await getDirectorESignature(); } catch (_) {}
   }
-  
+  const img  = document.getElementById('esigImg');
+  const ph   = document.getElementById('esigPlaceholder');
   if (_cachedEsig) {
     img.src = _cachedEsig;
     img.style.display = 'block';
@@ -701,7 +707,6 @@ async function loadESignatureDisplay() {
   } else {
     img.style.display = 'none';
     ph.style.display  = 'flex';
-    ph.innerHTML = `<i class="fa-solid fa-signature text-slate-600 text-2xl"></i><p class="text-slate-500 text-xs">ยังไม่ได้ตั้งค่าลายเซ็นอิเล็กทรอนิกส์</p>`;
   }
 }
 
@@ -795,9 +800,18 @@ async function submitApproval() {
   }
 
   // Gather data
-  const notes = _reviewTab === 'ai'
+  const signatureData = _sigMode === 'draw' ? _sigCanvasData : (_cachedEsig || null);
+  const reviewMode    = _reviewTab;
+  const notes         = _reviewTab === 'ai'
     ? document.getElementById('aiNotes').value.trim()
     : document.getElementById('manualNotes').value.trim();
+
+  // KPA checklist
+  const kpaChecklist = {};
+  document.querySelectorAll('.kpa-checkbox').forEach(c => {
+    kpaChecklist[c.dataset.key] = c.checked;
+  });
+  const checkedCount = Object.values(kpaChecklist).filter(Boolean).length;
 
   const feedback = notes || `ผ่านการอนุมัติจากผู้อำนวยการ (ตรวจแบบ${_reviewTab === 'ai' ? 'ใช้ AI' : 'ตนเอง'})`;
 
@@ -806,8 +820,11 @@ async function submitApproval() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
 
   try {
-    // เรียก updatePlanStatus จาก supabase_integration.js
-    await updatePlanStatus(_currentPlanId, 'Approved', feedback);
+    await updatePlanStatus(_currentPlanId, 'Approved', feedback, {
+      kpa_checklist: kpaChecklist,
+      signature_data: signatureData,
+      review_mode: reviewMode,
+    });
 
     closeReviewModal();
     Swal.fire({
@@ -817,7 +834,6 @@ async function submitApproval() {
       background: '#1a2540', color: '#e2e8f0',
     });
     loadPendingPlans();
-    loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message,
       background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
@@ -840,7 +856,7 @@ async function submitRevisionFromModal() {
     inputLabel: 'ระบุเหตุผลหรือข้อเสนอแนะ',
     inputValue: notes,
     inputPlaceholder: 'เช่น กรุณาเพิ่มกิจกรรม Active Learning...',
-    inputAttributes: { style: 'font-family:Sarabun; font-size:14px; background:#0d1526; color:#e2e8f0; border-color:rgba(255,255,255,0.1)' },
+    inputAttributes: { style: 'font-family:Sarabun; font-size:14px;' },
     showCancelButton: true,
     confirmButtonText: '<i class="fa-solid fa-rotate-left mr-1"></i>ส่งกลับ',
     cancelButtonText: 'ยกเลิก',
@@ -851,8 +867,16 @@ async function submitRevisionFromModal() {
   });
   if (!isConfirmed) return;
 
+  const kpaChecklist = {};
+  document.querySelectorAll('.kpa-checkbox').forEach(c => {
+    kpaChecklist[c.dataset.key] = c.checked;
+  });
+
   try {
-    await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback);
+    await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback, {
+      kpa_checklist: kpaChecklist,
+      review_mode: _reviewTab,
+    });
     closeReviewModal();
     Swal.fire({
       toast: true, position: 'bottom-end', icon: 'info',
@@ -861,7 +885,6 @@ async function submitRevisionFromModal() {
       background: '#1a2540', color: '#e2e8f0',
     });
     loadPendingPlans();
-    loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message,
       background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
@@ -939,13 +962,8 @@ async function saveEsigSettings() {
       background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
     return;
   }
-  
-  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-  if (!profile.id) return;
-
   try {
-    // บันทึกลงตาราง system_settings แทนเพื่อความสะดวก (key = esig_{director_id})
-    await saveSystemSetting('esig_' + profile.id, _settingsCanvasData);
+    await saveDirectorESignature(_settingsCanvasData);
     _cachedEsig = _settingsCanvasData;
     closeEsigSettings();
     Swal.fire({ toast: true, position: 'bottom-end', icon: 'success',
