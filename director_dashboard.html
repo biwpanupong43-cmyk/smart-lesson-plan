@@ -389,12 +389,12 @@
           <img id="esigImg" src="" alt="E-Signature" style="display:none">
           <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-3">
             <i class="fa-solid fa-signature text-slate-600 text-2xl"></i>
-            <p class="text-slate-500 text-xs">กำลังโหลดลายเซ็น...</p>
+            <p class="text-slate-500 text-xs">ยืนยันลายเซ็นอิเล็กทรอนิกส์ของ อจ.</p>
           </div>
         </div>
 
         <!-- Draw Canvas -->
-        <div id="drawSection" style="display:none">
+        <div id="drawSection" style="display:none; width:100%;">
           <canvas id="sigCanvas"></canvas>
           <div class="flex justify-between items-center mt-2">
             <p class="text-xs text-slate-500">วาดลายเซ็นในพื้นที่ด้านบน</p>
@@ -482,7 +482,8 @@ function showPage(name) {
 // ─── Load Dashboard ──────────────────────────────────────────
 async function loadDashboard() {
   try {
-    const { data, error } = await db.from('lesson_plans').select('status, subject, users(subject_group)');
+    // ✅ แก้ไขคอลัมน์ให้ตรงกับฐานข้อมูล: subject -> subject_name
+    const { data, error } = await db.from('lesson_plans').select('status, subject_name, users(subject_group)');
     if (error) throw error;
 
     const total    = data.length;
@@ -531,10 +532,10 @@ async function loadPendingPlans() {
     }
     tbody.innerHTML = plans.map(p => {
       const name = p.users?.name || 'ไม่ทราบชื่อ';
-      // ✅ submitted_at → created_at
       const date = p.created_at
         ? new Date(p.created_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
         : '—';
+      // ✅ แก้ไข: ใช้ p.subject_name
       return `<tr>
         <td>
           <div class="flex items-center gap-2">
@@ -565,21 +566,23 @@ async function loadApprovedPlans() {
   const tbody = document.getElementById('approvedTableBody');
   tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
   try {
+    // ✅ แก้ไขคอลัมน์ order ให้ตรงกับ DB: reviewed_at -> updated_at
     const { data, error } = await db
       .from('lesson_plans')
       .select('*, users(name, subject_group)')
       .eq('status', 'Approved')
-      .order('reviewed_at', { ascending: false });
+      .order('updated_at', { ascending: false });
     if (error) throw new Error(error.message);
     if (!data.length) {
       tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500">ยังไม่มีแผนที่อนุมัติ</td></tr>`;
       return;
     }
     tbody.innerHTML = data.map(p => {
-      const date = p.reviewed_at
-        ? new Date(p.reviewed_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
+      const date = p.updated_at
+        ? new Date(p.updated_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
         : '—';
-      const fileLink = p.file_url  // ✅ drive_url → file_url
+      // ✅ แก้ไขคอลัมน์ดูไฟล์ให้ตรงกับ DB: drive_url -> file_url
+      const fileLink = p.file_url
         ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 transition-colors">
             <i class="fa-solid fa-file-pdf"></i>ดูไฟล์</a>`
         : `<span class="text-slate-600 text-xs">ไม่มีไฟล์</span>`;
@@ -627,10 +630,13 @@ async function openReviewModal(plan) {
   const init = name.replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0, 2);
   document.getElementById('modalTeacherName').textContent = name;
   document.getElementById('modalAvatar').textContent = init || '—';
+  // ✅ แก้ไข: ใช้ plan.subject_name
   document.getElementById('modalSubject').textContent = `${plan.subject_name} — สัปดาห์ที่ ${plan.week_number}`;
+  
   const pdfLink = document.getElementById('modalPdfLink');
-  if (plan.drive_url) {
-    pdfLink.href = plan.drive_url;
+  // ✅ แก้ไข: ใช้ plan.file_url แทน drive_url
+  if (plan.file_url) {
+    pdfLink.href = plan.file_url;
     pdfLink.style.opacity = '1';
     pdfLink.style.pointerEvents = 'auto';
   } else {
@@ -652,8 +658,6 @@ async function openReviewModal(plan) {
   // Show modal
   document.getElementById('reviewModal').classList.remove('hidden');
 
-  // Init canvas after modal visible
-  setTimeout(() => initSigCanvas(), 50);
 }
 
 function closeReviewModal() {
@@ -677,7 +681,13 @@ function switchSigMode(mode) {
   _sigMode = mode;
   document.getElementById('esigDisplay').style.display  = mode === 'esig' ? 'flex' : 'none';
   document.getElementById('drawSection').style.display  = mode === 'draw' ? 'block' : 'none';
-  if (mode === 'draw') initSigCanvas();
+  
+  // ✅ แก้บัคลายเซ็น: หน่วงเวลาเล็กน้อยให้กล่องโชว์ขึ้นมาก่อน ค่อยวาด Canvas เพื่อให้วัดขนาดกว้างยาวได้ถูกต้อง
+  if (mode === 'draw') {
+    setTimeout(() => {
+        initSigCanvas();
+    }, 50);
+  }
 }
 
 // ─── Load E-Signature ──────────────────────────────────────────
@@ -709,9 +719,9 @@ async function loadESignatureDisplay() {
 function initSigCanvas() {
   const canvas = document.getElementById('sigCanvas');
   if (!canvas) return;
-  const rect = canvas.getBoundingClientRect();
-  canvas.width  = rect.width  || canvas.offsetWidth  || 560;
-  canvas.height = rect.height || canvas.offsetHeight || 150;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = rect.width  || 560;
+  canvas.height = 150;
 
   const ctx = canvas.getContext('2d');
   ctx.strokeStyle = '#e2e8f0';
