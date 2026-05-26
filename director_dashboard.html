@@ -531,8 +531,9 @@ async function loadPendingPlans() {
     }
     tbody.innerHTML = plans.map(p => {
       const name = p.users?.name || 'ไม่ทราบชื่อ';
-      const date = p.submitted_at
-        ? new Date(p.submitted_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
+      // ✅ submitted_at → created_at
+      const date = p.created_at
+        ? new Date(p.created_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
         : '—';
       return `<tr>
         <td>
@@ -544,7 +545,7 @@ async function loadPendingPlans() {
             <span class="font-medium text-white">${name}</span>
           </div>
         </td>
-        <td class="text-slate-300">${p.subject} <span class="text-slate-500">(สัปดาห์ที่ ${p.week_number})</span></td>
+        <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ที่ ${p.week_number})</span></td>
         <td class="text-slate-400">${date}</td>
         <td><span class="badge-pending">รอตรวจ</span></td>
         <td>
@@ -578,8 +579,8 @@ async function loadApprovedPlans() {
       const date = p.reviewed_at
         ? new Date(p.reviewed_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
         : '—';
-      const fileLink = p.drive_url
-        ? `<a href="${p.drive_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 transition-colors">
+      const fileLink = p.file_url  // ✅ drive_url → file_url
+        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 transition-colors">
             <i class="fa-solid fa-file-pdf"></i>ดูไฟล์</a>`
         : `<span class="text-slate-600 text-xs">ไม่มีไฟล์</span>`;
       return `<tr>
@@ -592,7 +593,7 @@ async function loadApprovedPlans() {
             <span class="font-medium text-white">${p.users?.name||'—'}</span>
           </div>
         </td>
-        <td class="text-slate-300">${p.subject} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
+        <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
         <td class="text-slate-400">${date}</td>
         <td>${fileLink}</td>
       </tr>`;
@@ -626,7 +627,7 @@ async function openReviewModal(plan) {
   const init = name.replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0, 2);
   document.getElementById('modalTeacherName').textContent = name;
   document.getElementById('modalAvatar').textContent = init || '—';
-  document.getElementById('modalSubject').textContent = `${plan.subject} — สัปดาห์ที่ ${plan.week_number}`;
+  document.getElementById('modalSubject').textContent = `${plan.subject_name} — สัปดาห์ที่ ${plan.week_number}`;
   const pdfLink = document.getElementById('modalPdfLink');
   if (plan.drive_url) {
     pdfLink.href = plan.drive_url;
