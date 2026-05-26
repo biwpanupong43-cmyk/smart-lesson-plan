@@ -310,7 +310,8 @@
           </div>
         </div>
         <a id="modalPdfLink" href="#" target="_blank"
-          class="btn-pdf text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+          class="btn-pdf text-xs px-3 py-2 rounded-lg flex items-center gap-2"
+          style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;text-decoration:none">
           <i class="fa-solid fa-file-pdf"></i> เปิดดูไฟล์ PDF
         </a>
       </div>
@@ -388,7 +389,7 @@
           <img id="esigImg" src="" alt="E-Signature" style="display:none">
           <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-3">
             <i class="fa-solid fa-signature text-slate-600 text-2xl"></i>
-            <p class="text-slate-500 text-xs">กำลังโหลดลายเซ็น...</p>
+            <p class="text-slate-500 text-xs">ยืนยันลายเซ็นอิเล็กทรอนิกส์ของ อจ.</p>
           </div>
         </div>
 
@@ -428,7 +429,7 @@
       <button onclick="closeEsigSettings()" class="text-slate-400 hover:text-white text-xl">&times;</button>
     </div>
     <div class="p-6 space-y-4">
-      <p class="text-sm text-slate-400">วาดลายเซ็นของท่านเพื่อบันทึกเป็นลายเซ็นอิเล็กทรอนิกส์ประจำระบบ (บันทึกลงฐานข้อมูล)</p>
+      <p class="text-sm text-slate-400">วาดลายเซ็นของท่านเพื่อบันทึกเป็นลายเซ็นอิเล็กทรอนิกส์ประจำระบบ</p>
       <canvas id="settingsSigCanvas" style="background:#0d1526;border:1px dashed rgba(255,255,255,.2);border-radius:10px;cursor:crosshair;touch-action:none;display:block;width:100%;height:160px;"></canvas>
       <div class="flex justify-between items-center">
         <button onclick="clearSettingsCanvas()" class="text-xs text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1">
@@ -481,7 +482,7 @@ function showPage(name) {
 // ─── Load Dashboard ──────────────────────────────────────────
 async function loadDashboard() {
   try {
-    const { data, error } = await db.from('lesson_plans').select('status, subject');
+    const { data, error } = await db.from('lesson_plans').select('status, subject, users(subject_group)');
     if (error) throw error;
 
     const total    = data.length;
@@ -781,7 +782,7 @@ async function submitApproval() {
       const { isConfirmed } = await Swal.fire({
         icon: 'warning',
         title: '<span style="font-family:Kanit">ยังไม่มีลายเซ็นอิเล็กทรอนิกส์</span>',
-        text: 'ท่านยังไม่ได้ตั้งค่าลายเซ็นอิเล็กทรอนิกส์ในระบบ ต้องการอนุมัติโดยไม่มีลายเซ็นหรือไม่?',
+        text: 'ท่านยังไม่ได้ตั้งค่าลายเซ็นอิเล็กทรอนิกส์ ต้องการอนุมัติโดยไม่มีลายเซ็นหรือไม่?',
         background: '#1a2540', color: '#e2e8f0',
         showCancelButton: true,
         confirmButtonText: 'อนุมัติต่อ',
