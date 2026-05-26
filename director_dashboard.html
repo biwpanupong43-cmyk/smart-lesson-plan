@@ -7,6 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { font-family: 'Sarabun', sans-serif; box-sizing: border-box; }
@@ -21,10 +22,11 @@
 
   /* ── Cards ── */
   .dark-card { background: #1a2540; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; }
-  .stat-card { border-radius: 14px; }
+  .stat-card { border-radius: 14px; transition: transform 0.2s; }
+  .stat-card:hover { transform: translateY(-2px); }
 
   /* ── Table ── */
-  .data-table th { color: #94a3b8; font-weight: 500; font-size: 13px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .data-table th { color: #94a3b8; font-weight: 500; font-size: 13px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.07); background: rgba(15, 23, 42, 0.2); }
   .data-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 14px; }
   .data-table tr:last-child td { border-bottom: none; }
   .data-table tr:hover td { background: rgba(255,255,255,.03); }
@@ -47,12 +49,12 @@
   ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
   /* ══════════════════════════════════════
-     REVIEW MODAL
+     REVIEW WORKSPACE MODAL
   ══════════════════════════════════════ */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 1000;
-    background: rgba(0,0,0,.7);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,.75);
+    backdrop-filter: blur(5px);
     display: flex; align-items: center; justify-content: center;
     padding: 16px;
     animation: fadeIn .2s ease;
@@ -63,27 +65,16 @@
     border: 1px solid rgba(255,255,255,.1);
     border-radius: 20px;
     width: 100%; max-width: 680px;
-    max-height: 90vh;
+    max-height: 92vh;
     overflow-y: auto;
     box-shadow: 0 32px 80px rgba(0,0,0,.6);
   }
 
-  /* Tabs */
-  .tab-btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; border: 1px solid transparent; color: #94a3b8; background: transparent; width: 100%; text-align: center; }
-  .tab-btn.active { background: rgba(99,102,241,.25); border-color: rgba(99,102,241,.5); color: #a5b4fc; }
-  .tab-btn:hover:not(.active) { background: rgba(255,255,255,.06); color: #e2e8f0; }
-  .tab-content.hidden { display: none; }
-
-  /* AI summary box */
-  .ai-box { background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3); border-radius: 12px; padding: 16px; }
-
-  /* Signature area */
   .sig-section { background: #1a2540; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px; }
   .sig-radio { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 0; }
   .sig-display { background: #0d1526; border: 1px dashed rgba(255,255,255,.15); border-radius: 10px; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #475569; font-size: 13px; overflow: hidden; padding: 10px; }
   .sig-display img { max-height: 90px; object-fit: contain; background: white; padding: 4px; border-radius: 6px; }
 
-  /* Action buttons */
   .btn-revision { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #f87171; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
   .btn-revision:hover { background: rgba(239,68,68,.25); }
   .btn-approve { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: opacity .2s; }
@@ -92,12 +83,11 @@
 
   .dark-textarea { background: #0d1526; border: 1px solid rgba(255,255,255,.1); color: #e2e8f0; border-radius: 10px; padding: 12px; font-family: 'Sarabun', sans-serif; font-size: 14px; width: 100%; resize: vertical; outline: none; transition: border .2s; }
   .dark-textarea:focus { border-color: rgba(99,102,241,.5); }
-
   .btn-pdf { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
   .btn-pdf:hover { background: rgba(255,255,255,.12); color: white; }
-
-  .prog-bar { background: #1e2d45; border-radius: 99px; height: 8px; overflow: hidden; }
-  .prog-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+  
+  .tab-btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; border: 1px solid transparent; color: #94a3b8; background: transparent; width: 100%; text-align: center; }
+  .tab-btn.active { background: rgba(99,102,241,.25); border-color: rgba(99,102,241,.5); color: #a5b4fc; }
 </style>
 </head>
 <body>
@@ -127,22 +117,22 @@
 
     <nav class="space-y-1 flex-1">
       <button onclick="showPage('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
-        <i class="fa-solid fa-gauge w-5 text-center text-indigo-400"></i>
-        <span>Dashboard</span>
+        <i class="fa-solid fa-chart-column w-5 text-center text-indigo-400"></i>
+        <span>Dashboard ระบบ</span>
       </button>
       <button onclick="showPage('review')" id="nav-review" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
         <i class="fa-solid fa-hourglass-half w-5 text-center text-yellow-400"></i>
-        <span>รอการตรวจ</span>
+        <span>รอการตรวจแผน</span>
       </button>
       <button onclick="showPage('approved')" id="nav-approved" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
         <i class="fa-solid fa-folder-open w-5 text-center text-emerald-400"></i>
-        <span>คลังแผน</span>
+        <span>คลังแผนการสอน</span>
       </button>
     </nav>
 
     <div class="mt-auto pt-4 border-t border-white/10">
       <button onclick="openEsigSettings()" class="nav-item w-full flex items-center gap-3 px-4 py-2 text-left text-sm text-slate-400 hover:text-white mb-1">
-        <i class="fa-solid fa-signature w-5 text-center"></i> ตั้งค่าลายเซ็น
+        <i class="fa-solid fa-signature w-5 text-center"></i> ตั้งค่าลายเซ็นหลัก
       </button>
       <button onclick="window._signOut()" class="nav-item w-full flex items-center gap-3 px-4 py-2 text-left text-sm text-red-400 hover:text-white hover:bg-red-500/20">
         <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> ออกจากระบบ
@@ -153,33 +143,90 @@
   <main class="flex-1 overflow-y-auto p-6" style="background:#0d1526">
 
     <section id="page-dashboard" class="page">
-      <div class="mb-6">
-        <h1 class="kn text-2xl font-bold text-white">Dashboard</h1>
-        <p class="text-slate-400 text-sm mt-1">ภาพรวมการส่งแผนการสอน</p>
+      <div class="mb-6 flex justify-between items-center">
+        <div>
+          <h1 class="kn text-2xl font-bold text-white">กระดานสรุปผลเชิงบริหาร (Executive Dashboard)</h1>
+          <p class="text-slate-400 text-sm mt-1">ข้อมูลสถานะการส่งแผนการสอนของบุคลากรภายในสถานศึกษา</p>
+        </div>
+        <button onclick="loadDashboard()" class="bg-slate-800 text-slate-300 hover:text-white border border-slate-700 px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all">
+          <i class="fa-solid fa-rotate"></i> อัปเดตข้อมูลจริง
+        </button>
       </div>
-      <div class="grid grid-cols-3 gap-4 mb-6">
-        <div class="stat-card p-5" style="background:linear-gradient(135deg,#1e40af,#2563eb);border-radius:14px">
+
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="stat-card p-5" style="background:linear-gradient(135deg,#1e40af,#2563eb)">
           <p id="dash-total" class="text-4xl kn font-bold text-white">—</p>
-          <p class="text-blue-200 text-sm mt-1">ทั้งหมด</p>
-          <p class="text-blue-300 text-xs">แผนการสอน</p>
+          <p class="text-blue-100 text-sm font-semibold mt-1">แผนการสอนทั้งหมด</p>
+          <p class="text-blue-200/60 text-xs">ยอดรวมสะสมในระบบ</p>
         </div>
-        <div class="stat-card p-5" style="background:linear-gradient(135deg,#92400e,#d97706);border-radius:14px">
+        <div class="stat-card p-5" style="background:linear-gradient(135deg,#92400e,#d97706)">
           <p id="dash-pending" class="text-4xl kn font-bold text-white">—</p>
-          <p class="text-yellow-200 text-sm mt-1">รอตรวจ</p>
-          <p class="text-yellow-300 text-xs">แผนการสอน</p>
+          <p class="text-yellow-100 text-sm font-semibold mt-1">รอการตรวจสอบ</p>
+          <p class="text-yellow-200/60 text-xs">ผอ. ต้องพิจารณาลงนาม</p>
         </div>
-        <div class="stat-card p-5" style="background:linear-gradient(135deg,#065f46,#059669);border-radius:14px">
+        <div class="stat-card p-5" style="background:linear-gradient(135deg,#065f46,#059669)">
           <p id="dash-approved" class="text-4xl kn font-bold text-white">—</p>
-          <p class="text-emerald-200 text-sm mt-1">อนุมัติแล้ว</p>
-          <p class="text-emerald-300 text-xs">แผนการสอน</p>
+          <p class="text-emerald-100 text-sm font-semibold mt-1">อนุมัติเสร็จสิ้น</p>
+          <p class="text-emerald-200/60 text-xs">ลงนามประทับตราแล้ว</p>
+        </div>
+        <div class="stat-card p-5" style="background:linear-gradient(135deg,#7f1d1d,#b91c1c)">
+          <p id="dash-revision" class="text-4xl kn font-bold text-white">—</p>
+          <p class="text-red-100 text-sm font-semibold mt-1">ส่งกลับไปแก้ไข</p>
+          <p class="text-red-200/60 text-xs">อยู่ระหว่างครูปรับปรุงงาน</p>
         </div>
       </div>
-      <div class="grid grid-cols-2 gap-5">
-        <div class="dark-card p-6">
-          <h2 class="kn font-semibold text-white mb-4 text-sm"><i class="fa-solid fa-chart-pie text-indigo-400 mr-2"></i>สถานะรวม</h2>
-          <div id="dashStatusBars" class="space-y-3">
-            <div class="text-slate-500 text-sm text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+        <div class="dark-card p-5 lg:col-span-7 flex flex-col justify-between">
+          <div>
+            <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-chart-bar text-indigo-400 mr-2"></i>แผนภูมิเปรียบเทียบการส่งแผนแยกตามกลุ่มสาระฯ</h2>
+            <p class="text-slate-400 text-xs mt-0.5">แผนงานอนุมัติเปรียบเทียบกับยอดคงค้างรอตรวจ</p>
           </div>
+          <div class="mt-4 relative" style="height: 280px; width: 100%;">
+            <canvas id="directorChart"></canvas>
+          </div>
+        </div>
+
+        <div class="dark-card p-5 lg:col-span-5 flex flex-col justify-between">
+          <div>
+            <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-table-list text-emerald-400 mr-2"></i>สรุปสถานะรายกลุ่มสาระฯ</h2>
+            <p class="text-slate-400 text-xs mt-0.5">สถิติตัวเลขและสัดส่วนเปอร์เซ็นต์ความสำเร็จ</p>
+          </div>
+          <div class="mt-3 overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead>
+                <tr class="text-slate-400 border-b border-slate-700/50">
+                  <th class="py-2">กลุ่มสาระการเรียนรู้</th>
+                  <th class="py-2 text-center">ส่ง</th>
+                  <th class="py-2 text-center">รอตรวจ</th>
+                  <th class="py-2 id-rate text-right">สำเร็จ</th>
+                </tr>
+              </thead>
+              <tbody id="groupSummaryTableBody" class="divide-y divide-slate-800/40">
+                <tr><td colspan="4" class="py-4 text-center text-slate-500">กำลังดึงข้อมูลสถิติ...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="dark-card p-5">
+        <h2 class="kn font-semibold text-white text-base mb-3"><i class="fa-solid fa-bell-concierge text-amber-400 mr-2"></i>งานด่วนค้างพิจารณา / ติดตามความคืบหน้า</h2>
+        <div class="overflow-x-auto">
+          <table class="data-table w-full text-xs text-left">
+            <thead>
+              <tr>
+                <th>ครูผู้สอน</th>
+                <th>กลุ่มสาระ</th>
+                <th>วิชา/สัปดาห์</th>
+                <th>สถานะปัจจุบัน</th>
+                <th>คำสั่ง</th>
+              </tr>
+            </thead>
+            <tbody id="urgentPlansTableBody">
+              <tr><td colspan="5" class="py-4 text-center text-slate-500">ไม่มีภาระงานด่วนตกค้างค้างคา</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -187,12 +234,9 @@
     <section id="page-review" class="page section-hidden">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="kn text-2xl font-bold text-white">รอการตรวจสอบ</h1>
-          <p class="text-slate-400 text-sm mt-1">แผนการสอนที่รอการพิจารณาจากท่าน</p>
+          <h1 class="kn text-2xl font-bold text-white">รอการตรวจสอบแผนการสอน</h1>
+          <p class="text-slate-400 text-sm mt-1">รายการแผนการสอนของคุณครูที่รอคำพิจารณาอนุมัติลงนามจากท่าน</p>
         </div>
-        <button onclick="loadPendingPlans()" class="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
-          <i class="fa-solid fa-rotate-right"></i> รีเฟรช
-        </button>
       </div>
       <div class="dark-card overflow-hidden">
         <table class="data-table w-full">
@@ -206,7 +250,7 @@
             </tr>
           </thead>
           <tbody id="pendingTableBody">
-            <tr><td colspan="5" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>
+            <tr><td colspan="5" class="py-10 text-center text-slate-500">กำลังโหลดรายการรอตรวจ...</td></tr>
           </tbody>
         </table>
       </div>
@@ -214,8 +258,8 @@
 
     <section id="page-approved" class="page section-hidden">
       <div class="mb-6">
-        <h1 class="kn text-2xl font-bold text-white">คลังแผนการสอน</h1>
-        <p class="text-slate-400 text-sm mt-1">แผนการสอนที่ผ่านการอนุมัติแล้ว</p>
+        <h1 class="kn text-2xl font-bold text-white">คลังประวัติแผนการสอน</h1>
+        <p class="text-slate-400 text-sm mt-1">เอกสารแผนการสอนทั้งหมดที่ผ่านการอนุมัติและรับรองจากผู้อำนวยการเรียบร้อยแล้ว</p>
       </div>
       <div class="dark-card overflow-hidden">
         <table class="data-table w-full">
@@ -224,11 +268,11 @@
               <th class="text-left">ครูผู้สอน</th>
               <th class="text-left">วิชา/สัปดาห์</th>
               <th class="text-left">วันที่อนุมัติ</th>
-              <th class="text-left">ไฟล์</th>
+              <th class="text-left">ไฟล์เอกสาร</th>
             </tr>
           </thead>
           <tbody id="approvedTableBody">
-            <tr><td colspan="4" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>
+            <tr><td colspan="4" class="py-10 text-center text-slate-500">กำลังเรียกสมุดบัญชีคลัง...</td></tr>
           </tbody>
         </table>
       </div>
@@ -241,8 +285,8 @@
   <div class="modal-box">
     <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.07)">
       <div class="flex items-center gap-2 text-white">
-        <i class="fa-solid fa-file-pen text-indigo-400"></i>
-        <span class="kn font-semibold">พิจารณาแผนการสอน</span>
+        <i class="fa-solid fa-file-signature text-indigo-400"></i>
+        <span class="kn font-semibold">พิจารณาแผนการสอน (ประเมินและลงนาม)</span>
       </div>
       <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white text-xl leading-none transition-colors">&times;</button>
     </div>
@@ -250,100 +294,71 @@
     <div class="p-6 space-y-5">
       <div class="flex items-center justify-between gap-4 dark-card p-4" style="border-radius:12px">
         <div class="flex items-center gap-3">
-          <div id="modalAvatar" class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-            style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">—</div>
+          <div id="modalAvatar" class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">—</div>
           <div>
             <p id="modalTeacherName" class="font-semibold text-white text-sm">—</p>
             <p id="modalSubject" class="text-xs text-slate-400">—</p>
           </div>
         </div>
-        <a id="modalPdfLink" href="#" target="_blank"
-          class="btn-pdf text-xs px-3 py-2 rounded-lg flex items-center gap-2"
-          style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;text-decoration:none">
-          <i class="fa-solid fa-file-pdf"></i> เปิดดูไฟล์ PDF
+        <a id="modalPdfLink" href="#" target="_blank" class="btn-pdf text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+          <i class="fa-solid fa-file-pdf"></i> เปิดดูไฟล์ PDF แผนการสอน
         </a>
       </div>
 
-      <div class="flex gap-2">
-        <button id="tabBtnAI" onclick="switchReviewTab('ai')" class="tab-btn active">
-          <i class="fa-solid fa-robot mr-1"></i> ตรวจด้วย AI
-        </button>
-        <button id="tabBtnManual" onclick="switchReviewTab('manual')" class="tab-btn">
-          <i class="fa-solid fa-user-pen mr-1"></i> ตรวจด้วยตนเอง
-        </button>
-      </div>
-
-      <div id="tabContentAI" class="tab-content space-y-4">
-        <div class="ai-box">
-          <p class="text-xs font-semibold text-indigo-300 mb-2 flex items-center gap-1">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> บทวิเคราะห์จาก AI
-          </p>
-          <p id="aiSummaryText" class="text-sm text-slate-300 leading-relaxed">กำลังโหลด...</p>
-        </div>
-        <div>
-          <label class="block text-xs text-slate-400 mb-2">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</label>
-          <textarea id="aiNotes" rows="3" class="dark-textarea" placeholder="ระบุคำแนะนำเพื่อให้ครูนำไปปรับปรุง..."></textarea>
-        </div>
-      </div>
-
-      <div id="tabContentManual" class="tab-content hidden space-y-4">
+      <div class="space-y-4">
         <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-700/50 space-y-2 text-sm text-slate-300">
-          <p class="font-semibold text-white mb-2">เกณฑ์ประเมินเบื้องต้น</p>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> จุดประสงค์การเรียนรู้ (K-P-A) ครบถ้วนชัดเจน</label>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> มีกิจกรรมกระตุ้นการเรียนรู้ (Active Learning)</label>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> สื่อการเรียนการสอนสอดคล้องกับเนื้อหา</label>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> การวัดและประเมินผลตรงตามตัวชี้วัด</label>
+          <p class="font-semibold text-white mb-2 flex items-center gap-1 text-sm"><i class="fa-solid fa-list-check text-indigo-400"></i> รายการเกณฑ์ตรวจประเมินแผนการสอน</p>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> จุดประสงค์การเรียนรู้ (K-P-A) ครบถ้วนและเขียนไว้วัดผลได้จริง</label>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> มีการจัดกิจกรรมการเรียนรู้เชิงรุก (Active Learning) ที่เน้นผู้เรียน</label>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> การเลือกใช้สื่อ/นวัตกรรม เทคโนโลยีการสอนมีความเหมาะสม</label>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> มีเกณฑ์การวัดและประเมินผลการเรียนรู้สอดคล้องกับเนื้อหาบทเรียน</label>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-2">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</label>
-          <textarea id="manualNotes" rows="3" class="dark-textarea" placeholder="ระบุคำแนะนำเพื่อให้ครูนำไปปรับปรุง..."></textarea>
+          <label class="block text-xs font-semibold text-slate-400 mb-2">บันทึกข้อเสนอแนะ/คำชี้แนะของผู้อำนวยการ</label>
+          <textarea id="manualNotes" rows="3" class="dark-textarea" placeholder="ระบุความเห็นเชิงวิชาการหรือคำแนะนำเพื่อครูนำไปปรับปรุงพัฒนาแผนต่อไป..."></textarea>
         </div>
       </div>
 
       <div class="sig-section">
-        <p class="text-sm font-semibold text-white mb-3">การลงนามอนุมัติ</p>
+        <p class="text-sm font-semibold text-white mb-3"><i class="fa-solid fa-signature text-violet-400 mr-1"></i>รูปแบบการลงนามประทับตราอนุมัติ</p>
         <div class="flex flex-col gap-1 mb-3">
           <label class="sig-radio">
             <input type="radio" name="sigMode" value="esig" checked onchange="switchSigMode('esig')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
-            <span class="text-sm text-slate-300">ใช้ลายเซ็นอิเล็กทรอนิกส์ <span class="text-slate-500 text-xs">(ดึงระบบที่ตั้งค่าไว้)</span></span>
+            <span class="text-sm text-slate-300">ใช้ลายเซ็นอิเล็กทรอนิกส์หลัก <span class="text-slate-500 text-xs">(ดึงรูปจากประวัติฐานข้อมูลระบบ)</span></span>
           </label>
           <label class="sig-radio">
             <input type="radio" name="sigMode" value="upload" onchange="switchSigMode('upload')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
-            <span class="text-sm text-slate-300">อัปโหลดไฟล์ภาพ <span class="text-slate-500 text-xs">(แนบรูปใหม่เฉพาะครั้งนี้)</span></span>
+            <span class="text-sm text-slate-300">อัปโหลดแนบรูปภาพใหม่ <span class="text-slate-500 text-xs">(นำเข้าไฟล์ภาพ .png/.jpg ของครั้งนี้)</span></span>
           </label>
           <label class="sig-radio">
             <input type="radio" name="sigMode" value="draw" onchange="switchSigMode('draw')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
-            <span class="text-sm text-slate-300">เซ็นชื่อด้วยมือ <span class="text-slate-500 text-xs">(วาดใหม่เฉพาะครั้งนี้)</span></span>
+            <span class="text-sm text-slate-300">วาดลงลายมือชื่อสดๆ <span class="text-slate-500 text-xs">(ใช้เมาส์ ปากกา หรือนิ้วลากเขียนตรงนี้)</span></span>
           </label>
         </div>
 
-        <!-- 1. ดึงของเก่าที่บันทึกไว้ -->
         <div id="esigDisplay" class="sig-display">
           <img id="esigImg" src="" alt="E-Signature" style="display:none">
-          <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-3">
+          <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-2">
             <i class="fa-solid fa-signature text-slate-600 text-2xl"></i>
-            <p class="text-slate-500 text-xs">ไม่ได้ตั้งค่าลายเซ็นไว้ในระบบ</p>
+            <p class="text-slate-500 text-xs">ยังไม่มีข้อมูลลายเซ็นเก็บถาวรในตารางระบบ</p>
           </div>
         </div>
         
-        <!-- 2. อัปโหลดรูปใหม่ตอนตรวจ -->
         <div id="uploadSection" style="display:none; width:100%;">
-          <div class="border-2 border-dashed border-slate-500 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-[#0d1526]" onclick="document.getElementById('modalSigUpload').click()">
+          <div class="border-2 border-dashed border-slate-600 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-[#0d1526]" onclick="document.getElementById('modalSigUpload').click()">
             <input type="file" id="modalSigUpload" accept="image/png, image/jpeg" class="hidden" onchange="handleModalSigUpload(event)">
-            <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
-            <p id="modalSigUploadText" class="text-sm text-slate-300 font-medium">คลิกเพื่อแนบไฟล์ลายเซ็น</p>
-            <p class="text-xs text-slate-500 mt-1">(รองรับ .jpg, .png)</p>
-            <img id="modalSigUploadPreview" class="hidden mx-auto mt-3 max-h-24 rounded bg-white p-1 border border-slate-200">
+            <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400 mb-1"></i>
+            <p id="modalSigUploadText" class="text-xs text-slate-300 font-medium">คลิกเพื่อเลือกไฟล์รูปลายเซ็นผอ.</p>
+            <img id="modalSigUploadPreview" class="hidden mx-auto mt-2 max-h-20 rounded bg-white p-1 border">
           </div>
         </div>
 
-        <!-- 3. วาดเส้นใหม่ตอนตรวจ -->
         <div id="drawSection" style="display:none; width:100%;">
           <canvas id="sigCanvas" class="w-full bg-[#0d1526] border border-dashed border-slate-500 rounded-xl cursor-crosshair touch-none" style="height:150px;"></canvas>
           <div class="flex justify-between items-center mt-2">
-            <p class="text-xs text-slate-500">ใช้นิ้วหรือเมาส์วาดลายเซ็นในพื้นที่ด้านบน</p>
+            <p class="text-xs text-slate-500">กรุณาวาดลายเซ็นภายในพื้นที่ตารางกรอบด้านบน</p>
             <button onclick="clearSigCanvas()" class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors">
-              <i class="fa-solid fa-eraser"></i> ล้างลายเซ็น
+              <i class="fa-solid fa-eraser"></i> ล้างออกเส้นวาดใหม่
             </button>
           </div>
         </div>
@@ -351,10 +366,10 @@
 
       <div class="flex justify-end gap-3 pt-2">
         <button onclick="submitRevisionFromModal()" class="btn-revision">
-          <i class="fa-solid fa-rotate-left mr-1"></i> ส่งกลับแก้ไข
+          <i class="fa-solid fa-rotate-left mr-1"></i> ตีกลับให้แก้ไข
         </button>
         <button onclick="submitApproval()" id="btnApprove" class="btn-approve">
-          <i class="fa-solid fa-check mr-1"></i> อนุมัติและลงนาม
+          <i class="fa-solid fa-check mr-1"></i> อนุมัติลงนามเสร็จสิ้น
         </button>
       </div>
     </div>
@@ -366,7 +381,7 @@
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
       <div class="flex items-center gap-2 text-white">
         <i class="fa-solid fa-signature text-indigo-400"></i>
-        <span class="kn font-semibold">ตั้งค่าลายเซ็นอิเล็กทรอนิกส์</span>
+        <span class="kn font-semibold">ตั้งค่าลายเซ็นอิเล็กทรอนิกส์หลัก</span>
       </div>
       <button onclick="closeEsigSettings()" class="text-slate-400 hover:text-white text-xl">&times;</button>
     </div>
@@ -381,23 +396,23 @@
         <div class="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-slate-800/50" onclick="document.getElementById('sigImageInput').click()">
           <input type="file" id="sigImageInput" accept="image/png, image/jpeg" class="hidden" onchange="handleSigImage(event)">
           <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
-          <p id="sigImageText" class="text-sm text-slate-300 font-medium">คลิกเพื่อเลือกไฟล์รูปล่าสุด</p>
-          <p class="text-xs text-slate-500 mt-1">(รองรับ .jpg, .png)</p>
-          <img id="sigImagePreview" class="hidden mx-auto mt-4 max-h-32 rounded bg-white p-2 border border-slate-200">
+          <p id="sigImageText" class="text-sm text-slate-300 font-medium">คลิกเพื่อเลือกไฟล์รูปภาพหลักจากเครื่อง</p>
+          <p class="text-xs text-slate-500 mt-1">(รองรับไฟล์นามสกุล .png, .jpg, .jpeg)</p>
+          <img id="sigImagePreview" class="hidden mx-auto mt-4 max-h-32 rounded bg-white p-2 border">
         </div>
       </div>
 
       <div id="esigTabDraw" class="hidden">
-        <p class="text-sm text-slate-400 mb-2">กรุณาลากเส้นวาดลายเซ็นของท่านในช่องด้านล่าง</p>
+        <p class="text-sm text-slate-400 mb-2">ลากเขียนลายเซ็นต้นแบบเพื่อบันทึกระบบถาวร</p>
         <canvas id="settingsSigCanvas" class="w-full bg-[#0d1526] border border-dashed border-slate-500 rounded-xl cursor-crosshair touch-none" style="height:150px;"></canvas>
         <div class="flex justify-end mt-2">
-          <button onclick="clearSettingsCanvas()" class="text-xs text-red-400 hover:text-red-300"><i class="fa-solid fa-eraser"></i> ล้างลายเซ็น</button>
+          <button onclick="clearSettingsCanvas()" class="text-xs text-red-400 hover:text-red-300"><i class="fa-solid fa-eraser"></i> ล้างออกวาดใหม่</button>
         </div>
       </div>
 
       <div class="flex justify-end pt-4 border-t border-white/10 mt-4">
         <button onclick="saveEsigSettings()" class="btn-approve text-sm px-6 py-2.5">
-          <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกลายเซ็น
+          <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูลลายเซ็นลงฐาน
         </button>
       </div>
     </div>
@@ -409,17 +424,17 @@
 <script>
 'use strict';
 
-// ─── State ────────────────────────────────────────────────────
+// ─── Global State ─────────────────────────────────────────────
 let _currentPlanId  = null;
 let _currentPlanData = null;
 let _sigCanvasData  = null;   
 let _settingsCanvasData = null;
 let _sigMode = 'esig';        
-let _reviewTab = 'ai';        
 let _cachedEsig = null;       
 let _settingsSigType = 'upload'; 
+let _chartInstance = null; // เก็บ Instance ป้องกันกราฟซ้อนทับกัน
 
-// ─── Init Profile ─────────────────────────────────────────────
+// ─── Profile Init ─────────────────────────────────────────────
 (function initProfile() {
   const p = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (p.name) {
@@ -439,11 +454,16 @@ function showPage(name) {
   if (name === 'approved')  loadApprovedPlans();
 }
 
+// ══════════════════════════════════════════════════════════════
+//  YAK-KREUANG DASHBOARD: ประมวลผลกลุ่มสาระเชิงลึกและวาดกราฟ
+// ══════════════════════════════════════════════════════════════
 async function loadDashboard() {
   try {
-    const { data, error } = await db.from('lesson_plans').select('status, subject_name, users(subject_group)');
+    // ดึงแผนการสอนทั้งหมดเพื่อมาสรุปยอดกลุ่มสาระ
+    const { data, error } = await db.from('lesson_plans').select('status, subject_name, week_number, id, created_at, users(name, subject_group)');
     if (error) throw error;
 
+    // 1. สรุปยอดหลักเกณฑ์หัวการ์ดด้านบน
     const total    = data.length;
     const pending  = data.filter(p => p.status === 'Pending').length;
     const approved = data.filter(p => p.status === 'Approved').length;
@@ -452,7 +472,68 @@ async function loadDashboard() {
     document.getElementById('dash-total').textContent   = total;
     document.getElementById('dash-pending').textContent = pending;
     document.getElementById('dash-approved').textContent= approved;
+    document.getElementById('dash-revision').textContent= revision;
 
+    // 2. จัดกลุ่มประมวลผลข้อมูลตามกลุ่มสาระการเรียนรู้
+    const summaryData = {};
+    const urgentPlans = [];
+
+    data.forEach(p => {
+      const gName = p.users?.subject_group || 'ไม่ระบุกลุ่มสาระ';
+      if (!summaryData[gName]) {
+        summaryData[gName] = { total: 0, pending: 0, approved: 0, revision: 0 };
+      }
+      summaryData[gName].total++;
+      if (p.status === 'Pending') { summaryData[gName].pending++; urgentPlans.push(p); }
+      else if (p.status === 'Approved') { summaryData[gName].approved++; }
+      else if (p.status === 'Revision Needed') { summaryData[gName].revision++; urgentPlans.push(p); }
+    });
+
+    // 3. แสดงผลตารางสรุปกลุ่มสาระวิชาด้านขวา
+    const summaryTbody = document.getElementById('groupSummaryTableBody');
+    const groupKeys = Object.keys(summaryData);
+    
+    if (groupKeys.length === 0) {
+      summaryTbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-500">ไม่มีข้อมูลการส่งแผนย่อย</td></tr>`;
+    } else {
+      summaryTbody.innerHTML = groupKeys.map(k => {
+        const item = summaryData[k];
+        const rate = item.total ? Math.round((item.approved / item.total) * 100) : 0;
+        return `
+          <tr class="border-b border-slate-800/40">
+            <td class="py-2.5 font-medium text-white">${k}</td>
+            <td class="py-2.5 text-center text-slate-300">${item.total}</td>
+            <td class="py-2.5 text-center text-yellow-400 font-semibold">${item.pending}</td>
+            <td class="py-2.5 text-right text-emerald-400 font-bold">${rate}%</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // 4. แสดงผลตารางแผนงานด่วน / รอติดตามด้านล่างสุด
+    const urgentTbody = document.getElementById('urgentPlansTableBody');
+    if (urgentPlans.length === 0) {
+      urgentTbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-500">🎉 เรียบร้อยดี ไม่มีภาระงานด่วนค้างคา</td></tr>`;
+    } else {
+      // เอาเฉพาะ 5 รายการล่าสุด
+      urgentTbody.innerHTML = urgentPlans.slice(0, 5).map(p => {
+        const name = p.users?.name || 'ไม่ทราบชื่อ';
+        const group = p.users?.subject_group || 'ไม่ระบุ';
+        const stBadge = p.status === 'Pending' ? '<span class="badge-pending">รอตรวจ</span>' : '<span class="badge-revision">ให้แก้ไข</span>';
+        return `
+          <tr>
+            <td class="font-medium text-white">${name}</td>
+            <td class="text-slate-400">${group}</td>
+            <td class="text-slate-300">${p.subject_name} (สัปดาห์ ${p.week_number})</td>
+            <td>${stBadge}</td>
+            <td><button onclick="showPage('review')" class="text-indigo-400 hover:underline">ไปที่งานตรวจ</button></td>
+          </tr>`;
+      }).join('');
+    }
+
+    // 5. เรนเดอร์วาดกราฟสถิติแท่ง Chart.js
+    renderDirectorChart(summaryData);
+
+    // 6. อัปเดตสถิติแถบหลอดแบบเดิม
     const pct = n => total ? Math.round(n / total * 100) : 0;
     document.getElementById('dashStatusBars').innerHTML = `
       <div>
@@ -462,28 +543,70 @@ async function loadDashboard() {
       <div>
         <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">รอตรวจ</span><span class="text-yellow-400 font-medium">${pending}</span></div>
         <div class="prog-bar"><div class="prog-fill" style="width:${pct(pending)}%;background:#f59e0b"></div></div>
-      </div>
-      <div>
-        <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">ส่งกลับแก้ไข</span><span class="text-red-400 font-medium">${revision}</span></div>
-        <div class="prog-bar"><div class="prog-fill" style="width:${pct(revision)}%;background:#ef4444"></div></div>
       </div>`;
+
   } catch (err) {
     console.error(err);
   }
 }
 
+// ฟังก์ชันสร้างและวาดกราฟแท่งเปรียบเทียบข้อมูลจริง
+function renderDirectorChart(summaryData) {
+  const ctx = document.getElementById('directorChart');
+  if (!ctx) return;
+
+  if (_chartInstance) { _chartInstance.destroy(); }
+
+  const labels = Object.keys(summaryData);
+  const approvedDataset = [];
+  const pendingDataset = [];
+  const revisionDataset = [];
+
+  labels.forEach(k => {
+    approvedDataset.push(summaryData[k].approved);
+    pendingDataset.push(summaryData[k].pending);
+    revisionDataset.push(summaryData[k].revision);
+  });
+
+  _chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'อนุมัติแล้ว', data: approvedDataset, backgroundColor: '#10b981', borderRadius: 4 },
+        { label: 'รอตรวจค้างอยู่', data: pendingDataset, backgroundColor: '#f59e0b', borderRadius: 4 },
+        { label: 'ตีกลับแก้ไข', data: revisionDataset, backgroundColor: '#ef4444', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Sarabun', size: 11 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1 } }
+      },
+      plugins: {
+        legend: { labels: { color: '#e2e8f0', font: { family: 'Sarabun', size: 12 } } }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CORE BUSINESS: หน้าตารางรอตรวจและคลังประวัติแผน
+// ══════════════════════════════════════════════════════════════
 async function loadPendingPlans() {
   const tbody = document.getElementById('pendingTableBody');
   tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดแผนจากระบบ...</td></tr>`;
   try {
     const plans = await getAllPendingPlans();
     if (!plans.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500">🎉 ตรวจครบหมดแล้ว ไม่มีแผนค้างคาห้องตรวจ</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500">🎉 ตรวจครบหมดแล้ว ไม่มีแผนค้างคาในห้องตรวจ</td></tr>`;
       return;
     }
     tbody.innerHTML = plans.map(p => {
       const name = p.users?.name || 'ไม่ทราบชื่อ';
-      const date = p.created_at ? new Date(p.created_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
+      const date = p.submitted_at ? new Date(p.submitted_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
       return `<tr>
         <td><span class="font-medium text-white">${name}</span></td>
         <td class="text-slate-300">${p.subject_name || '—'} <span class="text-slate-500">(สัปดาห์ที่ ${p.week_number})</span></td>
@@ -529,20 +652,19 @@ async function loadApprovedPlans() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  REWRITTEN CANVAS INTERACTION (FOOLPROOF MOUSE/TOUCH POSITION)
+//  FOOLPROOF SIGNATURE DRAW CANVAS ENGINE (คำนวณตำแหน่งเส้นตามพิกัดสัมผัส)
 // ══════════════════════════════════════════════════════════════
 function initCanvasDrawing(canvasId) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
-  if (canvas.dataset.inited === 'true') return; // กันผูก Event ซ้ำซ้อน
 
   const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width > 0 ? rect.width : 500; // ป้องกันบัคความกว้าง 0
+  canvas.width = rect.width > 0 ? rect.width : 540; 
   canvas.height = 150;
 
   const ctx = canvas.getContext('2d');
   ctx.strokeStyle = '#6366f1'; 
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 3.5;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
@@ -582,8 +704,6 @@ function initCanvasDrawing(canvasId) {
   canvas.ontouchstart = start;
   canvas.ontouchmove = draw;
   canvas.ontouchend = stop;
-  
-  canvas.dataset.inited = 'true';
 }
 
 function clearSigCanvas() {
@@ -599,21 +719,20 @@ function clearSettingsCanvas() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  REVIEW MODAL BUSINESS LOGIC
+//  WORK WORKSPACE: ควบคุมการเปิดปิดกล่องอนุมัติแผน
 // ══════════════════════════════════════════════════════════════
 async function openReviewModal(plan) {
   _currentPlanId   = plan.id;
   _currentPlanData = plan;
   _sigMode = 'esig';
-  _reviewTab = 'ai';
   _sigCanvasData = null;
 
   document.querySelector('input[name="sigMode"][value="esig"]').checked = true;
   document.getElementById('drawSection').style.display  = 'none';
   document.getElementById('uploadSection').style.display = 'none';
   document.getElementById('esigDisplay').style.display  = 'flex';
-  document.getElementById('aiNotes').value   = '';
   document.getElementById('manualNotes').value = '';
+  document.querySelectorAll('#reviewModal input[type="checkbox"]').forEach(cb => cb.checked = false);
 
   const name = plan.users?.name || 'ไม่ทราบชื่อ';
   document.getElementById('modalTeacherName').textContent = name;
@@ -631,9 +750,6 @@ async function openReviewModal(plan) {
     pdfLink.style.pointerEvents = 'none';
   }
 
-  document.getElementById('aiSummaryText').textContent = plan.ai_summary || 'ไม่มีบทวิเคราะห์ส่งกลับมาจากเซิร์ฟเวอร์ระบบ AI';
-
-  switchReviewTab('ai');
   await loadESignatureDisplay();
   document.getElementById('reviewModal').classList.remove('hidden');
 }
@@ -643,40 +759,29 @@ function closeReviewModal() {
   _currentPlanId = null;
 }
 
-function switchReviewTab(tab) {
-  _reviewTab = tab;
-  document.getElementById('tabContentAI').classList.toggle('hidden', tab !== 'ai');
-  document.getElementById('tabContentManual').classList.toggle('hidden', tab !== 'manual');
-  document.getElementById('tabBtnAI').classList.toggle('active', tab === 'ai');
-  document.getElementById('tabBtnManual').classList.toggle('active', tab === 'manual');
-}
-
 function switchSigMode(mode) {
   _sigMode = mode;
   document.getElementById('esigDisplay').style.display  = mode === 'esig' ? 'flex' : 'none';
   document.getElementById('drawSection').style.display  = mode === 'draw' ? 'block' : 'none';
   document.getElementById('uploadSection').style.display = mode === 'upload' ? 'block' : 'none';
   
-  // หน่วงเวลาให้ UI กางออกก่อนค่อยวัดขนาดสร้าง Canvas
   if (mode === 'draw') {
     setTimeout(() => { initCanvasDrawing('sigCanvas'); }, 150);
   }
 }
 
-// โหลดรูปภาพอัปโหลดจาก Modal ชั่วคราว
 function handleModalSigUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    _sigCanvasData = ev.target.result; // เก็บไว้ใช้บันทึก
+    _sigCanvasData = ev.target.result; 
     document.getElementById('modalSigUploadPreview').src = _sigCanvasData;
     document.getElementById('modalSigUploadPreview').classList.remove('hidden');
     document.getElementById('modalSigUploadText').textContent = file.name;
   };
   reader.readAsDataURL(file);
 }
-
 
 async function loadESignatureDisplay() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
@@ -704,31 +809,31 @@ async function submitApproval() {
 
   if (_sigMode === 'draw') {
     if (!_sigCanvasData) {
-      Swal.fire({ icon: 'warning', title: 'ลายเซ็นว่างเปล่า', text: 'กรุณาวาดเส้นลายเซ็นลงในกรอบ ก่อนบันทึกรายการอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
+      Swal.fire({ icon: 'warning', title: 'ยังไม่ได้เซ็นชื่อ', text: 'กรุณาวาดลายมือชื่อลงในช่องสี่เหลี่ยมก่อนอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
       return;
     }
   } else if (_sigMode === 'upload') {
     if (!_sigCanvasData) {
-      Swal.fire({ icon: 'warning', title: 'ยังไม่แนบไฟล์', text: 'กรุณาอัปโหลดรูปภาพลายเซ็นก่อนอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
+      Swal.fire({ icon: 'warning', title: 'ไม่พบไฟล์ภาพ', text: 'กรุณาอัปโหลดแนบไฟล์รูปภาพลายเซ็นก่อนทำการอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
       return;
     }
   } else {
     if (!_cachedEsig) {
       const { isConfirmed } = await Swal.fire({
-        icon: 'warning', title: 'ไม่พบลายเซ็นจัดเก็บ',
-        text: 'ท่านยังไม่ได้บันทึกลายเซ็นทิ้งไว้ในประวัติตั้งค่าระบบ ต้องการกดอนุมัติแบบปล่อยหน้าเอกสารว่างหรือไม่?',
-        showCancelButton: true, confirmButtonText: 'ยืนยันอนุมัติต่อ', cancelButtonText: 'ขอยกเลิก',
+        icon: 'warning', title: 'ไม่พบลายเซ็นหลัก',
+        text: 'ท่านยังไม่ได้บันทึกลายเซ็นหลักเก็บไว้ในตารางระบบ ต้องการอนุมัติปล่อยว่างโดยไม่มีลายเซ็นแนบหรือไม่?',
+        showCancelButton: true, confirmButtonText: 'ดำเนินการต่อ', cancelButtonText: 'ขอยกเลิก',
         confirmButtonColor: '#6366f1', background: '#1a2540', color: '#e2e8f0'
       });
       if (!isConfirmed) return;
     }
   }
 
-  const notes = _reviewTab === 'ai' ? document.getElementById('aiNotes').value.trim() : document.getElementById('manualNotes').value.trim();
-  const feedback = notes || `ผ่านการตรวจสอบและรับรองโดยผู้อำนวยการโรงเรียน`;
+  const notes = document.getElementById('manualNotes').value.trim();
+  const feedback = notes || `ผ่านการพิจารณาตรวจสอบและอนุมัติจากผู้อำนวยการเรียบร้อยแล้ว`;
   const btn = document.getElementById('btnApprove');
   btn.disabled = true;
-  btn.innerHTML = 'กำลังทำรายการลงนาม...';
+  btn.innerHTML = 'กำลังลงนามบันทึก...';
 
   try {
     await updatePlanStatus(_currentPlanId, 'Approved', feedback);
@@ -737,7 +842,7 @@ async function submitApproval() {
     loadPendingPlans();
     loadDashboard();
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'ล้มเหลว', text: err.message, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ icon: 'error', title: 'เกิดปัญหา', text: err.message, background: '#1a2540', color: '#e2e8f0' });
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> อนุมัติและลงนาม';
@@ -746,20 +851,20 @@ async function submitApproval() {
 
 async function submitRevisionFromModal() {
   if (!_currentPlanId) return;
-  const notes = _reviewTab === 'ai' ? document.getElementById('aiNotes').value.trim() : document.getElementById('manualNotes').value.trim();
+  const notes = document.getElementById('manualNotes').value.trim();
 
   const { value: feedback, isConfirmed } = await Swal.fire({
-    title: 'ส่งคำสั่งให้ปรับปรุงแก้ไข', input: 'textarea', inputLabel: 'พิมพ์คอมเมนต์ชี้แนะภาระงาน', inputValue: notes,
-    showCancelButton: true, confirmButtonText: 'ส่งกลับให้แก้ไข', cancelButtonText: 'กลับหน้าเดิม',
+    title: 'ส่งคำสั่งให้ครูปรับปรุงงาน', input: 'textarea', inputLabel: 'พิมพ์คำชี้แนะ/สาเหตุการส่งกลับแก้ไข', inputValue: notes,
+    showCancelButton: true, confirmButtonText: 'ยืนยันส่งกลับ', cancelButtonText: 'ยกเลิก',
     confirmButtonColor: '#ef4444', background: '#1a2540', color: '#e2e8f0',
-    inputValidator: v => !v.trim() && 'กรุณาระบุรายละเอียดข้อบกพร่อง'
+    inputValidator: v => !v.trim() && 'กรุณากรอกเหตุผลคำชี้แนะก่อนตีกลับเอกสาร'
   });
   if (!isConfirmed) return;
 
   try {
     await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback);
     closeReviewModal();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ตีกลับแผนการสอนเรียบร้อย', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ส่งกลับแก้ไขเรียบร้อย', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
     loadPendingPlans();
     loadDashboard();
   } catch (err) {
@@ -768,7 +873,7 @@ async function submitRevisionFromModal() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  E-SIGNATURE CONFIGURATION MODAL (UPLOAD + DRAW HYBRID)
+//  SETTINGS DIALOG: จัดการเซฟลายเซ็นลงฐานข้อมูลถาวร
 // ══════════════════════════════════════════════════════════════
 function openEsigSettings() {
   document.getElementById('esigSettingsModal').classList.remove('hidden');
@@ -787,7 +892,6 @@ function switchEsigTab(tab) {
   document.getElementById('esigTabUpload').classList.toggle('hidden', tab !== 'upload');
   document.getElementById('esigTabDraw').classList.toggle('hidden', tab !== 'draw');
 
-  // Reset file selector view
   const img = document.getElementById('sigImagePreview');
   img.src = ""; img.classList.add('hidden');
   document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปล่าสุด (JPG, PNG)";
@@ -805,7 +909,7 @@ function handleSigImage(e) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    _settingsCanvasData = ev.target.result; // ได้ Base64 string ข้อมูลภาพดิบ
+    _settingsCanvasData = ev.target.result; 
     const img = document.getElementById('sigImagePreview');
     img.src = _settingsCanvasData;
     img.classList.remove('hidden');
@@ -816,27 +920,24 @@ function handleSigImage(e) {
 
 async function saveEsigSettings() {
   if (!_settingsCanvasData) {
-    Swal.fire({ icon: 'warning', title: 'ไม่พบชุดข้อมูล', text: 'กรุณาอัปโหลดรูปภาพหลักฐาน หรือวาดเส้นชื่อก่อนกดตกลง', background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูลลายเซ็น', text: 'กรุณาอัปโหลดรูปภาพหลักฐาน หรือเซ็นลากเส้นลงในกรอบก่อนกดบันทึก', background: '#1a2540', color: '#e2e8f0' });
     return;
   }
   
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-  if (!profile.id) {
-    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาดเกี่ยวกับ Session', text: 'ไม่พบประวัติการ Login กรุณาล็อกอินใหม่', background: '#1a2540', color: '#e2e8f0' });
-    return;
-  }
+  if (!profile.id) return;
 
   try {
     await saveSystemSetting('esig_' + profile.id, _settingsCanvasData);
     _cachedEsig = _settingsCanvasData; 
     closeEsigSettings();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตระบบลายเซ็นประจำตัวสำเร็จ', showConfirmButton: false, timer: 2500, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'บันทึกลายเซ็นหลักสำเร็จแล้ว', showConfirmButton: false, timer: 2500, background: '#1a2540', color: '#e2e8f0' });
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#1a2540', color: '#e2e8f0' });
   }
 }
 
-// Initial Call
+// โหลดครั้งแรก
 loadDashboard();
 </script>
 </body>
