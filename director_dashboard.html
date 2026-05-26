@@ -93,6 +93,7 @@
 <body>
 <div class="flex h-screen overflow-hidden">
 
+  <!-- ══ SIDEBAR ══ -->
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 text-white overflow-y-auto">
     <div class="mb-7 mt-1">
       <div class="flex items-center gap-3 mb-1">
@@ -106,9 +107,18 @@
       </div>
     </div>
 
+    <!-- User profile with Image Upload Feature -->
     <div class="dark-card p-3 mb-6 flex items-center gap-3">
-      <div id="avatarInitials" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0"
-        style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">--</div>
+      <!-- Clickable Avatar -->
+      <div class="relative group cursor-pointer" onclick="openAvatarSettings()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden relative border border-indigo-400/30">
+          <span id="avatarText">--</span>
+          <img id="avatarImg" class="hidden absolute inset-0 w-full h-full object-cover" />
+        </div>
+        <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <i class="fa-solid fa-camera text-xs text-white"></i>
+        </div>
+      </div>
       <div class="flex-1 min-w-0">
         <p id="directorName" class="font-semibold text-sm truncate text-white">กำลังโหลด...</p>
         <span class="text-xs text-slate-400">ผู้อำนวยการ</span>
@@ -117,12 +127,12 @@
 
     <nav class="space-y-1 flex-1">
       <button onclick="showPage('dashboard')" id="nav-dashboard" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
-        <i class="fa-solid fa-chart-column w-5 text-center text-indigo-400"></i>
+        <i class="fa-solid fa-chart-line w-5 text-center text-indigo-400"></i>
         <span>Dashboard ระบบ</span>
       </button>
       <button onclick="showPage('review')" id="nav-review" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
-        <i class="fa-solid fa-hourglass-half w-5 text-center text-yellow-400"></i>
-        <span>รอการตรวจแผน</span>
+        <i class="fa-solid fa-clipboard-check w-5 text-center text-yellow-400"></i>
+        <span>ตรวจสอบแผน</span>
       </button>
       <button onclick="showPage('approved')" id="nav-approved" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
         <i class="fa-solid fa-folder-open w-5 text-center text-emerald-400"></i>
@@ -140,8 +150,10 @@
     </div>
   </aside>
 
+  <!-- ══ MAIN CONTENT ══ -->
   <main class="flex-1 overflow-y-auto p-6" style="background:#0d1526">
 
+    <!-- PAGE: Dashboard -->
     <section id="page-dashboard" class="page">
       <div class="mb-6 flex justify-between items-center">
         <div>
@@ -153,6 +165,7 @@
         </button>
       </div>
 
+      <!-- Stats Grid -->
       <div class="grid grid-cols-4 gap-4 mb-6">
         <div class="stat-card p-5" style="background:linear-gradient(135deg,#1e40af,#2563eb)">
           <p id="dash-total" class="text-4xl kn font-bold text-white">—</p>
@@ -176,17 +189,20 @@
         </div>
       </div>
 
+      <!-- Graph & Subject Group Breakdown Split Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+        <!-- กราฟ Chart.js ด้านซ้าย (เปลี่ยนเป็นกราฟเส้น) -->
         <div class="dark-card p-5 lg:col-span-7 flex flex-col justify-between">
           <div>
-            <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-chart-bar text-indigo-400 mr-2"></i>แผนภูมิเปรียบเทียบการส่งแผนแยกตามกลุ่มสาระฯ</h2>
-            <p class="text-slate-400 text-xs mt-0.5">แผนงานอนุมัติเปรียบเทียบกับยอดคงค้างรอตรวจ</p>
+            <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-chart-line text-indigo-400 mr-2"></i>แผนภูมิเปรียบเทียบการส่งแผนแยกตามกลุ่มสาระฯ</h2>
+            <p class="text-slate-400 text-xs mt-0.5">แผนงานอนุมัติเปรียบเทียบกับยอดคงค้างและรอแก้ไข</p>
           </div>
           <div class="mt-4 relative" style="height: 280px; width: 100%;">
             <canvas id="directorChart"></canvas>
           </div>
         </div>
 
+        <!-- ตารางรายละเอียดด้านขวา -->
         <div class="dark-card p-5 lg:col-span-5 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-table-list text-emerald-400 mr-2"></i>สรุปสถานะรายกลุ่มสาระฯ</h2>
@@ -210,6 +226,7 @@
         </div>
       </div>
 
+      <!-- ส่วนงานด่วน -->
       <div class="dark-card p-5">
         <h2 class="kn font-semibold text-white text-base mb-3"><i class="fa-solid fa-bell-concierge text-amber-400 mr-2"></i>งานด่วนค้างพิจารณา / ติดตามความคืบหน้า</h2>
         <div class="overflow-x-auto">
@@ -231,35 +248,54 @@
       </div>
     </section>
 
+    <!-- PAGE: Review (ตรวจสอบแผน) -->
     <section id="page-review" class="page section-hidden">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center justify-between mb-4">
         <div>
-          <h1 class="kn text-2xl font-bold text-white">รอการตรวจสอบแผนการสอน</h1>
-          <p class="text-slate-400 text-sm mt-1">รายการแผนการสอนของคุณครูที่รอคำพิจารณาอนุมัติลงนามจากท่าน</p>
+          <h1 class="kn text-2xl font-bold text-white">ตรวจสอบแผนการสอน</h1>
+          <p class="text-slate-400 text-sm mt-1">พิจารณาอนุมัติ หรือเรียกดูประวัติแผนการสอนของคุณครู</p>
         </div>
+        <button onclick="loadReviewPlans()" class="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+          <i class="fa-solid fa-rotate-right"></i> รีเฟรช
+        </button>
       </div>
+
+      <!-- แท็บปุ่มสถานะสำหรับหน้าตรวจสอบแผน -->
+      <div class="flex gap-2 mb-4">
+        <button onclick="filterReviewTable('Pending')" id="filter-rev-pending" class="filter-rev-btn px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white font-medium">
+          <i class="fa-solid fa-hourglass-half mr-1"></i> รอตรวจ
+        </button>
+        <button onclick="filterReviewTable('Approved')" id="filter-rev-approved" class="filter-rev-btn px-4 py-2 text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">
+          <i class="fa-solid fa-check-double mr-1"></i> อนุมัติแล้ว
+        </button>
+        <button onclick="filterReviewTable('Revision Needed')" id="filter-rev-revision" class="filter-rev-btn px-4 py-2 text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">
+          <i class="fa-solid fa-rotate-left mr-1"></i> แก้ไขแผน
+        </button>
+      </div>
+
       <div class="dark-card overflow-hidden">
         <table class="data-table w-full">
           <thead>
             <tr>
               <th class="text-left">ครูผู้สอน</th>
               <th class="text-left">วิชา/สัปดาห์</th>
-              <th class="text-left">วันที่ส่ง</th>
+              <th class="text-left">วันที่ทำรายการ</th>
               <th class="text-left">สถานะ</th>
-              <th class="text-left">ACTION</th>
+              <th class="text-left">คำสั่ง</th>
             </tr>
           </thead>
-          <tbody id="pendingTableBody">
-            <tr><td colspan="5" class="py-10 text-center text-slate-500">กำลังโหลดรายการรอตรวจ...</td></tr>
+          <tbody id="reviewTableBody">
+            <tr><td colspan="5" class="py-10 text-center text-slate-500">กำลังโหลดรายการ...</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
+    <!-- PAGE: Approved (คลังแผน) -->
     <section id="page-approved" class="page section-hidden">
       <div class="mb-6">
         <h1 class="kn text-2xl font-bold text-white">คลังประวัติแผนการสอน</h1>
-        <p class="text-slate-400 text-sm mt-1">เอกสารแผนการสอนทั้งหมดที่ผ่านการอนุมัติและรับรองจากผู้อำนวยการเรียบร้อยแล้ว</p>
+        <p class="text-slate-400 text-sm mt-1">เอกสารแผนการสอนทั้งหมดที่ผ่านการอนุมัติ ถูกจัดเรียงตามหมวดสาระการเรียนรู้</p>
       </div>
       <div class="dark-card overflow-hidden">
         <table class="data-table w-full">
@@ -281,6 +317,9 @@
   </main>
 </div>
 
+<!-- ══════════════════════════════════════════
+     REVIEW WORKSPACE MODAL
+══════════════════════════════════════════ -->
 <div id="reviewModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.07)">
@@ -292,6 +331,7 @@
     </div>
 
     <div class="p-6 space-y-5">
+      <!-- Teacher Info Card -->
       <div class="flex items-center justify-between gap-4 dark-card p-4" style="border-radius:12px">
         <div class="flex items-center gap-3">
           <div id="modalAvatar" class="w-11 h-11 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">—</div>
@@ -305,13 +345,14 @@
         </a>
       </div>
 
+      <!-- การตรวจประเมินด้วยตนเอง -->
       <div class="space-y-4">
         <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-700/50 space-y-2 text-sm text-slate-300">
           <p class="font-semibold text-white mb-2 flex items-center gap-1 text-sm"><i class="fa-solid fa-list-check text-indigo-400"></i> รายการเกณฑ์ตรวจประเมินแผนการสอน</p>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> จุดประสงค์การเรียนรู้ (K-P-A) ครบถ้วนและเขียนไว้วัดผลได้จริง</label>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> มีการจัดกิจกรรมการเรียนรู้เชิงรุก (Active Learning) ที่เน้นผู้เรียน</label>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> การเลือกใช้สื่อ/นวัตกรรม เทคโนโลยีการสอนมีความเหมาะสม</label>
-          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> มีเกณฑ์การวัดและประเมินผลการเรียนรู้สอดคล้องกับเนื้อหาบทเรียน</label>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="kpa-checkbox rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> จุดประสงค์การเรียนรู้ (K-P-A) ครบถ้วนและเขียนไว้วัดผลได้จริง</label>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="kpa-checkbox rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> มีการจัดกิจกรรมการเรียนรู้เชิงรุก (Active Learning) ที่เน้นผู้เรียน</label>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="kpa-checkbox rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> การเลือกใช้สื่อ/นวัตกรรม เทคโนโลยีการสอนมีความเหมาะสม</label>
+          <label class="flex items-center gap-2 cursor-pointer py-1"><input type="checkbox" class="kpa-checkbox rounded border-slate-600 bg-slate-800 text-indigo-500 w-4 h-4"> มีเกณฑ์การวัดและประเมินผลการเรียนรู้สอดคล้องกับเนื้อหาบทเรียน</label>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-2">บันทึกข้อเสนอแนะ/คำชี้แนะของผู้อำนวยการ</label>
@@ -319,6 +360,7 @@
         </div>
       </div>
 
+      <!-- Signature Section -->
       <div class="sig-section">
         <p class="text-sm font-semibold text-white mb-3"><i class="fa-solid fa-signature text-violet-400 mr-1"></i>รูปแบบการลงนามประทับตราอนุมัติ</p>
         <div class="flex flex-col gap-1 mb-3">
@@ -336,6 +378,7 @@
           </label>
         </div>
 
+        <!-- 1. แสดงผลลายเซ็นที่เซฟไว้ -->
         <div id="esigDisplay" class="sig-display">
           <img id="esigImg" src="" alt="E-Signature" style="display:none">
           <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-2">
@@ -344,8 +387,9 @@
           </div>
         </div>
         
+        <!-- 2. แนบอัปโหลดใหม่ระหว่างตรวจ -->
         <div id="uploadSection" style="display:none; width:100%;">
-          <div class="border-2 border-dashed border-slate-600 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-[#0d1526]" onclick="document.getElementById('modalSigUpload').click()">
+          <div class="border-2 border-dashed border-slate-500 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-[#0d1526]" onclick="document.getElementById('modalSigUpload').click()">
             <input type="file" id="modalSigUpload" accept="image/png, image/jpeg" class="hidden" onchange="handleModalSigUpload(event)">
             <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400 mb-1"></i>
             <p id="modalSigUploadText" class="text-xs text-slate-300 font-medium">คลิกเพื่อเลือกไฟล์รูปลายเซ็นผอ.</p>
@@ -353,6 +397,7 @@
           </div>
         </div>
 
+        <!-- 3. วาดเส้นสดระหว่างตรวจ -->
         <div id="drawSection" style="display:none; width:100%;">
           <canvas id="sigCanvas" class="w-full bg-[#0d1526] border border-dashed border-slate-500 rounded-xl cursor-crosshair touch-none" style="height:150px;"></canvas>
           <div class="flex justify-between items-center mt-2">
@@ -364,6 +409,7 @@
         </div>
       </div>
 
+      <!-- Action Footer -->
       <div class="flex justify-end gap-3 pt-2">
         <button onclick="submitRevisionFromModal()" class="btn-revision">
           <i class="fa-solid fa-rotate-left mr-1"></i> ตีกลับให้แก้ไข
@@ -376,6 +422,7 @@
   </div>
 </div>
 
+<!-- ══ E-SIGNATURE SETTINGS MODAL ══ -->
 <div id="esigSettingsModal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width:520px">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
@@ -433,16 +480,64 @@ let _sigMode = 'esig';
 let _cachedEsig = null;       
 let _settingsSigType = 'upload'; 
 let _chartInstance = null; // เก็บ Instance ป้องกันกราฟซ้อนทับกัน
+let allReviewPlans = []; // เก็บแผนทั้งหมดสำหรับหน้าตรวจสอบ
 
-// ─── Profile Init ─────────────────────────────────────────────
+// ─── Profile & Avatar Init ────────────────────────────────────
 (function initProfile() {
   const p = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (p.name) {
     document.getElementById('directorName').textContent = p.name;
     const init = p.name.replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0, 2);
-    document.getElementById('avatarInitials').textContent = init || '--';
+    document.getElementById('avatarText').textContent = init || '--';
+    loadAvatar(); // ดึงรูปโปรไฟล์มาแสดง (ถ้ามี)
   }
 })();
+
+// อัปโหลดและแสดงรูปโปรไฟล์
+async function openAvatarSettings() {
+  const { value: file } = await Swal.fire({
+    title: '<span class="font-display">อัปโหลดรูปโปรไฟล์</span>',
+    input: 'file',
+    inputAttributes: { accept: 'image/png, image/jpeg', 'aria-label': 'อัปโหลดรูปโปรไฟล์' },
+    background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1'
+  });
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result;
+      const { value: pos } = await Swal.fire({
+        title: '<span class="font-display">เลือกการจัดตำแหน่งรูปภาพ</span>',
+        input: 'select',
+        inputOptions: { 'center': 'ตรงกลาง (Center)', 'top': 'ชิดด้านบน (Top)', 'bottom': 'ชิดด้านล่าง (Bottom)' },
+        inputValue: 'center',
+        background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1'
+      });
+      const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+      if (profile.id) {
+        // บันทึกรูปโปรไฟล์และตำแหน่งลงใน LocalStorage แยกตามผู้ใช้
+        localStorage.setItem('avatar_' + profile.id, JSON.stringify({ img: base64, pos: pos || 'center' }));
+        loadAvatar();
+        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ', showConfirmButton: false, timer: 2000, background: '#1a2540', color: '#e2e8f0' });
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function loadAvatar() {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) return;
+  const saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
+  const imgEl = document.getElementById('avatarImg');
+  const txtEl = document.getElementById('avatarText');
+  if (saved && saved.img) {
+    imgEl.src = saved.img;
+    imgEl.style.objectPosition = saved.pos;
+    imgEl.classList.remove('hidden');
+    txtEl.classList.add('hidden');
+  }
+}
 
 function showPage(name) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
@@ -450,20 +545,18 @@ function showPage(name) {
   document.getElementById('page-' + name).classList.remove('section-hidden');
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'dashboard') loadDashboard();
-  if (name === 'review')    loadPendingPlans();
+  if (name === 'review')    loadReviewPlans();
   if (name === 'approved')  loadApprovedPlans();
 }
 
 // ══════════════════════════════════════════════════════════════
-//  YAK-KREUANG DASHBOARD: ประมวลผลกลุ่มสาระเชิงลึกและวาดกราฟ
+//  YAK-KREUANG DASHBOARD: ประมวลผลกลุ่มสาระเชิงลึกและวาดกราฟเส้น
 // ══════════════════════════════════════════════════════════════
 async function loadDashboard() {
   try {
-    // ดึงแผนการสอนทั้งหมดเพื่อมาสรุปยอดกลุ่มสาระ
     const { data, error } = await db.from('lesson_plans').select('status, subject_name, week_number, id, created_at, users(name, subject_group)');
     if (error) throw error;
 
-    // 1. สรุปยอดหลักเกณฑ์หัวการ์ดด้านบน
     const total    = data.length;
     const pending  = data.filter(p => p.status === 'Pending').length;
     const approved = data.filter(p => p.status === 'Approved').length;
@@ -474,7 +567,6 @@ async function loadDashboard() {
     document.getElementById('dash-approved').textContent= approved;
     document.getElementById('dash-revision').textContent= revision;
 
-    // 2. จัดกลุ่มประมวลผลข้อมูลตามกลุ่มสาระการเรียนรู้
     const summaryData = {};
     const urgentPlans = [];
 
@@ -489,7 +581,6 @@ async function loadDashboard() {
       else if (p.status === 'Revision Needed') { summaryData[gName].revision++; urgentPlans.push(p); }
     });
 
-    // 3. แสดงผลตารางสรุปกลุ่มสาระวิชาด้านขวา
     const summaryTbody = document.getElementById('groupSummaryTableBody');
     const groupKeys = Object.keys(summaryData);
     
@@ -509,12 +600,10 @@ async function loadDashboard() {
       }).join('');
     }
 
-    // 4. แสดงผลตารางแผนงานด่วน / รอติดตามด้านล่างสุด
     const urgentTbody = document.getElementById('urgentPlansTableBody');
     if (urgentPlans.length === 0) {
       urgentTbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-500">🎉 เรียบร้อยดี ไม่มีภาระงานด่วนค้างคา</td></tr>`;
     } else {
-      // เอาเฉพาะ 5 รายการล่าสุด
       urgentTbody.innerHTML = urgentPlans.slice(0, 5).map(p => {
         const name = p.users?.name || 'ไม่ทราบชื่อ';
         const group = p.users?.subject_group || 'ไม่ระบุ';
@@ -530,27 +619,14 @@ async function loadDashboard() {
       }).join('');
     }
 
-    // 5. เรนเดอร์วาดกราฟสถิติแท่ง Chart.js
     renderDirectorChart(summaryData);
-
-    // 6. อัปเดตสถิติแถบหลอดแบบเดิม
-    const pct = n => total ? Math.round(n / total * 100) : 0;
-    document.getElementById('dashStatusBars').innerHTML = `
-      <div>
-        <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">อนุมัติแล้ว</span><span class="text-emerald-400 font-medium">${approved}/${total}</span></div>
-        <div class="prog-bar"><div class="prog-fill" style="width:${pct(approved)}%;background:#10b981"></div></div>
-      </div>
-      <div>
-        <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">รอตรวจ</span><span class="text-yellow-400 font-medium">${pending}</span></div>
-        <div class="prog-bar"><div class="prog-fill" style="width:${pct(pending)}%;background:#f59e0b"></div></div>
-      </div>`;
 
   } catch (err) {
     console.error(err);
   }
 }
 
-// ฟังก์ชันสร้างและวาดกราฟแท่งเปรียบเทียบข้อมูลจริง
+// กราฟเส้น (Line Chart) ตามความต้องการ
 function renderDirectorChart(summaryData) {
   const ctx = document.getElementById('directorChart');
   if (!ctx) return;
@@ -569,13 +645,13 @@ function renderDirectorChart(summaryData) {
   });
 
   _chartInstance = new Chart(ctx, {
-    type: 'bar',
+    type: 'line', // เปลี่ยนเป็นกราฟเส้น
     data: {
       labels: labels,
       datasets: [
-        { label: 'อนุมัติแล้ว', data: approvedDataset, backgroundColor: '#10b981', borderRadius: 4 },
-        { label: 'รอตรวจค้างอยู่', data: pendingDataset, backgroundColor: '#f59e0b', borderRadius: 4 },
-        { label: 'ตีกลับแก้ไข', data: revisionDataset, backgroundColor: '#ef4444', borderRadius: 4 }
+        { label: 'อนุมัติแล้ว', data: approvedDataset, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', borderWidth: 2, pointRadius: 4, fill: true, tension: 0.4 },
+        { label: 'รอตรวจค้างอยู่', data: pendingDataset, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.1)', borderWidth: 2, pointRadius: 4, fill: true, tension: 0.4 },
+        { label: 'ตีกลับแก้ไข', data: revisionDataset, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', borderWidth: 2, pointRadius: 4, fill: true, tension: 0.4 }
       ]
     },
     options: {
@@ -583,47 +659,84 @@ function renderDirectorChart(summaryData) {
       maintainAspectRatio: false,
       scales: {
         x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Sarabun', size: 11 } } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1 } }
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1 }, min: 0 }
       },
       plugins: {
         legend: { labels: { color: '#e2e8f0', font: { family: 'Sarabun', size: 12 } } }
-      }
+      },
+      interaction: { mode: 'index', intersect: false }
     }
   });
 }
 
 // ══════════════════════════════════════════════════════════════
-//  CORE BUSINESS: หน้าตารางรอตรวจและคลังประวัติแผน
+//  REVIEW SECTION WITH STATUS TABS
 // ══════════════════════════════════════════════════════════════
-async function loadPendingPlans() {
-  const tbody = document.getElementById('pendingTableBody');
-  tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดแผนจากระบบ...</td></tr>`;
+async function loadReviewPlans() {
+  const tbody = document.getElementById('reviewTableBody');
+  tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังดึงข้อมูลแผนจากระบบ...</td></tr>`;
   try {
-    const plans = await getAllPendingPlans();
-    if (!plans.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500">🎉 ตรวจครบหมดแล้ว ไม่มีแผนค้างคาในห้องตรวจ</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = plans.map(p => {
-      const name = p.users?.name || 'ไม่ทราบชื่อ';
-      const date = p.submitted_at ? new Date(p.submitted_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
-      return `<tr>
-        <td><span class="font-medium text-white">${name}</span></td>
-        <td class="text-slate-300">${p.subject_name || '—'} <span class="text-slate-500">(สัปดาห์ที่ ${p.week_number})</span></td>
-        <td class="text-slate-400">${date}</td>
-        <td><span class="badge-pending">รอตรวจ</span></td>
-        <td>
-          <button onclick='openReviewModal(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="btn-review">
-            ตรวจสอบแผน
-          </button>
-        </td>
-      </tr>`;
-    }).join('');
+    const { data, error } = await db.from('lesson_plans').select('*, users(name, subject_group)').order('created_at', { ascending: false });
+    if (error) throw error;
+    allReviewPlans = data || [];
+    filterReviewTable('Pending'); // ค่าเริ่มต้นให้โชว์รอตรวจก่อน
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
   }
 }
 
+function filterReviewTable(status) {
+  // สลับสไตล์ปุ่มแท็บ
+  document.querySelectorAll('.filter-rev-btn').forEach(b => {
+    b.classList.remove('bg-indigo-600', 'text-white');
+    b.classList.add('bg-slate-800', 'text-slate-300');
+  });
+  const btnMap = { 'Pending': 'pending', 'Approved': 'approved', 'Revision Needed': 'revision' };
+  const activeBtn = document.getElementById(`filter-rev-${btnMap[status]}`);
+  if (activeBtn) {
+    activeBtn.classList.add('bg-indigo-600', 'text-white');
+    activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+  }
+
+  const filtered = allReviewPlans.filter(p => p.status === status);
+  const tbody = document.getElementById('reviewTableBody');
+  
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500">🎉 ไม่มีแผนการสอนในหมวดหมู่นี้</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => {
+    const name = p.users?.name || 'ไม่ทราบชื่อ';
+    const date = p.created_at ? new Date(p.created_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
+    
+    let badge = '';
+    if (p.status === 'Pending') badge = '<span class="badge-pending">รอตรวจ</span>';
+    else if (p.status === 'Approved') badge = '<span class="badge-approved">อนุมัติแล้ว</span>';
+    else badge = '<span class="badge-revision">ต้องแก้ไข</span>';
+    
+    // แผนที่ตรวจไปแล้ว สามารถเรียกดูซ้ำเพื่อแก้การตัดสินใจได้
+    let actionBtn = '';
+    if (p.status === 'Pending') {
+        actionBtn = `<button onclick='openReviewModal(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="btn-review bg-indigo-600 hover:bg-indigo-500"><i class="fa-solid fa-magnifying-glass mr-1"></i>ตรวจประเมิน</button>`;
+    } else {
+        actionBtn = `<button onclick='openReviewModal(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="btn-review bg-slate-600 hover:bg-slate-500"><i class="fa-solid fa-eye mr-1"></i>เรียกดูข้อมูล</button>`;
+    }
+
+    return `<tr>
+      <td><span class="font-medium text-white">${name}</span></td>
+      <td class="text-slate-300">${p.subject_name || '—'} <span class="text-slate-500">(สัปดาห์ที่ ${p.week_number})</span></td>
+      <td class="text-slate-400">${date}</td>
+      <td>${badge}</td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+
+// ══════════════════════════════════════════════════════════════
+//  APPROVED ARCHIVE GROUPED BY SUBJECT GROUP
+// ══════════════════════════════════════════════════════════════
 async function loadApprovedPlans() {
   const tbody = document.getElementById('approvedTableBody');
   tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500">กำลังดึงคลังเอกสาร...</td></tr>`;
@@ -634,18 +747,42 @@ async function loadApprovedPlans() {
       tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500">ยังไม่มีประวัติแผนการสอนที่ผ่านการอนุมัติ</td></tr>`;
       return;
     }
-    tbody.innerHTML = data.map(p => {
-      const date = p.updated_at ? new Date(p.updated_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
-      const fileLink = p.file_url
-        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold"><i class="fa-solid fa-file-pdf"></i>เปิดดูไฟล์บนไดรฟ์</a>`
-        : `<span class="text-slate-600 text-xs">ไม่พบไฟล์เอกสาร</span>`;
-      return `<tr>
-        <td><span class="font-medium text-white">${p.users?.name || '—'}</span></td>
-        <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
-        <td class="text-slate-400">${date}</td>
-        <td>${fileLink}</td>
-      </tr>`;
-    }).join('');
+
+    // จัดกลุ่มตามหมวดสาระ
+    const grouped = {};
+    data.forEach(p => {
+      const gName = p.users?.subject_group || 'ไม่ระบุหมวดสาระ';
+      if (!grouped[gName]) grouped[gName] = [];
+      grouped[gName].push(p);
+    });
+
+    let html = '';
+    for (const [gName, plans] of Object.entries(grouped)) {
+      // แถวหัวข้อกลุ่มสาระ
+      html += `
+        <tr class="bg-slate-800/80 border-b border-slate-700/50">
+          <td colspan="4" class="py-2.5 px-4 font-semibold text-indigo-300 text-sm">
+            <i class="fa-solid fa-layer-group mr-2"></i> หมวดสาระการเรียนรู้: ${gName}
+          </td>
+        </tr>`;
+      
+      // แผนในกลุ่มนั้น
+      html += plans.map(p => {
+        const date = p.updated_at ? new Date(p.updated_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
+        const fileLink = p.file_url
+          ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold"><i class="fa-solid fa-file-pdf"></i>เปิดดูไฟล์บนไดรฟ์</a>`
+          : `<span class="text-slate-600 text-xs">ไม่พบไฟล์เอกสาร</span>`;
+        return `<tr>
+          <td class="pl-8"><span class="font-medium text-white">${p.users?.name || '—'}</span></td>
+          <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
+          <td class="text-slate-400">${date}</td>
+          <td>${fileLink}</td>
+        </tr>`;
+      }).join('');
+    }
+    
+    tbody.innerHTML = html;
+
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
   }
@@ -731,7 +868,9 @@ async function openReviewModal(plan) {
   document.getElementById('drawSection').style.display  = 'none';
   document.getElementById('uploadSection').style.display = 'none';
   document.getElementById('esigDisplay').style.display  = 'flex';
-  document.getElementById('manualNotes').value = '';
+  
+  // โหลดคอมเมนต์เก่ามาแสดง (ถ้าเคยตรวจไปแล้ว)
+  document.getElementById('manualNotes').value = plan.director_feedback || '';
   document.querySelectorAll('#reviewModal input[type="checkbox"]').forEach(cb => cb.checked = false);
 
   const name = plan.users?.name || 'ไม่ทราบชื่อ';
@@ -839,7 +978,7 @@ async function submitApproval() {
     await updatePlanStatus(_currentPlanId, 'Approved', feedback);
     closeReviewModal();
     Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'ลงนามแผนการสอนสำเร็จ', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
-    loadPendingPlans();
+    loadReviewPlans();
     loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'เกิดปัญหา', text: err.message, background: '#1a2540', color: '#e2e8f0' });
@@ -864,8 +1003,8 @@ async function submitRevisionFromModal() {
   try {
     await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback);
     closeReviewModal();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ส่งกลับแก้ไขเรียบร้อย', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
-    loadPendingPlans();
+    Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ตีกลับแผนการสอนเรียบร้อย', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
+    loadReviewPlans();
     loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message, background: '#1a2540', color: '#e2e8f0' });
@@ -873,7 +1012,7 @@ async function submitRevisionFromModal() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  SETTINGS DIALOG: จัดการเซฟลายเซ็นลงฐานข้อมูลถาวร
+//  E-SIGNATURE CONFIGURATION MODAL (UPLOAD + DRAW HYBRID)
 // ══════════════════════════════════════════════════════════════
 function openEsigSettings() {
   document.getElementById('esigSettingsModal').classList.remove('hidden');
@@ -892,6 +1031,7 @@ function switchEsigTab(tab) {
   document.getElementById('esigTabUpload').classList.toggle('hidden', tab !== 'upload');
   document.getElementById('esigTabDraw').classList.toggle('hidden', tab !== 'draw');
 
+  // Reset file selector view
   const img = document.getElementById('sigImagePreview');
   img.src = ""; img.classList.add('hidden');
   document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปล่าสุด (JPG, PNG)";
@@ -909,7 +1049,7 @@ function handleSigImage(e) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    _settingsCanvasData = ev.target.result; 
+    _settingsCanvasData = ev.target.result; // ได้ Base64 string ข้อมูลภาพดิบ
     const img = document.getElementById('sigImagePreview');
     img.src = _settingsCanvasData;
     img.classList.remove('hidden');
@@ -920,24 +1060,27 @@ function handleSigImage(e) {
 
 async function saveEsigSettings() {
   if (!_settingsCanvasData) {
-    Swal.fire({ icon: 'warning', title: 'ไม่พบข้อมูลลายเซ็น', text: 'กรุณาอัปโหลดรูปภาพหลักฐาน หรือเซ็นลากเส้นลงในกรอบก่อนกดบันทึก', background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ icon: 'warning', title: 'ไม่พบชุดข้อมูล', text: 'กรุณาอัปโหลดรูปภาพหลักฐาน หรือวาดเส้นชื่อก่อนกดตกลง', background: '#1a2540', color: '#e2e8f0' });
     return;
   }
   
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-  if (!profile.id) return;
+  if (!profile.id) {
+    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาดเกี่ยวกับ Session', text: 'ไม่พบประวัติการ Login กรุณาล็อกอินใหม่', background: '#1a2540', color: '#e2e8f0' });
+    return;
+  }
 
   try {
     await saveSystemSetting('esig_' + profile.id, _settingsCanvasData);
     _cachedEsig = _settingsCanvasData; 
     closeEsigSettings();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'บันทึกลายเซ็นหลักสำเร็จแล้ว', showConfirmButton: false, timer: 2500, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตระบบลายเซ็นประจำตัวสำเร็จ', showConfirmButton: false, timer: 2500, background: '#1a2540', color: '#e2e8f0' });
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message, background: '#1a2540', color: '#e2e8f0' });
   }
 }
 
-// โหลดครั้งแรก
+// Initial Call
 loadDashboard();
 </script>
 </body>
