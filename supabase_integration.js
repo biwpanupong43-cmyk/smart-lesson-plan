@@ -186,13 +186,15 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   }
 
   const result = await response.json();
-  if (!result.success) {
+  // ✅ แก้ไข: GAS ส่งกลับ { status: 'success' } ไม่ใช่ { success: true }
+  if (result.status !== 'success') {
     throw new Error(result.message || 'GAS ส่งไฟล์ไม่สำเร็จ');
   }
 
-  const driveUrl  = result.fileUrl  || null;
-  const driveId   = result.fileId   || null;
-  const aiSummary = result.summary  || null;
+  const driveUrl  = result.fileUrl   || null;
+  const driveId   = result.fileId    || null;
+  // ✅ แก้ไข: GAS ส่งกลับ aiSummary ไม่ใช่ summary
+  const aiSummary = result.aiSummary || null;
 
   // ── บันทึก metadata ลง Supabase ─────────────────────────────
   const weekNumber = parseInt(weekLabel.replace(/[^0-9]/g, '')) || 0;
