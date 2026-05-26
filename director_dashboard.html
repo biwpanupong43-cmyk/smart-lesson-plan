@@ -88,6 +88,23 @@
   
   .tab-btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; border: 1px solid transparent; color: #94a3b8; background: transparent; width: 100%; text-align: center; }
   .tab-btn.active { background: rgba(99,102,241,.25); border-color: rgba(99,102,241,.5); color: #a5b4fc; }
+
+  /* ── Sub-nav items ── */
+  .sub-nav { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+  .sub-nav.open { max-height: 300px; }
+  .sub-nav-item { border-radius: 8px; transition: all .2s; color: #94a3b8; font-size: 12px; display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer; background: transparent; border: none; width: 100%; text-align: left; }
+  .sub-nav-item:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+  .sub-nav-item.active { background: rgba(99,102,241,.18); color: #a5b4fc; font-weight: 600; }
+  .nav-item-row { display: flex; align-items: center; justify-content: space-between; }
+  .nav-item-row .chevron { transition: transform .25s; font-size: 10px; color: #64748b; flex-shrink:0; }
+  .nav-item-row.expanded .chevron { transform: rotate(90deg); }
+
+  /* ── Avatar drag modal ── */
+  #avatarDragModal { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.8); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; }
+  #avatarDragModal.hidden { display:none; }
+  .drag-viewport { width:200px; height:200px; border-radius:50%; overflow:hidden; cursor:grab; user-select:none; border:3px solid rgba(99,102,241,.6); box-shadow:0 0 30px rgba(99,102,241,.3); position:relative; flex-shrink:0; }
+  .drag-viewport:active { cursor:grabbing; }
+  .drag-viewport img { width:250%; height:250%; position:absolute; object-fit:cover; }
 </style>
 </head>
 <body>
@@ -130,14 +147,49 @@
         <i class="fa-solid fa-chart-line w-5 text-center text-indigo-400"></i>
         <span>Dashboard ระบบ</span>
       </button>
-      <button onclick="showPage('review')" id="nav-review" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
-        <i class="fa-solid fa-clipboard-check w-5 text-center text-yellow-400"></i>
-        <span>ตรวจสอบแผน</span>
-      </button>
-      <button onclick="showPage('approved')" id="nav-approved" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
-        <i class="fa-solid fa-folder-open w-5 text-center text-emerald-400"></i>
-        <span>คลังแผนการสอน</span>
-      </button>
+
+      <!-- ตรวจสอบแผน + sub-nav -->
+      <div>
+        <button onclick="toggleNavGroup('review')" id="nav-review" class="nav-item w-full px-4 py-3 text-sm">
+          <div class="nav-item-row w-full" id="nav-review-row">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-clipboard-check w-5 text-center text-yellow-400"></i>
+              <span>ตรวจสอบแผน</span>
+            </div>
+            <i class="fa-solid fa-chevron-right chevron"></i>
+          </div>
+        </button>
+        <div id="sub-review" class="sub-nav pl-2 mt-0.5 space-y-0.5">
+          <button onclick="navReviewFilter('Pending')" id="subnav-rev-pending" class="sub-nav-item active">
+            <i class="fa-solid fa-hourglass-half text-yellow-400 w-4 text-center"></i> รอตรวจ
+          </button>
+          <button onclick="navReviewFilter('Approved')" id="subnav-rev-approved" class="sub-nav-item">
+            <i class="fa-solid fa-check-double text-emerald-400 w-4 text-center"></i> อนุมัติแล้ว
+          </button>
+          <button onclick="navReviewFilter('RevisionNeeded')" id="subnav-rev-revision" class="sub-nav-item">
+            <i class="fa-solid fa-rotate-left text-red-400 w-4 text-center"></i> แก้ไขแผน
+          </button>
+        </div>
+      </div>
+
+      <!-- คลังแผนการสอน + sub-nav -->
+      <div>
+        <button onclick="toggleNavGroup('approved')" id="nav-approved" class="nav-item w-full px-4 py-3 text-sm">
+          <div class="nav-item-row w-full" id="nav-approved-row">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-folder-open w-5 text-center text-emerald-400"></i>
+              <span>คลังแผนการสอน</span>
+            </div>
+            <i class="fa-solid fa-chevron-right chevron"></i>
+          </div>
+        </button>
+        <div id="sub-approved" class="sub-nav pl-2 mt-0.5 space-y-0.5">
+          <button onclick="navApprovedFilter('__all__')" id="subnav-approved-all" class="sub-nav-item active">
+            <i class="fa-solid fa-layer-group text-indigo-400 w-4 text-center"></i> ทั้งหมด
+          </button>
+          <!-- dynamic subject groups added by JS -->
+        </div>
+      </div>
     </nav>
 
     <div class="mt-auto pt-4 border-t border-white/10">
@@ -422,6 +474,25 @@
   </div>
 </div>
 
+<!-- ══ AVATAR DRAG POSITION MODAL ══ -->
+<div id="avatarDragModal" class="hidden">
+  <div class="dark-card p-6 flex flex-col items-center gap-5" style="width:360px; border-radius:20px; border:1px solid rgba(99,102,241,.3);">
+    <div class="w-full flex items-center justify-between">
+      <p class="kn font-semibold text-white text-base"><i class="fa-solid fa-camera text-indigo-400 mr-2"></i>จัดตำแหน่งรูปโปรไฟล์</p>
+      <button onclick="closeAvatarDragModal()" class="text-slate-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <p class="text-slate-400 text-xs text-center -mt-2">ลากรูปภาพเพื่อปรับตำแหน่ง ให้พอดีกับกรอบวงกลม</p>
+    <div class="drag-viewport" id="dragViewport">
+      <img id="dragImg" src="" draggable="false" />
+    </div>
+    <div class="flex gap-3 w-full">
+      <button onclick="confirmAvatarPosition()" class="btn-approve flex-1 text-sm py-2.5">
+        <i class="fa-solid fa-check mr-1"></i> บันทึกตำแหน่งนี้
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ E-SIGNATURE SETTINGS MODAL ══ -->
 <div id="esigSettingsModal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width:520px">
@@ -539,14 +610,221 @@ function loadAvatar() {
   }
 }
 
+// ─── Global approved filter state ─────────────────────────────
+let allApprovedPlans = [];
+let _currentApprovedGroup = '__all__';
+let _dragAvatarBase64 = null;
+let _dragPosX = 50, _dragPosY = 50; // percentage
+
+// ─── Sidebar: toggle expand/collapse sub-nav ──────────────────
+function toggleNavGroup(name) {
+  const sub = document.getElementById('sub-' + name);
+  const row = document.getElementById('nav-' + name + '-row');
+  const navBtn = document.getElementById('nav-' + name);
+  const isOpen = sub.classList.contains('open');
+
+  if (!isOpen) {
+    // Expand and show the page
+    sub.classList.add('open');
+    row.classList.add('expanded');
+    navBtn.classList.add('active');
+    showPage(name);
+  } else {
+    // Collapse only (keep page visible)
+    sub.classList.remove('open');
+    row.classList.remove('expanded');
+  }
+}
+
+// ─── Review sub-nav filter ─────────────────────────────────────
+function navReviewFilter(statusKey) {
+  // ensure the review page is visible
+  if (document.getElementById('page-review').classList.contains('section-hidden')) {
+    showPage('review');
+  }
+  const mapStatus = { 'Pending': 'Pending', 'Approved': 'Approved', 'RevisionNeeded': 'Revision Needed' };
+  const status = mapStatus[statusKey] || 'Pending';
+  filterReviewTable(status);
+
+  // highlight correct sub-item
+  ['pending','approved','revision'].forEach(k => {
+    document.getElementById('subnav-rev-' + k)?.classList.remove('active');
+  });
+  const keyMap = { 'Pending': 'pending', 'Approved': 'approved', 'RevisionNeeded': 'revision' };
+  document.getElementById('subnav-rev-' + keyMap[statusKey])?.classList.add('active');
+}
+
+// ─── Approved sub-nav filter ──────────────────────────────────
+function navApprovedFilter(group) {
+  _currentApprovedGroup = group;
+  // highlight
+  document.querySelectorAll('[id^="subnav-approved-"]').forEach(b => b.classList.remove('active'));
+  const safeId = 'subnav-approved-' + group.replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+  const target = document.getElementById(safeId) || document.getElementById('subnav-approved-all');
+  if (target) target.classList.add('active');
+
+  renderApprovedTable();
+
+  // ensure the page is visible
+  if (document.getElementById('page-approved').classList.contains('section-hidden')) {
+    showPage('approved');
+  }
+}
+
+function renderApprovedTable() {
+  const tbody = document.getElementById('approvedTableBody');
+  let data = allApprovedPlans;
+
+  if (_currentApprovedGroup !== '__all__') {
+    data = data.filter(p => (p.users?.subject_group || 'ไม่ระบุหมวดสาระ') === _currentApprovedGroup);
+  }
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500">ไม่พบแผนการสอนในหมวดสาระนี้</td></tr>`;
+    return;
+  }
+
+  const grouped = {};
+  data.forEach(p => {
+    const gName = p.users?.subject_group || 'ไม่ระบุหมวดสาระ';
+    if (!grouped[gName]) grouped[gName] = [];
+    grouped[gName].push(p);
+  });
+
+  let html = '';
+  for (const [gName, plans] of Object.entries(grouped)) {
+    html += `<tr class="bg-slate-800/80 border-b border-slate-700/50">
+      <td colspan="4" class="py-2.5 px-4 font-semibold text-indigo-300 text-sm">
+        <i class="fa-solid fa-layer-group mr-2"></i> หมวดสาระการเรียนรู้: ${gName}
+      </td></tr>`;
+    html += plans.map(p => {
+      const date = p.updated_at ? new Date(p.updated_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
+      const fileLink = p.file_url
+        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold"><i class="fa-solid fa-file-pdf"></i>เปิดดูไฟล์</a>`
+        : `<span class="text-slate-600 text-xs">ไม่พบไฟล์</span>`;
+      return `<tr>
+        <td class="pl-8"><span class="font-medium text-white">${p.users?.name || '—'}</span></td>
+        <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
+        <td class="text-slate-400">${date}</td>
+        <td>${fileLink}</td>
+      </tr>`;
+    }).join('');
+  }
+  tbody.innerHTML = html;
+}
+
 function showPage(name) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
-  document.querySelectorAll('button[id^="nav-"]').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('[id^="nav-"]').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + name).classList.remove('section-hidden');
-  document.getElementById('nav-' + name).classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
   if (name === 'dashboard') loadDashboard();
   if (name === 'review')    loadReviewPlans();
   if (name === 'approved')  loadApprovedPlans();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  AVATAR DRAG-TO-POSITION
+// ══════════════════════════════════════════════════════════════
+async function openAvatarSettings() {
+  const { value: file } = await Swal.fire({
+    title: 'อัปโหลดรูปโปรไฟล์',
+    input: 'file',
+    inputAttributes: { accept: 'image/png, image/jpeg', 'aria-label': 'อัปโหลดรูปโปรไฟล์' },
+    background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1'
+  });
+
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    _dragAvatarBase64 = e.target.result;
+    _dragPosX = 50; _dragPosY = 50;
+    openAvatarDragModal(_dragAvatarBase64);
+  };
+  reader.readAsDataURL(file);
+}
+
+function openAvatarDragModal(src) {
+  const modal = document.getElementById('avatarDragModal');
+  const img = document.getElementById('dragImg');
+  img.src = src;
+  modal.classList.remove('hidden');
+
+  // Reset position
+  img.style.left = '-75%';
+  img.style.top  = '-75%';
+  _dragPosX = 50; _dragPosY = 50;
+
+  // Setup dragging
+  const viewport = document.getElementById('dragViewport');
+  let isDragging = false, startX, startY, startLeft, startTop;
+
+  function getImgPos() {
+    return { left: parseFloat(img.style.left) || -75, top: parseFloat(img.style.top) || -75 };
+  }
+
+  // Remove old listeners
+  viewport.onmousedown = null;
+  viewport.ontouchstart = null;
+
+  viewport.onmousedown = (e) => {
+    isDragging = true;
+    startX = e.clientX; startY = e.clientY;
+    const pos = getImgPos();
+    startLeft = pos.left; startTop = pos.top;
+    e.preventDefault();
+  };
+  window.onmousemove = (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    const vw = viewport.offsetWidth;
+    // img is 250% of vw = 2.5*vw, range is -(2.5*vw - vw) to 0 = -(1.5*vw) to 0 in px
+    const newLeft = Math.min(0, Math.max(-(viewport.offsetWidth * 1.5), startLeft + dx));
+    const newTop  = Math.min(0, Math.max(-(viewport.offsetHeight * 1.5), startTop + dy));
+    img.style.left = newLeft + 'px';
+    img.style.top  = newTop + 'px';
+    // Store as percentages for object-position
+    _dragPosX = Math.round((-newLeft / (viewport.offsetWidth  * 1.5)) * 100);
+    _dragPosY = Math.round((-newTop  / (viewport.offsetHeight * 1.5)) * 100);
+  };
+  window.onmouseup = () => { isDragging = false; };
+
+  // Touch support
+  viewport.ontouchstart = (e) => {
+    isDragging = true;
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+    const pos = getImgPos();
+    startLeft = pos.left; startTop = pos.top;
+  };
+  window.ontouchmove = (e) => {
+    if (!isDragging) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    const newLeft = Math.min(0, Math.max(-(viewport.offsetWidth * 1.5), startLeft + dx));
+    const newTop  = Math.min(0, Math.max(-(viewport.offsetHeight * 1.5), startTop + dy));
+    img.style.left = newLeft + 'px';
+    img.style.top  = newTop + 'px';
+    _dragPosX = Math.round((-newLeft / (viewport.offsetWidth  * 1.5)) * 100);
+    _dragPosY = Math.round((-newTop  / (viewport.offsetHeight * 1.5)) * 100);
+  };
+  window.ontouchend = () => { isDragging = false; };
+}
+
+function closeAvatarDragModal() {
+  document.getElementById('avatarDragModal').classList.add('hidden');
+  window.onmousemove = null; window.onmouseup = null;
+  window.ontouchmove = null; window.ontouchend = null;
+}
+
+function confirmAvatarPosition() {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id || !_dragAvatarBase64) return;
+  const posValue = `${_dragPosX}% ${_dragPosY}%`;
+  localStorage.setItem('avatar_' + profile.id, JSON.stringify({ img: _dragAvatarBase64, pos: posValue }));
+  loadAvatar();
+  closeAvatarDragModal();
+  Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ', showConfirmButton: false, timer: 2000, background: '#1a2540', color: '#e2e8f0' });
 }
 
 // ══════════════════════════════════════════════════════════════
