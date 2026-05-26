@@ -91,15 +91,6 @@ const db = (typeof window._supabaseClient !== 'undefined')
 
 /**
  * addNewUser — สร้างบัญชีผู้ใช้ใหม่ใน Supabase Auth + ตาราง users
- *
- * @param {{ name:string, role:string, subject_group:string,
- *           username:string, temp_password:string }} userData
- *
- * ⚠️  ต้องการให้ปิด "Email Confirmation" ใน Supabase Dashboard
- *     Authentication → Settings → Email → Confirm email: OFF
- *
- * ถ้าต้องการสร้างโดยไม่ให้ผู้ใช้ต้อง confirm email ควรใช้
- * Supabase Edge Function + service_role key แทน (แนะนำสำหรับ production)
  */
 async function addNewUser({ name, role, subject_group, username, temp_password }) {
   // แปลง username เป็น email (รูปแบบเดียวกับ login)
@@ -110,13 +101,11 @@ async function addNewUser({ name, role, subject_group, username, temp_password }
     email,
     password: temp_password,
     options: {
-      // ฝัง username ไว้ใน user_metadata ด้วย (สะดวกเวลาดึงข้อมูล)
       data: { username, role },
     },
   });
 
   if (authErr) {
-    // แปลงข้อความ error เป็นภาษาไทย
     if (authErr.message.includes('already registered')) {
       throw new Error(`Username "${username}" ถูกใช้งานไปแล้ว`);
     }
@@ -147,11 +136,8 @@ async function addNewUser({ name, role, subject_group, username, temp_password }
 
 /**
  * resetDatabase — ลบข้อมูล lesson_plans ทั้งหมด
- * (ไม่ลบบัญชีผู้ใช้ เพื่อความปลอดภัย — ถ้าต้องการลบผู้ใช้ด้วย
- *  ต้องใช้ service_role key ผ่าน Edge Function)
  */
 async function resetDatabase() {
-  // ลบแผนการสอนทั้งหมด
   const { error: plansErr } = await db
     .from('lesson_plans')
     .delete()
@@ -170,11 +156,6 @@ async function resetDatabase() {
 /**
  * uploadPlanViaGAS — ส่งไฟล์ PDF ไปยัง Google Apps Script
  * แล้วบันทึก metadata ลง Supabase
- *
- * @param {string} subject    วิชา เช่น "วิทยาศาสตร์ ม.1"
- * @param {string} weekLabel  สัปดาห์ เช่น "สัปดาห์ที่ 2"
- * @param {File}   file       ไฟล์ PDF
- * @param {string} gasUrl     URL ของ Google Apps Script Web App
  */
 async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   // ── ดึง profile ของครูที่ login อยู่ ──
@@ -187,7 +168,7 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   // ── ส่ง request ไปยัง GAS ────────────────────────────────────
   const payload = {
     fileName:    file.name,
-    fileBase64:  base64,
+    base64:      base64,     // <--- 🔴 แก้ไขตรงนี้ให้ชื่อตรงกับที่ GAS ของคุณต้องการ
     mimeType:    file.type,
     subject:     subject,
     week:        weekLabel,
@@ -239,7 +220,6 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
 
 /**
  * getMyPlans — ดึงประวัติแผนการสอนของครูที่ login อยู่
- * @returns {Array} รายการแผนการสอน เรียงจากใหม่ไปเก่า
  */
 async function getMyPlans() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
@@ -261,7 +241,7 @@ async function getMyPlans() {
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * getAllPendingPlans — ดึงแผนที่รอการอนุมัติทั้งหมด (director ใช้)
+ * getAllPendingPlans — ดึงแผนที่รอการอนุมัติทั้งหมด
  */
 async function getAllPendingPlans() {
   const { data, error } = await db
@@ -279,10 +259,6 @@ async function getAllPendingPlans() {
 
 /**
  * updatePlanStatus — อนุมัติหรือส่งกลับแก้ไขแผนการสอน
- *
- * @param {string} planId   UUID ของแผน
- * @param {'Approved'|'Revision Needed'} status
- * @param {string} feedback ความคิดเห็น
  */
 async function updatePlanStatus(planId, status, feedback = '') {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
@@ -308,7 +284,6 @@ async function updatePlanStatus(planId, status, feedback = '') {
 
 /**
  * getSystemSetting / saveSystemSetting
- * ใช้ตาราง system_settings (key TEXT PRIMARY KEY, value TEXT)
  */
 async function getSystemSetting(key) {
   const { data, error } = await db
@@ -334,9 +309,6 @@ async function saveSystemSetting(key, value) {
 //  8. USER MANAGEMENT (Admin)
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * getAllUsers — ดึงรายชื่อผู้ใช้ทั้งหมด (ยกเว้น admin เอง)
- */
 async function getAllUsers() {
   const { data, error } = await db
     .from('users')
@@ -347,9 +319,6 @@ async function getAllUsers() {
   return data || [];
 }
 
-/**
- * updateUser — แก้ไขข้อมูลผู้ใช้ (ชื่อ, role, กลุ่มสาระ)
- */
 async function updateUser(userId, { name, role, subject_group }) {
   const { error } = await db
     .from('users')
@@ -370,8 +339,6 @@ async function signOut() {
   window.location.href = 'index.html';
 }
 
-// ── Override ฟังก์ชัน logout() ที่แต่ละหน้าเรียก ──
-// (แต่ละหน้า define logout() ไว้แล้ว ฟังก์ชันนี้ทำหน้าที่ backup)
 window._signOut = signOut;
 
 
@@ -387,20 +354,4 @@ function _fileToBase64(file) {
     reader.onerror = () => reject(new Error('อ่านไฟล์ไม่สำเร็จ'));
     reader.readAsDataURL(file);
   });
-}
-
-/** แสดง toast สำเร็จ (SweetAlert2) */
-function _toastOk(msg) {
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:msg,
-      showConfirmButton:false, timer:2500, background:'#18181b', color:'#e4e4e7' });
-  }
-}
-
-/** แสดง toast error (SweetAlert2) */
-function _toastErr(msg) {
-  if (typeof Swal !== 'undefined') {
-    Swal.fire({ toast:true, position:'bottom-end', icon:'error', title:msg,
-      showConfirmButton:false, timer:3500, background:'#18181b', color:'#e4e4e7' });
-  }
 }
