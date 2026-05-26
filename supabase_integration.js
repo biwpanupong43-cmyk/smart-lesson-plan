@@ -197,16 +197,15 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   // ── บันทึก metadata ลง Supabase ─────────────────────────────
   const weekNumber = parseInt(weekLabel.replace(/[^0-9]/g, '')) || 0;
 
-  // ✅ แก้ไข: ลบ drive_file_id ออก (ไม่มีใน schema) และเปลี่ยน submitted_at → created_at
+  // ✅ แก้ไข: ใช้ชื่อ column ตรงกับ schema จริงใน Supabase
   const { error: insertErr } = await db.from('lesson_plans').insert({
-    teacher_id:  profile.id,
-    subject:     subject,
-    week_number: weekNumber,
-    file_name:   file.name,
-    drive_url:   driveUrl,
-    ai_summary:  aiSummary,
-    status:      'Pending',
-    created_at:  new Date().toISOString(),
+    teacher_id:   profile.id,
+    subject_name: subject,        // subject → subject_name
+    week_number:  weekNumber,
+    file_url:     driveUrl,       // drive_url → file_url  (file_name ไม่มีใน schema)
+    ai_summary:   aiSummary,
+    status:       'Pending',
+    // created_at จัดการโดย Supabase อัตโนมัติ ไม่ต้องส่ง
   });
 
   if (insertErr) {
@@ -229,8 +228,7 @@ async function getMyPlans() {
     .from('lesson_plans')
     .select('*')
     .eq('teacher_id', profile.id)
-    // ✅ แก้ไข: submitted_at → created_at
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false }); // submitted_at → created_at
 
   if (error) throw new Error(`ดึงข้อมูลแผนไม่สำเร็จ: ${error.message}`);
   return data || [];
@@ -252,8 +250,7 @@ async function getAllPendingPlans() {
       users ( name, subject_group )
     `)
     .eq('status', 'Pending')
-    // ✅ แก้ไข: submitted_at → created_at
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true }); // submitted_at → created_at
 
   if (error) throw new Error(`ดึงข้อมูลแผนไม่สำเร็จ: ${error.message}`);
   return data || [];
@@ -265,13 +262,12 @@ async function getAllPendingPlans() {
 async function updatePlanStatus(planId, status, feedback = '') {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
 
+  // ✅ แก้ไข: feedback → director_feedback, ลบ reviewed_by/reviewed_at (ไม่มีใน schema)
   const { error } = await db
     .from('lesson_plans')
     .update({
-      status:       status,
-      feedback:     feedback,
-      reviewed_by:  profile.id,
-      reviewed_at:  new Date().toISOString(),
+      status:             status,
+      director_feedback:  feedback,   // feedback → director_feedback
     })
     .eq('id', planId);
 
