@@ -497,6 +497,8 @@ async function loadUserTable() {
   try {
     allUsers = await getAllUsers();
     renderUserTable(allUsers);
+    // ✅ FIX: อัปเดต stat card ด้านบนด้วย
+    document.getElementById('totalUsers').textContent = allUsers.length;
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
   }
@@ -799,29 +801,108 @@ function openAddUserModal() {
 }
 
 // ── Edit User ─────────────────────────────────────────────────
+// ✅ FIX: เปิด modal แก้ไขข้อมูลจริง (ก่อนหน้านี้แค่ toast)
 function editUser(userId, userName) {
-  Swal.fire({ toast:true, position:'bottom-end', icon:'info',
-    title:`แก้ไขผู้ใช้: ${userName}`, showConfirmButton:false, timer:2000 });
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+
+  Swal.fire({
+    width: 520,
+    title: '<span style="font-family:Kanit">แก้ไขข้อมูลผู้ใช้งาน</span>',
+    html: `<div style="font-family:Sarabun;text-align:left;font-size:14px;display:grid;gap:12px">
+      <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">ชื่อ-นามสกุล *</label>
+        <input id="eu-name" type="text" value="${user.name}"
+          style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">บทบาท *</label>
+          <select id="eu-role"
+            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px">
+            <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher (ครู)</option>
+            <option value="director" ${user.role === 'director' ? 'selected' : ''}>Director (ผู้อำนวยการ)</option>
+          </select></div>
+        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">กลุ่มสาระ</label>
+          <input id="eu-group" type="text" value="${user.subject_group || ''}" placeholder="คณิตศาสตร์..."
+            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px"/></div>
+      </div>
+    </div>`,
+    showCancelButton: true, cancelButtonText: 'ยกเลิก',
+    confirmButtonText: '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกการเปลี่ยนแปลง',
+    confirmButtonColor: '#7c3aed', cancelButtonColor: '#6b7280',
+    preConfirm: async () => {
+      const name = document.getElementById('eu-name').value.trim();
+      if (!name) { Swal.showValidationMessage('กรุณากรอกชื่อ-นามสกุล'); return false; }
+      try {
+        await updateUser(userId, {
+          name,
+          role:          document.getElementById('eu-role').value,
+          subject_group: document.getElementById('eu-group').value.trim() || null,
+        });
+      } catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
+      return name;
+    }
+  }).then(result => {
+    if (result.isConfirmed) {
+      Swal.fire({ toast:true, position:'bottom-end', icon:'success',
+        title:`แก้ไขข้อมูล "${result.value}" สำเร็จ`, showConfirmButton:false, timer:2500 });
+      loadUserTable(); // รีโหลดตารางทันที
+    }
+  });
 }
 
 // ── Reset Password ────────────────────────────────────────────
+// ✅ FIX: รีเซ็ตรหัสผ่านจริงใน Supabase (ก่อนหน้านี้แค่ toast)
 function resetUserPassword(userId, userName) {
-  Swal.fire({ toast:true, position:'bottom-end', icon:'info',
-    title:`รีเซ็ตรหัสผ่าน: ${userName}`, showConfirmButton:false, timer:2000 });
+  Swal.fire({
+    width: 460,
+    title: `<span style="font-family:Kanit">รีเซ็ตรหัสผ่าน</span>`,
+    html: `<div style="font-family:Sarabun;text-align:left;font-size:14px">
+      <p style="color:#6b7280;margin-bottom:12px">ตั้งรหัสผ่านชั่วคราวใหม่ให้ <strong style="color:#1f2937">${userName}</strong></p>
+      <label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">รหัสผ่านใหม่ *</label>
+      <input id="rp-pass" type="text" placeholder="Teacher@0000"
+        style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:monospace;font-size:13px"/>
+    </div>`,
+    showCancelButton: true, cancelButtonText: 'ยกเลิก',
+    confirmButtonText: '<i class="fa-solid fa-key mr-1"></i> รีเซ็ตรหัสผ่าน',
+    confirmButtonColor: '#d97706', cancelButtonColor: '#6b7280',
+    preConfirm: async () => {
+      const newPass = document.getElementById('rp-pass').value;
+      if (!newPass || newPass.length < 6) {
+        Swal.showValidationMessage('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'); return false;
+      }
+      try { await updateUserPassword(userId, newPass); }
+      catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
+      return newPass;
+    }
+  }).then(result => {
+    if (result.isConfirmed) {
+      Swal.fire({ icon:'success',
+        title: '<span style="font-family:Kanit">รีเซ็ตรหัสผ่านสำเร็จ</span>',
+        html: `<div style="font-family:Sarabun">รหัสผ่านใหม่ของ <strong>${userName}</strong>:<br>
+          <code style="background:#f3f4f6;padding:4px 10px;border-radius:6px;font-size:15px">${result.value}</code></div>`,
+        confirmButtonColor: '#7c3aed' });
+    }
+  });
 }
 
 // ── Delete User ───────────────────────────────────────────────
+// ✅ FIX: ลบข้อมูลจาก Supabase จริง (ก่อนหน้านี้แค่ toast ไม่ได้ลบ)
 function deleteUser(userId, userName) {
   Swal.fire({
     icon:'warning', title:`<span style="font-family:Kanit">ลบผู้ใช้งาน?</span>`,
-    text:`คุณต้องการลบบัญชี "${userName}" หรือไม่?`,
+    text:`คุณต้องการลบบัญชี "${userName}" หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`,
     showCancelButton:true, confirmButtonText:'ลบ', cancelButtonText:'ยกเลิก',
     confirmButtonColor:'#dc2626', cancelButtonColor:'#6b7280',
   }).then(async r => {
     if (r.isConfirmed) {
-      Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-        title:`ลบบัญชี ${userName} เรียบร้อย`, showConfirmButton:false, timer:2000 });
-      loadUserTable();
+      try {
+        await deleteUserById(userId);
+        Swal.fire({ toast:true, position:'bottom-end', icon:'success',
+          title:`ลบบัญชี "${userName}" เรียบร้อย`, showConfirmButton:false, timer:2500 });
+        loadUserTable(); // รีโหลดตารางทันที
+      } catch (err) {
+        Swal.fire({ toast:true, position:'bottom-end', icon:'error',
+          title:`❌ ${err.message}`, showConfirmButton:false, timer:3000 });
+      }
     }
   });
 }
