@@ -47,7 +47,7 @@
   ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
   /* ══════════════════════════════════════
-     MODAL
+     REVIEW MODAL
   ══════════════════════════════════════ */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 1000;
@@ -74,11 +74,24 @@
   .tab-btn:hover:not(.active) { background: rgba(255,255,255,.06); color: #e2e8f0; }
   .tab-content.hidden { display: none; }
 
+  /* AI summary box */
+  .ai-box { background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3); border-radius: 12px; padding: 16px; }
+
+  /* Checklist */
+  .kpa-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.05); cursor: pointer; }
+  .kpa-item:last-child { border-bottom: none; }
+  .kpa-checkbox { width: 20px; height: 20px; flex-shrink: 0; background: #1e2d45; border: 2px solid #334155; border-radius: 5px; appearance: none; -webkit-appearance: none; cursor: pointer; transition: all .2s; margin-top: 1px; }
+  .kpa-checkbox:checked { background: #6366f1; border-color: #6366f1; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 8l4 4 6-6' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-size: 14px; background-repeat: no-repeat; background-position: center; }
+
   /* Signature area */
   .sig-section { background: #1a2540; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px; }
   .sig-radio { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 0; }
+  .sig-radio input[type=radio] { width: 18px; height: 18px; accent-color: #ef4444; cursor: pointer; }
   .sig-display { background: #0d1526; border: 1px dashed rgba(255,255,255,.15); border-radius: 10px; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #475569; font-size: 13px; overflow: hidden; }
-  .sig-display img { max-height: 90px; object-fit: contain; background: white; padding: 4px; border-radius: 4px; }
+  .sig-display img { max-height: 90px; object-fit: contain; }
+
+  /* Canvas for drawing */
+  #sigCanvas { background: #0d1526; border: 1px dashed rgba(255,255,255,.2); border-radius: 10px; cursor: crosshair; touch-action: none; display: block; width: 100%; height: 150px; }
 
   /* Action buttons */
   .btn-revision { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.4); color: #f87171; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
@@ -95,6 +108,7 @@
   .btn-pdf { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
   .btn-pdf:hover { background: rgba(255,255,255,.12); color: white; }
 
+  /* Progress bars (Dashboard) */
   .prog-bar { background: #1e2d45; border-radius: 99px; height: 8px; overflow: hidden; }
   .prog-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
 </style>
@@ -142,6 +156,7 @@
     </nav>
 
     <div class="mt-auto pt-4 border-t border-white/10">
+      <!-- ตั้งค่าลายเซ็น E-Signature -->
       <button onclick="openEsigSettings()" class="nav-item w-full flex items-center gap-3 px-4 py-2 text-left text-sm text-slate-400 hover:text-white mb-1">
         <i class="fa-solid fa-signature w-5 text-center"></i> ตั้งค่าลายเซ็น
       </button>
@@ -160,6 +175,7 @@
         <h1 class="kn text-2xl font-bold text-white">Dashboard</h1>
         <p class="text-slate-400 text-sm mt-1">ภาพรวมการส่งแผนการสอน</p>
       </div>
+      <!-- Stats -->
       <div class="grid grid-cols-3 gap-4 mb-6">
         <div class="stat-card p-5" style="background:linear-gradient(135deg,#1e40af,#2563eb);border-radius:14px">
           <p id="dash-total" class="text-4xl kn font-bold text-white">—</p>
@@ -177,11 +193,33 @@
           <p class="text-emerald-300 text-xs">แผนการสอน</p>
         </div>
       </div>
+      <!-- Summary card -->
       <div class="grid grid-cols-2 gap-5">
         <div class="dark-card p-6">
           <h2 class="kn font-semibold text-white mb-4 text-sm"><i class="fa-solid fa-chart-pie text-indigo-400 mr-2"></i>สถานะรวม</h2>
           <div id="dashStatusBars" class="space-y-3">
             <div class="text-slate-500 text-sm text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</div>
+          </div>
+        </div>
+        <div class="dark-card p-6">
+          <h2 class="kn font-semibold text-white mb-4 text-sm"><i class="fa-solid fa-list-check text-emerald-400 mr-2"></i>สรุปตัวเลข</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3 rounded-xl text-center" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)">
+              <p id="sum-pending" class="text-2xl kn font-bold text-yellow-400">—</p>
+              <p class="text-xs text-yellow-400/70 mt-1">รอตรวจ</p>
+            </div>
+            <div class="p-3 rounded-xl text-center" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)">
+              <p id="sum-approved" class="text-2xl kn font-bold text-emerald-400">—</p>
+              <p class="text-xs text-emerald-400/70 mt-1">อนุมัติแล้ว</p>
+            </div>
+            <div class="p-3 rounded-xl text-center" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)">
+              <p id="sum-revision" class="text-2xl kn font-bold text-red-400">—</p>
+              <p class="text-xs text-red-400/70 mt-1">ส่งกลับแก้ไข</p>
+            </div>
+            <div class="p-3 rounded-xl text-center" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2)">
+              <p id="sum-total" class="text-2xl kn font-bold text-indigo-400">—</p>
+              <p class="text-xs text-indigo-400/70 mt-1">ทั้งหมด</p>
+            </div>
           </div>
         </div>
       </div>
@@ -210,7 +248,9 @@
             </tr>
           </thead>
           <tbody id="pendingTableBody">
-            <tr><td colspan="5" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>
+            <tr><td colspan="5" class="py-10 text-center text-slate-500">
+              <i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...
+            </td></tr>
           </tbody>
         </table>
       </div>
@@ -233,7 +273,9 @@
             </tr>
           </thead>
           <tbody id="approvedTableBody">
-            <tr><td colspan="4" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>
+            <tr><td colspan="4" class="py-10 text-center text-slate-500">
+              <i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...
+            </td></tr>
           </tbody>
         </table>
       </div>
@@ -247,6 +289,7 @@
 ══════════════════════════════════════════ -->
 <div id="reviewModal" class="modal-overlay hidden">
   <div class="modal-box">
+    <!-- Modal Header -->
     <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.07)">
       <div class="flex items-center gap-2 text-white">
         <i class="fa-solid fa-file-pen text-indigo-400"></i>
@@ -300,6 +343,28 @@
       <!-- Manual Tab -->
       <div id="tabContentManual" class="tab-content hidden space-y-4">
         <div>
+          <p class="text-sm font-semibold text-white mb-1">แบบประเมินองค์ประกอบแผนการสอน</p>
+          <p class="text-xs text-slate-400 mb-3">เลือกรายการที่แผนการสอนผ่านเกณฑ์</p>
+          <div id="kpaChecklist">
+            <label class="kpa-item">
+              <input type="checkbox" class="kpa-checkbox" data-key="kpa_objective">
+              <span class="text-sm text-slate-300">จุดประสงค์การเรียนรู้ (K-P-A) ชัดเจนและวัดผลได้</span>
+            </label>
+            <label class="kpa-item">
+              <input type="checkbox" class="kpa-checkbox" data-key="active_learning">
+              <span class="text-sm text-slate-300">มีกิจกรรม Active Learning ที่ให้นักเรียนมีส่วนร่วม</span>
+            </label>
+            <label class="kpa-item">
+              <input type="checkbox" class="kpa-checkbox" data-key="media_suitable">
+              <span class="text-sm text-slate-300">สื่อและแหล่งเรียนรู้เหมาะสมกับวัยผู้เรียน</span>
+            </label>
+            <label class="kpa-item">
+              <input type="checkbox" class="kpa-checkbox" data-key="assessment_aligned">
+              <span class="text-sm text-slate-300">การวัดและประเมินผลสอดคล้องกับจุดประสงค์</span>
+            </label>
+          </div>
+        </div>
+        <div>
           <label class="block text-xs text-slate-400 mb-2">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</label>
           <textarea id="manualNotes" rows="3" class="dark-textarea" placeholder="ระบุคำแนะนำเพื่อให้ครูนำไปปรับปรุง..."></textarea>
         </div>
@@ -310,15 +375,16 @@
         <p class="text-sm font-semibold text-white mb-3">การลงนามอนุมัติ</p>
         <div class="flex flex-col gap-1 mb-3">
           <label class="sig-radio">
-            <input type="radio" name="sigMode" value="esig" checked onchange="switchSigMode('esig')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
-            <span class="text-sm text-slate-300">ใช้ลายเซ็นอิเล็กทรอนิกส์ <span class="text-slate-500 text-xs">(ดึงจากที่ตั้งค่าไว้)</span></span>
+            <input type="radio" name="sigMode" value="esig" checked onchange="switchSigMode('esig')">
+            <span class="text-sm text-slate-300">ใช้ลายเซ็นอิเล็กทรอนิกส์ <span class="text-slate-500 text-xs">(บันทึกไว้แล้ว)</span></span>
           </label>
           <label class="sig-radio">
-            <input type="radio" name="sigMode" value="draw" onchange="switchSigMode('draw')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
-            <span class="text-sm text-slate-300">เซ็นชื่อด้วยมือ <span class="text-slate-500 text-xs">(วาดใหม่เฉพาะครั้งนี้)</span></span>
+            <input type="radio" name="sigMode" value="draw" onchange="switchSigMode('draw')">
+            <span class="text-sm text-slate-300">เซ็นชื่อด้วยมือ <span class="text-slate-500 text-xs">(วาดใหม่)</span></span>
           </label>
         </div>
 
+        <!-- E-Signature display -->
         <div id="esigDisplay" class="sig-display">
           <img id="esigImg" src="" alt="E-Signature" style="display:none">
           <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-3">
@@ -327,12 +393,12 @@
           </div>
         </div>
 
+        <!-- Draw Canvas -->
         <div id="drawSection" style="display:none; width:100%;">
-          <!-- แก้บัควาดรูป โดยการ fixed height และใช้ script คำนวณ width ให้เป๊ะ -->
-          <canvas id="sigCanvas" class="w-full bg-[#0d1526] border border-dashed border-slate-500 rounded-xl cursor-crosshair touch-none h-[150px]"></canvas>
+          <canvas id="sigCanvas"></canvas>
           <div class="flex justify-between items-center mt-2">
-            <p class="text-xs text-slate-500">ใช้นิ้วหรือเมาส์วาดลายเซ็นในพื้นที่ด้านบน</p>
-            <button onclick="clearSigCanvas()" class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1 transition-colors">
+            <p class="text-xs text-slate-500">วาดลายเซ็นในพื้นที่ด้านบน</p>
+            <button onclick="clearSigCanvas()" class="text-xs text-slate-400 hover:text-red-400 flex items-center gap-1 transition-colors">
               <i class="fa-solid fa-eraser"></i> ล้างลายเซ็น
             </button>
           </div>
@@ -352,45 +418,24 @@
   </div>
 </div>
 
-<!-- ══ E-Signature Settings Modal (New Version: Upload + Draw) ══ -->
+<!-- ══ E-Signature Settings Modal ══ -->
 <div id="esigSettingsModal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width:520px">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+    <div class="flex items-center justify-between px-6 py-4" style="border-bottom:1px solid rgba(255,255,255,.07)">
       <div class="flex items-center gap-2 text-white">
         <i class="fa-solid fa-signature text-indigo-400"></i>
         <span class="kn font-semibold">ตั้งค่าลายเซ็นอิเล็กทรอนิกส์</span>
       </div>
       <button onclick="closeEsigSettings()" class="text-slate-400 hover:text-white text-xl">&times;</button>
     </div>
-    
     <div class="p-6 space-y-4">
-      <div class="flex gap-2 mb-4">
-        <button id="btnEsigUpload" onclick="switchEsigTab('upload')" class="tab-btn active w-1/2">อัปโหลดรูปภาพ</button>
-        <button id="btnEsigDraw" onclick="switchEsigTab('draw')" class="tab-btn w-1/2">วาดด้วยมือ</button>
-      </div>
-
-      <!-- Tab: Upload Image -->
-      <div id="esigTabUpload">
-        <div class="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-slate-800/50" onclick="document.getElementById('sigImageInput').click()">
-          <input type="file" id="sigImageInput" accept="image/png, image/jpeg" class="hidden" onchange="handleSigImage(event)">
-          <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
-          <p id="sigImageText" class="text-sm text-slate-300">คลิกเพื่อเลือกไฟล์รูปลายเซ็น</p>
-          <p class="text-xs text-slate-500 mt-1">(รองรับ .jpg, .png)</p>
-          <img id="sigImagePreview" class="hidden mx-auto mt-4 max-h-32 rounded bg-white p-2">
-        </div>
-      </div>
-
-      <!-- Tab: Draw Canvas -->
-      <div id="esigTabDraw" class="hidden">
-        <p class="text-sm text-slate-400 mb-2">ใช้นิ้วหรือเมาส์วาดลายเซ็นของท่านในกรอบด้านล่าง</p>
-        <canvas id="settingsSigCanvas" class="w-full bg-[#0d1526] border border-dashed border-slate-500 rounded-xl cursor-crosshair touch-none h-[150px]"></canvas>
-        <div class="flex justify-end mt-2">
-          <button onclick="clearSettingsCanvas()" class="text-xs text-red-400 hover:text-red-300"><i class="fa-solid fa-eraser"></i> ล้างลายเซ็น</button>
-        </div>
-      </div>
-
-      <div class="flex justify-end pt-4 border-t border-white/10 mt-4">
-        <button onclick="saveEsigSettings()" class="btn-approve text-sm px-6 py-2.5">
+      <p class="text-sm text-slate-400">วาดลายเซ็นของท่านเพื่อบันทึกเป็นลายเซ็นอิเล็กทรอนิกส์ประจำระบบ (บันทึกลงฐานข้อมูล)</p>
+      <canvas id="settingsSigCanvas" style="background:#0d1526;border:1px dashed rgba(255,255,255,.2);border-radius:10px;cursor:crosshair;touch-action:none;display:block;width:100%;height:160px;"></canvas>
+      <div class="flex justify-between items-center">
+        <button onclick="clearSettingsCanvas()" class="text-xs text-slate-400 hover:text-red-400 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-eraser"></i> ล้างลายเซ็น
+        </button>
+        <button onclick="saveEsigSettings()" class="btn-approve text-sm px-5 py-2">
           <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกลายเซ็น
         </button>
       </div>
@@ -407,12 +452,11 @@
 // ─── State ────────────────────────────────────────────────────
 let _currentPlanId  = null;
 let _currentPlanData = null;
-let _sigCanvasData  = null;   
+let _sigCanvasData  = null;   // base64 ของ canvas วาดใหม่ (review modal)
 let _settingsCanvasData = null;
-let _sigMode = 'esig';        
-let _reviewTab = 'ai';        
-let _cachedEsig = null;       
-let _settingsSigType = 'upload'; // สถานะ tab ในหน้าตั้งค่าลายเซ็น
+let _sigMode = 'esig';        // 'esig' | 'draw'
+let _reviewTab = 'ai';        // 'ai' | 'manual'
+let _cachedEsig = null;       // เก็บ e-sig ที่โหลดมาจาก DB
 
 // ─── Init Profile ─────────────────────────────────────────────
 (function initProfile() {
@@ -424,6 +468,7 @@ let _settingsSigType = 'upload'; // สถานะ tab ในหน้าตั
   }
 })();
 
+// ─── Navigation ───────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
   document.querySelectorAll('button[id^="nav-"]').forEach(b => b.classList.remove('active'));
@@ -434,8 +479,10 @@ function showPage(name) {
   if (name === 'approved')  loadApprovedPlans();
 }
 
+// ─── Load Dashboard ──────────────────────────────────────────
 async function loadDashboard() {
   try {
+    // ✅ แก้ไขคอลัมน์ให้ตรงกับฐานข้อมูล: subject -> subject_name
     const { data, error } = await db.from('lesson_plans').select('status, subject_name, users(subject_group)');
     if (error) throw error;
 
@@ -447,31 +494,64 @@ async function loadDashboard() {
     document.getElementById('dash-total').textContent   = total;
     document.getElementById('dash-pending').textContent = pending;
     document.getElementById('dash-approved').textContent= approved;
+    document.getElementById('sum-pending').textContent  = pending;
+    document.getElementById('sum-approved').textContent = approved;
+    document.getElementById('sum-revision').textContent = revision;
+    document.getElementById('sum-total').textContent    = total;
+
+    const pct = n => total ? Math.round(n / total * 100) : 0;
+    document.getElementById('dashStatusBars').innerHTML = `
+      <div>
+        <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">อนุมัติแล้ว</span><span class="text-emerald-400 font-medium">${approved}/${total}</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct(approved)}%;background:#10b981"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">รอตรวจ</span><span class="text-yellow-400 font-medium">${pending}</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct(pending)}%;background:#f59e0b"></div></div>
+      </div>
+      <div>
+        <div class="flex justify-between text-xs mb-1"><span class="text-slate-400">ส่งกลับแก้ไข</span><span class="text-red-400 font-medium">${revision}</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct(revision)}%;background:#ef4444"></div></div>
+      </div>`;
   } catch (err) {
-    console.error(err);
+    document.getElementById('dashStatusBars').innerHTML = `<p class="text-red-400 text-sm">${err.message}</p>`;
   }
 }
 
+// ─── Load Pending Plans ───────────────────────────────────────
 async function loadPendingPlans() {
   const tbody = document.getElementById('pendingTableBody');
-  tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500">กำลังโหลด...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
   try {
     const plans = await getAllPendingPlans();
     if (!plans.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500">ไม่มีแผนที่รอการตรวจสอบ</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500">
+        <i class="fa-solid fa-circle-check text-emerald-500 text-2xl block mb-2 mx-auto"></i>
+        ไม่มีแผนที่รอการตรวจสอบ</td></tr>`;
       return;
     }
     tbody.innerHTML = plans.map(p => {
       const name = p.users?.name || 'ไม่ทราบชื่อ';
-      const date = p.created_at ? new Date(p.created_at).toLocaleDateString('th-TH') : '—';
+      const date = p.created_at
+        ? new Date(p.created_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
+        : '—';
+      // ✅ แก้ไข: ใช้ p.subject_name
       return `<tr>
-        <td><span class="font-medium text-white">${name}</span></td>
+        <td>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+              ${name.replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0,2)}
+            </div>
+            <span class="font-medium text-white">${name}</span>
+          </div>
+        </td>
         <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ที่ ${p.week_number})</span></td>
         <td class="text-slate-400">${date}</td>
         <td><span class="badge-pending">รอตรวจ</span></td>
         <td>
           <button onclick='openReviewModal(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="btn-review">
-            ตรวจสอบ
+            <i class="fa-solid fa-magnifying-glass mr-1"></i>ตรวจสอบ
           </button>
         </td>
       </tr>`;
@@ -481,23 +561,41 @@ async function loadPendingPlans() {
   }
 }
 
+// ─── Load Approved Plans ──────────────────────────────────────
 async function loadApprovedPlans() {
   const tbody = document.getElementById('approvedTableBody');
-  tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500">กำลังโหลด...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
   try {
-    const { data, error } = await db.from('lesson_plans').select('*, users(name, subject_group)').eq('status', 'Approved').order('updated_at', { ascending: false });
-    if (error) throw error;
+    // ✅ แก้ไขคอลัมน์ order ให้ตรงกับ DB: reviewed_at -> updated_at
+    const { data, error } = await db
+      .from('lesson_plans')
+      .select('*, users(name, subject_group)')
+      .eq('status', 'Approved')
+      .order('updated_at', { ascending: false });
+    if (error) throw new Error(error.message);
     if (!data.length) {
       tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-500">ยังไม่มีแผนที่อนุมัติ</td></tr>`;
       return;
     }
     tbody.innerHTML = data.map(p => {
-      const date = p.updated_at ? new Date(p.updated_at).toLocaleDateString('th-TH') : '—';
+      const date = p.updated_at
+        ? new Date(p.updated_at).toLocaleDateString('th-TH', { day:'numeric', month:'short', year:'2-digit' })
+        : '—';
+      // ✅ แก้ไขคอลัมน์ดูไฟล์ให้ตรงกับ DB: drive_url -> file_url
       const fileLink = p.file_url
-        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>`
+        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 transition-colors">
+            <i class="fa-solid fa-file-pdf"></i>ดูไฟล์</a>`
         : `<span class="text-slate-600 text-xs">ไม่มีไฟล์</span>`;
       return `<tr>
-        <td><span class="font-medium text-white">${p.users?.name||'—'}</span></td>
+        <td>
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style="background:linear-gradient(135deg,#059669,#10b981)">
+              ${(p.users?.name||'').replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0,2)||'??'}
+            </div>
+            <span class="font-medium text-white">${p.users?.name||'—'}</span>
+          </div>
+        </td>
         <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
         <td class="text-slate-400">${date}</td>
         <td>${fileLink}</td>
@@ -509,100 +607,34 @@ async function loadApprovedPlans() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  แก้ไขบัคการวาดรูป Canvas ทั้งหมด
-// ══════════════════════════════════════════════════════════════
-function setupCanvas(canvasId) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas || canvas.dataset.initialized) return;
-  canvas.dataset.initialized = "true";
-
-  let drawing = false;
-  let lastX = 0, lastY = 0;
-
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return [
-      (clientX - rect.left) * (canvas.width / rect.width),
-      (clientY - rect.top) * (canvas.height / rect.height)
-    ];
-  }
-
-  function startDraw(e) { e.preventDefault(); drawing = true; [lastX, lastY] = getPos(e); }
-  function draw(e) {
-    if (!drawing) return;
-    e.preventDefault();
-    const ctx = canvas.getContext('2d');
-    const [x, y] = getPos(e);
-    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
-    [lastX, lastY] = [x, y];
-    
-    // เซฟรูปเก็บไว้ทุกครั้งที่วาดเสร็จ
-    if (canvasId === 'sigCanvas') _sigCanvasData = canvas.toDataURL('image/png');
-    if (canvasId === 'settingsSigCanvas') _settingsCanvasData = canvas.toDataURL('image/png');
-  }
-  function stopDraw() { drawing = false; }
-
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDraw);
-  canvas.addEventListener('mouseleave', stopDraw);
-  canvas.addEventListener('touchstart', startDraw, { passive: false });
-  canvas.addEventListener('touchmove', draw, { passive: false });
-  canvas.addEventListener('touchend', stopDraw);
-}
-
-// ฟังก์ชันรีเซ็ตขนาด Canvas ให้วาดติด
-function resizeCanvas(canvasId) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  if (rect.width > 0) {
-    canvas.width = rect.width;
-    canvas.height = 150;
-    const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  }
-}
-
-function clearSigCanvas() {
-  const canvas = document.getElementById('sigCanvas');
-  if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-  _sigCanvasData = null;
-}
-
-function clearSettingsCanvas() {
-  const canvas = document.getElementById('settingsSigCanvas');
-  if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-  _settingsCanvasData = null;
-}
-
-
-// ══════════════════════════════════════════════════════════════
 //  REVIEW MODAL
 // ══════════════════════════════════════════════════════════════
+
 async function openReviewModal(plan) {
   _currentPlanId   = plan.id;
   _currentPlanData = plan;
-  _sigMode = 'esig';
+
+  // Reset state
+  _sigMode   = 'esig';
   _reviewTab = 'ai';
-  _sigCanvasData = null;
   document.querySelector('input[name="sigMode"][value="esig"]').checked = true;
   document.getElementById('drawSection').style.display  = 'none';
   document.getElementById('esigDisplay').style.display  = 'flex';
   document.getElementById('aiNotes').value   = '';
   document.getElementById('manualNotes').value = '';
+  document.querySelectorAll('.kpa-checkbox').forEach(c => c.checked = false);
+  _sigCanvasData = null;
 
+  // Populate teacher info
   const name = plan.users?.name || 'ไม่ทราบชื่อ';
+  const init = name.replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0, 2);
   document.getElementById('modalTeacherName').textContent = name;
-  document.getElementById('modalAvatar').textContent = name.slice(0, 2);
+  document.getElementById('modalAvatar').textContent = init || '—';
+  // ✅ แก้ไข: ใช้ plan.subject_name
   document.getElementById('modalSubject').textContent = `${plan.subject_name} — สัปดาห์ที่ ${plan.week_number}`;
   
   const pdfLink = document.getElementById('modalPdfLink');
+  // ✅ แก้ไข: ใช้ plan.file_url แทน drive_url
   if (plan.file_url) {
     pdfLink.href = plan.file_url;
     pdfLink.style.opacity = '1';
@@ -613,18 +645,29 @@ async function openReviewModal(plan) {
     pdfLink.style.pointerEvents = 'none';
   }
 
-  document.getElementById('aiSummaryText').textContent = plan.ai_summary || 'ไม่มีข้อมูลบทวิเคราะห์จาก AI สำหรับแผนนี้';
+  // AI summary
+  document.getElementById('aiSummaryText').textContent =
+    plan.ai_summary || 'ไม่มีข้อมูลบทวิเคราะห์จาก AI สำหรับแผนนี้';
 
+  // Switch to AI tab
   switchReviewTab('ai');
+
+  // Load e-signature
   await loadESignatureDisplay();
+
+  // Show modal
   document.getElementById('reviewModal').classList.remove('hidden');
+
 }
 
 function closeReviewModal() {
   document.getElementById('reviewModal').classList.add('hidden');
   _currentPlanId = null;
+  _currentPlanData = null;
+  _sigCanvasData = null;
 }
 
+// ─── Tab switching ─────────────────────────────────────────────
 function switchReviewTab(tab) {
   _reviewTab = tab;
   document.getElementById('tabContentAI').classList.toggle('hidden', tab !== 'ai');
@@ -633,18 +676,21 @@ function switchReviewTab(tab) {
   document.getElementById('tabBtnManual').classList.toggle('active', tab === 'manual');
 }
 
+// ─── Signature Mode ────────────────────────────────────────────
 function switchSigMode(mode) {
   _sigMode = mode;
   document.getElementById('esigDisplay').style.display  = mode === 'esig' ? 'flex' : 'none';
   document.getElementById('drawSection').style.display  = mode === 'draw' ? 'block' : 'none';
+  
+  // ✅ แก้บัคลายเซ็น: หน่วงเวลาเล็กน้อยให้กล่องโชว์ขึ้นมาก่อน ค่อยวาด Canvas เพื่อให้วัดขนาดกว้างยาวได้ถูกต้อง
   if (mode === 'draw') {
     setTimeout(() => {
-      resizeCanvas('sigCanvas');
-      setupCanvas('sigCanvas');
-    }, 100);
+        initSigCanvas();
+    }, 50);
   }
 }
 
+// ─── Load E-Signature ──────────────────────────────────────────
 async function loadESignatureDisplay() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
@@ -653,7 +699,10 @@ async function loadESignatureDisplay() {
   const img = document.getElementById('esigImg');
   
   if (!_cachedEsig) {
-    try { _cachedEsig = await getSystemSetting('esig_' + profile.id); } catch (_) {}
+    try { 
+      // โหลดลายเซ็นของ ผอ. จากตาราง system_settings (key: esig_{userId})
+      _cachedEsig = await getSystemSetting('esig_' + profile.id); 
+    } catch (_) {}
   }
   
   if (_cachedEsig) {
@@ -666,125 +715,238 @@ async function loadESignatureDisplay() {
   }
 }
 
+// ─── Canvas Drawing (Review Modal) ────────────────────────────
+function initSigCanvas() {
+  const canvas = document.getElementById('sigCanvas');
+  if (!canvas) return;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = rect.width  || 560;
+  canvas.height = 150;
+
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+
+  let drawing = false;
+  let lastX = 0, lastY = 0;
+
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    const scaleX = canvas.width  / r.width;
+    const scaleY = canvas.height / r.height;
+    return [(src.clientX - r.left) * scaleX, (src.clientY - r.top) * scaleY];
+  }
+
+  function startDraw(e) { e.preventDefault(); drawing = true; [lastX, lastY] = getPos(e); }
+  function draw(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const [x, y] = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    [lastX, lastY] = [x, y];
+    _sigCanvasData = canvas.toDataURL();
+  }
+  function stopDraw() { drawing = false; }
+
+  // ทำการ clone canvas ใหม่เพื่อเคลียร์ event listener เดิม ป้องกันการวาดเบิ้ล
+  const newCanvas = canvas.cloneNode(false);
+  canvas.parentNode.replaceChild(newCanvas, canvas);
+  newCanvas.addEventListener('mousedown',  startDraw, { passive: false });
+  newCanvas.addEventListener('mousemove',  draw,      { passive: false });
+  newCanvas.addEventListener('mouseup',    stopDraw);
+  newCanvas.addEventListener('mouseleave', stopDraw);
+  newCanvas.addEventListener('touchstart', startDraw, { passive: false });
+  newCanvas.addEventListener('touchmove',  draw,      { passive: false });
+  newCanvas.addEventListener('touchend',   stopDraw,  { passive: false });
+}
+
+function clearSigCanvas() {
+  const canvas = document.getElementById('sigCanvas');
+  if (!canvas) return;
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  _sigCanvasData = null;
+}
+
+// ─── Submit Approval ──────────────────────────────────────────
 async function submitApproval() {
   if (!_currentPlanId) return;
 
+  // ตรวจสอบความถูกต้องของลายเซ็น
   if (_sigMode === 'draw') {
     if (!_sigCanvasData) {
-      Swal.fire({ icon: 'warning', title: 'ยังไม่มีลายเซ็น', text: 'กรุณาวาดลายเซ็นในพื้นที่ที่กำหนด ก่อนอนุมัติ' });
+      Swal.fire({
+        icon: 'warning',
+        title: '<span style="font-family:Kanit">ยังไม่มีลายเซ็น</span>',
+        text: 'กรุณาวาดลายเซ็นในพื้นที่ที่กำหนด ก่อนอนุมัติ',
+        background: '#1a2540', color: '#e2e8f0',
+        confirmButtonColor: '#6366f1',
+      });
       return;
     }
   } else {
+    // โหมด E-Signature - ตรวจสอบว่ามีรูปภาพลายเซ็นที่เคยเซฟไว้แล้วหรือไม่
     if (!_cachedEsig) {
       const { isConfirmed } = await Swal.fire({
-        icon: 'warning', title: 'ยังไม่มีลายเซ็นอิเล็กทรอนิกส์',
-        text: 'ท่านยังไม่ได้ตั้งค่ารูปลายเซ็นในระบบ ต้องการอนุมัติโดยไม่มีลายเซ็นหรือไม่?',
-        showCancelButton: true, confirmButtonText: 'อนุมัติต่อ', cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#6366f1', background: '#1a2540', color: '#e2e8f0'
+        icon: 'warning',
+        title: '<span style="font-family:Kanit">ยังไม่มีลายเซ็นอิเล็กทรอนิกส์</span>',
+        text: 'ท่านยังไม่ได้ตั้งค่าลายเซ็นอิเล็กทรอนิกส์ประจำตัวในระบบ ต้องการอนุมัติโดยไม่มีลายเซ็นหรือไม่?',
+        background: '#1a2540', color: '#e2e8f0',
+        showCancelButton: true,
+        confirmButtonText: 'อนุมัติต่อ',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#6366f1',
+        cancelButtonColor: '#475569',
       });
       if (!isConfirmed) return;
     }
   }
 
-  const notes = _reviewTab === 'ai' ? document.getElementById('aiNotes').value.trim() : document.getElementById('manualNotes').value.trim();
-  const feedback = notes || `ผ่านการอนุมัติจากผู้อำนวยการ`;
+  // รวบรวมข้อเสนอแนะตามแท็บตรวจที่เปิดใช้งาน
+  const notes = _reviewTab === 'ai'
+    ? document.getElementById('aiNotes').value.trim()
+    : document.getElementById('manualNotes').value.trim();
+
+  const feedback = notes || `ผ่านการอนุมัติจากผู้อำนวยการ (ตรวจประเมินแบบ${_reviewTab === 'ai' ? 'ใช้ AI วิเคราะห์' : 'ตรวจสอบเกณฑ์ด้วยตนเอง'})`;
+
   const btn = document.getElementById('btnApprove');
   btn.disabled = true;
-  btn.innerHTML = 'กำลังบันทึก...';
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังบันทึก...';
 
   try {
+    // บันทึกข้อมูลและสถานะการตรวจสอบลง Supabase
     await updatePlanStatus(_currentPlanId, 'Approved', feedback);
+
     closeReviewModal();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อนุมัติแผนเรียบร้อย', showConfirmButton: false, timer: 2500, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({
+      toast: true, position: 'bottom-end', icon: 'success',
+      title: 'อนุมัติแผนการสอนเรียบร้อยแล้ว',
+      showConfirmButton: false, timer: 2800,
+      background: '#1a2540', color: '#e2e8f0',
+    });
     loadPendingPlans();
     loadDashboard();
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message,
+      background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
   } finally {
     btn.disabled = false;
-    btn.innerHTML = 'อนุมัติและลงนาม';
+    btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> อนุมัติและลงนาม';
   }
 }
 
+// ─── Submit Revision from Modal ───────────────────────────────
 async function submitRevisionFromModal() {
   if (!_currentPlanId) return;
-  const notes = _reviewTab === 'ai' ? document.getElementById('aiNotes').value.trim() : document.getElementById('manualNotes').value.trim();
+  const notes = _reviewTab === 'ai'
+    ? document.getElementById('aiNotes').value.trim()
+    : document.getElementById('manualNotes').value.trim();
 
   const { value: feedback, isConfirmed } = await Swal.fire({
-    title: 'ส่งกลับเพื่อแก้ไข', input: 'textarea', inputLabel: 'ระบุคำแนะนำเพื่อให้ครูนำไปปรับปรุง', inputValue: notes,
-    showCancelButton: true, confirmButtonText: 'ส่งกลับแก้ไข', cancelButtonText: 'ยกเลิก',
-    confirmButtonColor: '#ef4444', background: '#1a2540', color: '#e2e8f0',
-    inputValidator: v => !v.trim() && 'กรุณากรอกคำแนะนำ'
+    title: '<span style="font-family:Kanit">ส่งกลับเพื่อแก้ไข</span>',
+    input: 'textarea',
+    inputLabel: 'ระบุคำแนะนำเพื่อให้ครูนำไปปรับปรุงแก้ไข',
+    inputValue: notes,
+    inputPlaceholder: 'ตัวอย่าง: กรุณาเพิ่มกิจกรรม Active Learning ในขั้นสรุป...',
+    inputAttributes: { style: 'font-family:Sarabun; font-size:14px; background:#0d1526; color:#e2e8f0; border-color:rgba(255,255,255,0.1)' },
+    showCancelButton: true,
+    confirmButtonText: '<i class="fa-solid fa-rotate-left mr-1"></i>ส่งกลับแก้ไข',
+    cancelButtonText: 'ยกเลิก',
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#475569',
+    background: '#1a2540', color: '#e2e8f0',
+    inputValidator: v => !v.trim() && 'กรุณากรอกระบุคำแนะนำสำหรับการแก้ไข',
   });
   if (!isConfirmed) return;
 
   try {
     await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback);
     closeReviewModal();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ส่งกลับแผนให้ครูแก้ไขแล้ว', showConfirmButton: false, timer: 2500, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({
+      toast: true, position: 'bottom-end', icon: 'info',
+      title: 'ส่งกลับแผนการสอนให้ครูแก้ไขแล้ว',
+      showConfirmButton: false, timer: 2500,
+      background: '#1a2540', color: '#e2e8f0',
+    });
     loadPendingPlans();
     loadDashboard();
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message,
+      background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-//  E-SIGNATURE SETTINGS MODAL (แบบมี Upload รูปภาพ)
+//  E-SIGNATURE SETTINGS MODAL
 // ══════════════════════════════════════════════════════════════
+
 function openEsigSettings() {
   document.getElementById('esigSettingsModal').classList.remove('hidden');
-  switchEsigTab('upload'); 
+  setTimeout(() => initSettingsCanvas(), 80);
 }
 function closeEsigSettings() {
   document.getElementById('esigSettingsModal').classList.add('hidden');
+  _settingsCanvasData = null;
 }
 
-function switchEsigTab(tab) {
-  _settingsSigType = tab;
-  _settingsCanvasData = null; // เคลียร์ค่าก่อนหน้า
-  
-  // จัดการปุ่ม
-  document.getElementById('btnEsigUpload').classList.toggle('active', tab === 'upload');
-  document.getElementById('btnEsigDraw').classList.toggle('active', tab === 'draw');
-  document.getElementById('esigTabUpload').classList.toggle('hidden', tab !== 'upload');
-  document.getElementById('esigTabDraw').classList.toggle('hidden', tab !== 'draw');
+function initSettingsCanvas() {
+  const canvas = document.getElementById('settingsSigCanvas');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  || 440;
+  canvas.height = rect.height || 160;
 
-  // รีเซ็ตหน้าจอ Upload
-  const img = document.getElementById('sigImagePreview');
-  img.src = ""; img.classList.add('hidden');
-  document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปลายเซ็น (JPG, PNG)";
-  document.getElementById('sigImageInput').value = '';
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth   = 2.5;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
 
-  // รีเซ็ตหน้าจอ Draw
-  clearSettingsCanvas();
+  let drawing = false;
+  let lastX = 0, lastY = 0;
 
-  // สร้าง Canvas ใหม่
-  if (tab === 'draw') {
-    setTimeout(() => {
-      resizeCanvas('settingsSigCanvas');
-      setupCanvas('settingsSigCanvas');
-    }, 100);
+  function getPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    const scaleX = canvas.width  / r.width;
+    const scaleY = canvas.height / r.height;
+    return [(src.clientX - r.left) * scaleX, (src.clientY - r.top) * scaleY];
   }
+  function start(e) { e.preventDefault(); drawing = true; [lastX, lastY] = getPos(e); }
+  function move(e) {
+    if (!drawing) return; e.preventDefault();
+    const [x, y] = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    [lastX, lastY] = [x, y];
+    _settingsCanvasData = canvas.toDataURL();
+  }
+  function stop() { drawing = false; }
+
+  const nc = canvas.cloneNode(false);
+  canvas.parentNode.replaceChild(nc, canvas);
+  nc.addEventListener('mousedown',  start, { passive: false });
+  nc.addEventListener('mousemove',  move,  { passive: false });
+  nc.addEventListener('mouseup',    stop);
+  nc.addEventListener('mouseleave', stop);
+  nc.addEventListener('touchstart', start, { passive: false });
+  nc.addEventListener('touchmove',  move,  { passive: false });
+  nc.addEventListener('touchend',   stop,  { passive: false });
 }
 
-function handleSigImage(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    _settingsCanvasData = ev.target.result; // เซฟรูปเป็น base64
-    const img = document.getElementById('sigImagePreview');
-    img.src = _settingsCanvasData;
-    img.classList.remove('hidden');
-    document.getElementById('sigImageText').textContent = file.name;
-  };
-  reader.readAsDataURL(file);
+function clearSettingsCanvas() {
+  const canvas = document.getElementById('settingsSigCanvas');
+  if (!canvas) return;
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  _settingsCanvasData = null;
 }
 
 async function saveEsigSettings() {
   if (!_settingsCanvasData) {
-    Swal.fire({ icon: 'warning', title: 'ยังไม่มีลายเซ็น', text: 'กรุณาอัปโหลดรูปภาพ หรือวาดลายเซ็นก่อนกดบันทึก', background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
+    Swal.fire({ icon: 'warning', title: '<span style="font-family:Kanit">ยังไม่มีลายเซ็น</span>',
+      text: 'กรุณาวาดลายเซ็นในพื้นที่ด้านบนก่อนบันทึก',
+      background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
     return;
   }
   
@@ -792,15 +954,21 @@ async function saveEsigSettings() {
   if (!profile.id) return;
 
   try {
+    // บันทึกลายเซ็นลงฐานข้อมูลตาราง system_settings โดยผูกกับ id ของ ผอ. (key = esig_{userId})
     await saveSystemSetting('esig_' + profile.id, _settingsCanvasData);
-    _cachedEsig = _settingsCanvasData; // อัปเดตในระบบทันที
+    _cachedEsig = _settingsCanvasData;
     closeEsigSettings();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'บันทึกลายเซ็นอิเล็กทรอนิกส์สำเร็จ', showConfirmButton: false, timer: 2500, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success',
+      title: 'บันทึกลายเซ็นอิเล็กทรอนิกส์เรียบร้อยแล้ว',
+      showConfirmButton: false, timer: 2500,
+      background: '#1a2540', color: '#e2e8f0' });
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message, background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: err.message,
+      background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1' });
   }
 }
 
+// ── Init ──────────────────────────────────────────────────────
 loadDashboard();
 </script>
 </body>
