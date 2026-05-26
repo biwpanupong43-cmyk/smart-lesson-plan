@@ -51,7 +51,17 @@
   @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
   .page { animation: fadeIn .35s ease; }
   .section-hidden { display:none!important; }
-  select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+  
+  /* Input Customizations for the memory fields */
+  input[list] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  input[list]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+  }
+  
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:3px; }
 </style>
 </head>
@@ -73,7 +83,7 @@
       <p class="text-xs text-blue-300 mt-1 ml-1">ระบบตรวจแผนการสอน</p>
     </div>
 
-    <!-- ✅ User info โหลดจาก sessionStorage -->
+    <!-- User info -->
     <div class="glass-card bg-white/10 border-white/20 p-3 mb-6 flex items-center gap-3">
       <div id="avatarInitials" class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center font-bold text-sm">--</div>
       <div class="flex-1 min-w-0">
@@ -84,7 +94,7 @@
 
     <nav class="space-y-1 flex-1">
       <button onclick="showPage('upload')" id="nav-upload" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
-        <i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i> ส่งแผนการสอน
+        <i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i> ส่งแผนการสอนใหม่
       </button>
       <button onclick="showPage('history')" id="nav-history" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
         <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> ประวัติและสถานะ
@@ -92,7 +102,6 @@
     </nav>
 
     <div class="mt-auto pt-4 border-t border-white/20">
-      <!-- ✅ logout เรียก signOut จริงๆ ผ่าน supabase_integration.js -->
       <button onclick="window._signOut()" class="nav-item w-full flex items-center gap-3 px-4 py-2 text-left text-sm font-medium text-red-200 hover:text-white hover:bg-red-500/50 mb-4">
         <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> ออกจากระบบ
       </button>
@@ -111,8 +120,8 @@
     <!-- PAGE: Upload -->
     <section id="page-upload" class="page">
       <div class="mb-6">
-        <h1 class="font-display text-2xl font-bold text-blue-900">ส่งแผนการสอน</h1>
-        <p class="text-gray-500 text-sm mt-1">อัปโหลด PDF แผนการสอนของคุณเพื่อรับการตรวจสอบ</p>
+        <h1 class="font-display text-2xl font-bold text-blue-900">ส่งแผนการสอนใหม่</h1>
+        <p class="text-gray-500 text-sm mt-1">กรอกข้อมูลและอัปโหลดไฟล์ PDF แผนการสอนประจำสัปดาห์</p>
       </div>
 
       <!-- Stats row -->
@@ -134,31 +143,32 @@
       <!-- Upload Form -->
       <div class="glass-card p-6">
         <h2 class="font-display font-semibold text-lg text-blue-900 mb-5">
-          <i class="fa-solid fa-file-circle-plus text-blue-500 mr-2"></i>แบบฟอร์มส่งแผนการสอน
+          <i class="fa-solid fa-file-circle-plus text-blue-500 mr-2"></i>รายละเอียดรายวิชา
         </h2>
 
-        <div class="grid grid-cols-2 gap-5 mb-5">
+        <!-- เปลี่ยนเป็นระบบ Datalist พิมพ์แล้วจำ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">วิชา <span class="text-red-500">*</span></label>
-            <select id="subject" class="w-full px-4 py-2.5 bg-white/80 border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-              <option value="">-- เลือกวิชา --</option>
-              <option>วิทยาศาสตร์ ม.1</option>
-              <option>วิทยาศาสตร์ ม.2</option>
-              <option>วิทยาศาสตร์ ม.3</option>
-              <option>คณิตศาสตร์ ม.1</option>
-              <option>ภาษาไทย ม.1</option>
-            </select>
+            <label class="block text-sm font-medium text-gray-700 mb-2">หมวดสาระการเรียนรู้ <span class="text-red-500">*</span></label>
+            <input type="text" id="inpGroup" list="groupList" required placeholder="เช่น วิทยาศาสตร์" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <datalist id="groupList"></datalist>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">สัปดาห์ที่ <span class="text-red-500">*</span></label>
-            <select id="week" class="w-full px-4 py-2.5 bg-white/80 border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-              <option value="">-- เลือกสัปดาห์ --</option>
-              <option>สัปดาห์ที่ 1</option><option>สัปดาห์ที่ 2</option><option>สัปดาห์ที่ 3</option>
-              <option>สัปดาห์ที่ 4</option><option>สัปดาห์ที่ 5</option><option>สัปดาห์ที่ 6</option>
-              <option>สัปดาห์ที่ 7</option><option>สัปดาห์ที่ 8</option>
-            </select>
+            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อรายวิชา <span class="text-red-500">*</span></label>
+            <input type="text" id="inpSubject" list="subjectList" required placeholder="เช่น วิทยาศาสตร์พื้นฐาน" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <datalist id="subjectList"></datalist>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">ระดับชั้น <span class="text-red-500">*</span></label>
+            <input type="text" id="inpGrade" list="gradeList" required placeholder="เช่น ม.1/2" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <datalist id="gradeList"></datalist>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">สัปดาห์ที่ (ตัวเลข) <span class="text-red-500">*</span></label>
+            <input type="number" id="inpWeek" min="1" max="40" required placeholder="เช่น 1" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
           </div>
         </div>
+        <p class="text-xs text-blue-500 mb-6 italic"><i class="fa-solid fa-circle-info mr-1"></i>ระบบจะจดจำคำตอบของคุณไว้เป็นตัวเลือก (Dropdown) ในการส่งครั้งต่อไป</p>
 
         <!-- Drag & Drop zone -->
         <div id="dropZone" class="drop-zone p-10 text-center mb-5"
@@ -183,7 +193,7 @@
         </div>
 
         <button id="btnSubmit" onclick="submitPlan()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3 rounded-xl shadow-lg shadow-blue-200 transition-all duration-200 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-paper-plane"></i> ส่งแผนการสอน
+          <i class="fa-solid fa-paper-plane"></i> ยืนยันการส่งเอกสาร
         </button>
       </div>
     </section>
@@ -192,7 +202,7 @@
     <section id="page-history" class="page section-hidden">
       <div class="mb-6">
         <h1 class="font-display text-2xl font-bold text-blue-900">ประวัติการส่งแผนการสอน</h1>
-        <p class="text-gray-500 text-sm mt-1">ติดตามสถานะแผนการสอนทั้งหมดของคุณ</p>
+        <p class="text-gray-500 text-sm mt-1">ตรวจสอบสถานะแผนการสอนและแก้ไขงานที่ถูกตีกลับ</p>
       </div>
 
       <div class="glass-card p-6">
@@ -201,9 +211,9 @@
             <button onclick="filterTable('all')"              id="filter-all"      class="filter-btn px-4 py-2 text-sm rounded-lg bg-blue-600 text-white font-medium">ทั้งหมด</button>
             <button onclick="filterTable('Pending')"          id="filter-pending"  class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">รอตรวจ</button>
             <button onclick="filterTable('Approved')"         id="filter-approved" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">อนุมัติ</button>
-            <button onclick="filterTable('Revision Needed')"  id="filter-revision" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">แก้ไข</button>
+            <button onclick="filterTable('Revision Needed')"  id="filter-revision" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">ต้องแก้ไข</button>
           </div>
-          <button onclick="loadHistory()" class="text-xs text-blue-500 hover:text-blue-700"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
+          <button onclick="loadHistory()" class="text-xs text-blue-500 hover:text-blue-700"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรชข้อมูล</button>
         </div>
 
         <div class="overflow-x-auto">
@@ -211,15 +221,15 @@
             <thead>
               <tr class="border-b border-blue-100">
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">สัปดาห์</th>
-                <th class="text-left py-3 px-2 text-gray-500 font-medium">วิชา</th>
-                <th class="text-left py-3 px-2 text-gray-500 font-medium">วันที่ส่ง</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">รายวิชา</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">วันที่ส่ง/แก้ไข</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">สถานะ</th>
-                <th class="text-left py-3 px-2 text-gray-500 font-medium">ความเห็น</th>
-                <th class="text-left py-3 px-2 text-gray-500 font-medium">ไฟล์</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">ข้อเสนอแนะ ผอ.</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">เอกสารและคำสั่ง</th>
               </tr>
             </thead>
             <tbody id="historyTable">
-              <tr><td colspan="6" class="py-8 text-center text-gray-400">กำลังโหลด...</td></tr>
+              <tr><td colspan="6" class="py-8 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>
             </tbody>
           </table>
         </div>
@@ -228,6 +238,7 @@
   </main>
 </div>
 
+<!-- ================= เชื่อม Backend ================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase_integration.js"></script>
 
@@ -239,7 +250,6 @@ let allPlans = [];
 let selectedFile = null;
 
 (async function init() {
-  // โหลด profile จาก sessionStorage (auth guard ใน supabase_integration.js จัดการ redirect แล้ว)
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (profile.name) {
     document.getElementById('teacherName').textContent = profile.name;
@@ -248,7 +258,6 @@ let selectedFile = null;
     document.getElementById('avatarInitials').textContent = initials || '--';
   }
 
-  // โหลด current_term และ upload_open จาก system_settings
   try {
     const term       = await getSystemSetting('current_term');
     const uploadOpen = await getSystemSetting('upload_open');
@@ -261,9 +270,39 @@ let selectedFile = null;
     }
   } catch (_) {}
 
-  // โหลดสถิติ
+  // โหลดความจำช่องกรอก
+  loadMemory();
   await loadStats();
 })();
+
+// ── Memory System (จดจำสิ่งที่เคยพิมพ์) ────────────────────────
+function loadMemory() {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) return;
+  const mem = JSON.parse(localStorage.getItem('teacher_mem_' + profile.id) || '{"groups":[], "subjects":[], "grades":[]}');
+
+  document.getElementById('groupList').innerHTML = mem.groups.map(g => `<option value="${g}">`).join('');
+  document.getElementById('subjectList').innerHTML = mem.subjects.map(s => `<option value="${s}">`).join('');
+  document.getElementById('gradeList').innerHTML = mem.grades.map(g => `<option value="${g}">`).join('');
+
+  if (document.getElementById('inpGroup').value === '' && profile.subject_group) {
+    document.getElementById('inpGroup').value = profile.subject_group;
+  }
+}
+
+function saveMemory(g, s, gr) {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) return;
+  let mem = JSON.parse(localStorage.getItem('teacher_mem_' + profile.id) || '{"groups":[], "subjects":[], "grades":[]}');
+
+  if (g && !mem.groups.includes(g)) mem.groups.push(g);
+  if (s && !mem.subjects.includes(s)) mem.subjects.push(s);
+  if (gr && !mem.grades.includes(gr)) mem.grades.push(gr);
+
+  localStorage.setItem('teacher_mem_' + profile.id, JSON.stringify(mem));
+  loadMemory();
+}
+
 
 // ── Stats ─────────────────────────────────────────────────────
 async function loadStats() {
@@ -302,25 +341,32 @@ async function loadHistory() {
 function renderTable(data) {
   const tbody = document.getElementById('historyTable');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ยังไม่มีประวัติการส่งแผน</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ยังไม่มีประวัติการส่งแผนการสอน</td></tr>`;
     return;
   }
   tbody.innerHTML = data.map(p => {
-    // ✅ แก้ไข: submitted_at → created_at
-    const date = p.created_at
-      ? new Date(p.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
+    // ใช้วันที่อัปเดตล่าสุด จะได้รู้ว่าส่งแก้ไปตอนไหน
+    const date = p.updated_at || p.created_at
+      ? new Date(p.updated_at || p.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
       : '—';
-    // ✅ แก้ไข: drive_url → file_url
+      
     const fileLink = p.file_url
-      ? `<a href="${p.file_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>`
-      : `<span class="text-gray-400 text-xs">—</span>`;
+      ? `<a href="${p.file_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs font-semibold mr-2 border border-blue-200 bg-white px-2 py-1 rounded shadow-sm"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์เก่า</a>`
+      : `<span class="text-gray-400 text-xs mr-2">—</span>`;
+      
+    // ปุ่มส่งแก้ สำหรับสถานะตีกลับ
+    let extraAction = '';
+    if (p.status === 'Revision Needed') {
+      extraAction = `<button onclick="resubmitPlan('${p.id}', '${p.subject_name}', '${p.week_number}')" class="text-white hover:bg-red-600 text-xs font-semibold bg-red-500 px-3 py-1.5 rounded-lg shadow-md transition-colors whitespace-nowrap"><i class="fa-solid fa-upload mr-1"></i>ส่งไฟล์แก้ไข</button>`;
+    }
+
     return `<tr class="border-b border-blue-50 hover:bg-blue-50/40 transition-colors">
-      <td class="py-3 px-2 font-medium text-blue-900">สัปดาห์ที่ ${p.week_number}</td>
-      <td class="py-3 px-2 text-gray-700">${p.subject_name}</td>  <!-- subject → subject_name -->
-      <td class="py-3 px-2 text-gray-500">${date}</td>
-      <td class="py-3 px-2">${badgeHTML(p.status)}</td>
-      <td class="py-3 px-2 text-gray-600 max-w-xs truncate">${p.director_feedback || '—'}</td>  <!-- feedback → director_feedback -->
-      <td class="py-3 px-2">${fileLink}</td>
+      <td class="py-4 px-2 font-semibold text-blue-900 text-center">${p.week_number}</td>
+      <td class="py-4 px-2 text-gray-800 font-medium">${p.subject_name}</td>
+      <td class="py-4 px-2 text-gray-500 text-xs">${date}</td>
+      <td class="py-4 px-2">${badgeHTML(p.status)}</td>
+      <td class="py-4 px-2 text-gray-600 max-w-xs truncate">${p.director_feedback || '<span class="text-gray-300 italic">ไม่มีข้อเสนอแนะ</span>'}</td>
+      <td class="py-4 px-2 flex items-center gap-2">${fileLink} ${extraAction}</td>
     </tr>`;
   }).join('');
 }
@@ -332,7 +378,7 @@ function badgeHTML(status) {
     'Revision Needed': ['badge-revision', 'fa-rotate-left',  'ต้องแก้ไข'],
   };
   const [cls, icon, label] = map[status] || ['badge-pending', 'fa-question', 'ไม่ทราบ'];
-  return `<span class="${cls} px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1"><i class="fa-solid ${icon}"></i>${label}</span>`;
+  return `<span class="${cls} px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1 whitespace-nowrap"><i class="fa-solid ${icon}"></i>${label}</span>`;
 }
 
 function filterTable(key) {
@@ -381,13 +427,15 @@ function clearFile(e) {
   document.getElementById('fileSelected').classList.add('hidden');
 }
 
-// ── Submit (✅ เชื่อมกับ uploadPlanViaGAS จริงๆ) ─────────────
+// ── Submit New Plan ─────────────────────────────
 async function submitPlan() {
-  const subject = document.getElementById('subject').value;
-  const weekNum = document.getElementById('week').value;
+  const group = document.getElementById('inpGroup').value.trim();
+  const subj  = document.getElementById('inpSubject').value.trim();
+  const grade = document.getElementById('inpGrade').value.trim();
+  const weekNum = document.getElementById('inpWeek').value.trim();
 
-  if (!subject || !weekNum) {
-    Swal.fire({ icon:'warning', title:'กรุณากรอกข้อมูลให้ครบ', text:'เลือกวิชาและสัปดาห์ก่อนส่ง', confirmButtonColor:'#3b82f6' });
+  if (!group || !subj || !grade || !weekNum) {
+    Swal.fire({ icon:'warning', title:'กรุณากรอกข้อมูลให้ครบ', text:'ระบุสาระฯ, วิชา, ชั้น และสัปดาห์', confirmButtonColor:'#3b82f6' });
     return;
   }
   if (!selectedFile) {
@@ -395,34 +443,37 @@ async function submitPlan() {
     return;
   }
 
-  // ✅ แก้ไข: loading ธรรมดา ไม่ขึ้น "AI กำลังวิเคราะห์"
   Swal.fire({
-    title: '<span style="font-family:Kanit">กำลังส่งแผนการสอน...</span>',
-    html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่</p>',
+    title: '<span style="font-family:Kanit">กำลังอัปโหลดแผนการสอน...</span>',
+    html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่ ห้ามปิดหน้าต่างนี้</p>',
     allowOutsideClick: false,
     showConfirmButton: false,
     didOpen: () => Swal.showLoading()
   });
 
-  // ✅ URL ของ Google Apps Script (GAS)
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbxncvxZ2KbRVRE2Osn_6LV3mGtne5NIxdGvrbnIkzf1YExO2B_-wCv2aqm0gcHApu8/exec';
+  const fullSubjectName = `${subj} ${grade}`;
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyi3mrOYV5o-47ITAQosbXNDklhgMu43bwNakoT7bH1QT4P-ThwxXRQp9PkbY5xPl_N/exec';
 
   try {
-    // ✅ เรียก uploadPlanViaGAS จาก supabase_integration.js
-    await uploadPlanViaGAS(subject, weekNum, selectedFile, GAS_URL); // ✅ ไม่ต้องรับ result แล้ว
+    // เซฟความจำ
+    saveMemory(group, subj, grade);
 
-    // ✅ แก้ไข: ไม่แสดง AI summary ในหน้าครู (ผู้อำนวยการเป็นคนใช้)
+    // อัปโหลดเข้าสู่ระบบ (GAS + Supabase Insert)
+    await uploadPlanViaGAS(fullSubjectName, weekNum, selectedFile, GAS_URL);
+
     await Swal.fire({
       icon: 'success',
       title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>',
-      html: '<p style="font-family:Sarabun;font-size:14px">แผนของคุณถูกส่งและรอการตรวจสอบแล้ว</p>',
+      html: '<p style="font-family:Sarabun;font-size:14px">แผนของคุณเข้าสู่ระบบและรอผู้อำนวยการตรวจสอบแล้ว</p>',
       confirmButtonColor: '#3b82f6',
-      confirmButtonText: 'ดูประวัติการส่ง',
+      confirmButtonText: 'รับทราบ',
     });
 
     clearFile(null);
-    document.getElementById('subject').value = '';
-    document.getElementById('week').value    = '';
+    document.getElementById('inpSubject').value = '';
+    document.getElementById('inpGrade').value   = '';
+    document.getElementById('inpWeek').value    = '';
+    
     await loadStats();
     showPage('history');
 
@@ -435,6 +486,82 @@ async function submitPlan() {
     });
   }
 }
+
+// ── Submit Revision Plan (อัปโหลดทับอันที่ตีกลับ) ────────────────
+async function resubmitPlan(planId, subjectName, weekNumber) {
+  const { value: file } = await Swal.fire({
+    title: '<span style="font-family:Kanit">ส่งแผนการสอนฉบับแก้ไข</span>',
+    html: `<p style="font-family:Sarabun;font-size:14px;color:#4b5563;margin-bottom:12px;">อัปโหลดไฟล์แก้ไขสำหรับ <strong>${subjectName}</strong> (สัปดาห์ที่ ${weekNumber})</p>`,
+    input: 'file',
+    inputAttributes: {
+      'accept': 'application/pdf',
+      'aria-label': 'อัปโหลดไฟล์ PDF ฉบับแก้ไข'
+    },
+    showCancelButton: true,
+    confirmButtonText: '<i class="fa-solid fa-cloud-arrow-up mr-1"></i>อัปโหลดแก้ไข',
+    cancelButtonText: 'ยกเลิก',
+    confirmButtonColor: '#3b82f6',
+    cancelButtonColor: '#94a3b8'
+  });
+
+  if (!file) return; // กดยกเลิก
+  if (file.type !== 'application/pdf') {
+     return Swal.fire({ icon:'error', title:'ไฟล์ไม่ถูกต้อง', text:'กรุณาอัปโหลดไฟล์ PDF เท่านั้น', confirmButtonColor:'#3b82f6'});
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return Swal.fire({ icon:'error', title:'ไฟล์ใหญ่เกินไป', text:'ขนาดไฟล์ต้องไม่เกิน 10 MB', confirmButtonColor:'#3b82f6'});
+  }
+
+  Swal.fire({
+    title: '<span style="font-family:Kanit">กำลังอัปโหลดฉบับแก้ไข...</span>',
+    html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่ ระบบกำลังอัปเดตไฟล์ไปยังฐานข้อมูล</p>',
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  try {
+    const base64 = await _fileToBase64(file);
+    const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxncvxZ2KbRVRE2Osn_6LV3mGtne5NIxdGvrbnIkzf1YExO2B_-wCv2aqm0gcHApu8/exec';
+
+    const payload = {
+      fileName:    file.name,
+      base64:      base64,
+      mimeType:    file.type,
+      subject:     subjectName,
+      week:        weekNumber,
+      teacherId:   profile.id,
+      teacherName: profile.name,
+    };
+
+    // 1. ส่งไฟล์ไปฝากที่ Google Drive (GAS) ใหม่
+    const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+    if (!response.ok) throw new Error(`การเชื่อมต่อขัดข้อง (Status ${response.status})`);
+    const result = await response.json();
+    if (!result.success) throw new Error(result.message);
+
+    // 2. อัปเดตตารางฐานข้อมูล Supabase ด้วยลิงก์ไฟล์ใหม่ ล้างคอมเมนต์และรีเซ็ตสถานะเป็นรอตรวจ
+    const { error } = await db.from('lesson_plans').update({
+      file_url: result.fileUrl,
+      status: 'Pending',
+      director_feedback: null, // รีเซ็ตเพื่อรอ ผอ. ตรวจใหม่
+      updated_at: new Date().toISOString()
+    }).eq('id', planId);
+
+    if (error) throw error;
+
+    Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', text: 'ส่งแผนการสอนฉบับแก้ไขเรียบร้อยแล้ว', confirmButtonColor: '#3b82f6' });
+    
+    // โหลดหน้าใหม่
+    await loadStats();
+    loadHistory();
+
+  } catch (err) {
+    Swal.fire({ icon: 'error', title: 'การส่งไฟล์ล้มเหลว', text: err.message, confirmButtonColor: '#3b82f6' });
+  }
+}
+
 </script>
 </body>
 </html>
