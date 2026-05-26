@@ -308,11 +308,16 @@
             <span class="text-sm text-slate-300">ใช้ลายเซ็นอิเล็กทรอนิกส์ <span class="text-slate-500 text-xs">(ดึงระบบที่ตั้งค่าไว้)</span></span>
           </label>
           <label class="sig-radio">
+            <input type="radio" name="sigMode" value="upload" onchange="switchSigMode('upload')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
+            <span class="text-sm text-slate-300">อัปโหลดไฟล์ภาพ <span class="text-slate-500 text-xs">(แนบรูปใหม่เฉพาะครั้งนี้)</span></span>
+          </label>
+          <label class="sig-radio">
             <input type="radio" name="sigMode" value="draw" onchange="switchSigMode('draw')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
             <span class="text-sm text-slate-300">เซ็นชื่อด้วยมือ <span class="text-slate-500 text-xs">(วาดใหม่เฉพาะครั้งนี้)</span></span>
           </label>
         </div>
 
+        <!-- 1. ดึงของเก่าที่บันทึกไว้ -->
         <div id="esigDisplay" class="sig-display">
           <img id="esigImg" src="" alt="E-Signature" style="display:none">
           <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-3">
@@ -320,7 +325,19 @@
             <p class="text-slate-500 text-xs">ไม่ได้ตั้งค่าลายเซ็นไว้ในระบบ</p>
           </div>
         </div>
+        
+        <!-- 2. อัปโหลดรูปใหม่ตอนตรวจ -->
+        <div id="uploadSection" style="display:none; width:100%;">
+          <div class="border-2 border-dashed border-slate-500 rounded-xl p-6 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-[#0d1526]" onclick="document.getElementById('modalSigUpload').click()">
+            <input type="file" id="modalSigUpload" accept="image/png, image/jpeg" class="hidden" onchange="handleModalSigUpload(event)">
+            <i class="fa-solid fa-cloud-arrow-up text-3xl text-indigo-400 mb-2"></i>
+            <p id="modalSigUploadText" class="text-sm text-slate-300 font-medium">คลิกเพื่อแนบไฟล์ลายเซ็น</p>
+            <p class="text-xs text-slate-500 mt-1">(รองรับ .jpg, .png)</p>
+            <img id="modalSigUploadPreview" class="hidden mx-auto mt-3 max-h-24 rounded bg-white p-1 border border-slate-200">
+          </div>
+        </div>
 
+        <!-- 3. วาดเส้นใหม่ตอนตรวจ -->
         <div id="drawSection" style="display:none; width:100%;">
           <canvas id="sigCanvas" class="w-full bg-[#0d1526] border border-dashed border-slate-500 rounded-xl cursor-crosshair touch-none" style="height:150px;"></canvas>
           <div class="flex justify-between items-center mt-2">
@@ -424,7 +441,6 @@ function showPage(name) {
 
 async function loadDashboard() {
   try {
-    // ดึงข้อมูลเพื่อนับสถิติจริงจาก Supabase
     const { data, error } = await db.from('lesson_plans').select('status, subject_name, users(subject_group)');
     if (error) throw error;
 
@@ -467,7 +483,7 @@ async function loadPendingPlans() {
     }
     tbody.innerHTML = plans.map(p => {
       const name = p.users?.name || 'ไม่ทราบชื่อ';
-      const date = p.submitted_at ? new Date(p.submitted_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
+      const date = p.created_at ? new Date(p.created_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
       return `<tr>
         <td><span class="font-medium text-white">${name}</span></td>
         <td class="text-slate-300">${p.subject_name || '—'} <span class="text-slate-500">(สัปดาห์ที่ ${p.week_number})</span></td>
@@ -518,13 +534,14 @@ async function loadApprovedPlans() {
 function initCanvasDrawing(canvasId) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
+  if (canvas.dataset.inited === 'true') return; // กันผูก Event ซ้ำซ้อน
 
   const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = rect.width || 540;
+  canvas.width = rect.width > 0 ? rect.width : 500; // ป้องกันบัคความกว้าง 0
   canvas.height = 150;
 
   const ctx = canvas.getContext('2d');
-  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeStyle = '#6366f1'; 
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -542,31 +559,31 @@ function initCanvasDrawing(canvasId) {
     ];
   }
 
-  function start(e) { e.preventDefault(); isDrawing = true; [lastX, lastY] = getCoordinates(e); }
+  function start(e) { e.preventDefault(); isDrawing = true; [lastX, lastY] = getCoordinates(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); }
   function draw(e) {
     if (!isDrawing) return;
     e.preventDefault();
     const [x, y] = getCoordinates(e);
-    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(x, y); ctx.stroke();
+    ctx.lineTo(x, y); ctx.stroke();
     [lastX, lastY] = [x, y];
-    
-    if (canvasId === 'sigCanvas') _sigCanvasData = canvas.toDataURL('image/png');
-    if (canvasId === 'settingsSigCanvas') _settingsCanvasData = canvas.toDataURL('image/png');
   }
-  function stop() { isDrawing = false; }
+  function stop() { 
+    if(isDrawing) {
+      isDrawing = false; 
+      if (canvasId === 'sigCanvas') _sigCanvasData = canvas.toDataURL('image/png');
+      if (canvasId === 'settingsSigCanvas') _settingsCanvasData = canvas.toDataURL('image/png');
+    }
+  }
 
-  // Clone to erase standard and ghost event listeners
-  const freshCanvas = canvas.cloneNode(false);
-  canvas.parentNode.replaceChild(freshCanvas, canvas);
-
-  freshCanvas.addEventListener('mousedown', start, { passive: false });
-  freshCanvas.addEventListener('mousemove', draw, { passive: false });
-  freshCanvas.addEventListener('mouseup', stop);
-  freshCanvas.addEventListener('mouseleave', stop);
-
-  freshCanvas.addEventListener('touchstart', start, { passive: false });
-  freshCanvas.addEventListener('touchmove', draw, { passive: false });
-  freshCanvas.addEventListener('touchend', stop);
+  canvas.onmousedown = start;
+  canvas.onmousemove = draw;
+  canvas.onmouseup = stop;
+  canvas.onmouseleave = stop;
+  canvas.ontouchstart = start;
+  canvas.ontouchmove = draw;
+  canvas.ontouchend = stop;
+  
+  canvas.dataset.inited = 'true';
 }
 
 function clearSigCanvas() {
@@ -593,6 +610,7 @@ async function openReviewModal(plan) {
 
   document.querySelector('input[name="sigMode"][value="esig"]').checked = true;
   document.getElementById('drawSection').style.display  = 'none';
+  document.getElementById('uploadSection').style.display = 'none';
   document.getElementById('esigDisplay').style.display  = 'flex';
   document.getElementById('aiNotes').value   = '';
   document.getElementById('manualNotes').value = '';
@@ -637,10 +655,28 @@ function switchSigMode(mode) {
   _sigMode = mode;
   document.getElementById('esigDisplay').style.display  = mode === 'esig' ? 'flex' : 'none';
   document.getElementById('drawSection').style.display  = mode === 'draw' ? 'block' : 'none';
+  document.getElementById('uploadSection').style.display = mode === 'upload' ? 'block' : 'none';
+  
+  // หน่วงเวลาให้ UI กางออกก่อนค่อยวัดขนาดสร้าง Canvas
   if (mode === 'draw') {
-    setTimeout(() => { initCanvasDrawing('sigCanvas'); }, 80);
+    setTimeout(() => { initCanvasDrawing('sigCanvas'); }, 150);
   }
 }
+
+// โหลดรูปภาพอัปโหลดจาก Modal ชั่วคราว
+function handleModalSigUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    _sigCanvasData = ev.target.result; // เก็บไว้ใช้บันทึก
+    document.getElementById('modalSigUploadPreview').src = _sigCanvasData;
+    document.getElementById('modalSigUploadPreview').classList.remove('hidden');
+    document.getElementById('modalSigUploadText').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
 
 async function loadESignatureDisplay() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
@@ -669,6 +705,11 @@ async function submitApproval() {
   if (_sigMode === 'draw') {
     if (!_sigCanvasData) {
       Swal.fire({ icon: 'warning', title: 'ลายเซ็นว่างเปล่า', text: 'กรุณาวาดเส้นลายเซ็นลงในกรอบ ก่อนบันทึกรายการอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
+      return;
+    }
+  } else if (_sigMode === 'upload') {
+    if (!_sigCanvasData) {
+      Swal.fire({ icon: 'warning', title: 'ยังไม่แนบไฟล์', text: 'กรุณาอัปโหลดรูปภาพลายเซ็นก่อนอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
       return;
     }
   } else {
@@ -755,7 +796,7 @@ function switchEsigTab(tab) {
   clearSettingsCanvas();
 
   if (tab === 'draw') {
-    setTimeout(() => { initCanvasDrawing('settingsSigCanvas'); }, 100);
+    setTimeout(() => { initCanvasDrawing('settingsSigCanvas'); }, 150);
   }
 }
 
@@ -780,7 +821,10 @@ async function saveEsigSettings() {
   }
   
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-  if (!profile.id) return;
+  if (!profile.id) {
+    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาดเกี่ยวกับ Session', text: 'ไม่พบประวัติการ Login กรุณาล็อกอินใหม่', background: '#1a2540', color: '#e2e8f0' });
+    return;
+  }
 
   try {
     await saveSystemSetting('esig_' + profile.id, _settingsCanvasData);
