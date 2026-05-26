@@ -310,15 +310,16 @@ function renderTable(data) {
     const date = p.created_at
       ? new Date(p.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
       : '—';
-    const fileLink = p.drive_url
-      ? `<a href="${p.drive_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>`
+    // ✅ แก้ไข: drive_url → file_url
+    const fileLink = p.file_url
+      ? `<a href="${p.file_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์</a>`
       : `<span class="text-gray-400 text-xs">—</span>`;
     return `<tr class="border-b border-blue-50 hover:bg-blue-50/40 transition-colors">
       <td class="py-3 px-2 font-medium text-blue-900">สัปดาห์ที่ ${p.week_number}</td>
-      <td class="py-3 px-2 text-gray-700">${p.subject}</td>
+      <td class="py-3 px-2 text-gray-700">${p.subject_name}</td>  <!-- subject → subject_name -->
       <td class="py-3 px-2 text-gray-500">${date}</td>
       <td class="py-3 px-2">${badgeHTML(p.status)}</td>
-      <td class="py-3 px-2 text-gray-600 max-w-xs truncate">${p.feedback || '—'}</td>
+      <td class="py-3 px-2 text-gray-600 max-w-xs truncate">${p.director_feedback || '—'}</td>  <!-- feedback → director_feedback -->
       <td class="py-3 px-2">${fileLink}</td>
     </tr>`;
   }).join('');
@@ -380,7 +381,7 @@ function clearFile(e) {
   document.getElementById('fileSelected').classList.add('hidden');
 }
 
-// ── Submit ────────────────────────────────────────────────────
+// ── Submit (✅ เชื่อมกับ uploadPlanViaGAS จริงๆ) ─────────────
 async function submitPlan() {
   const subject = document.getElementById('subject').value;
   const weekNum = document.getElementById('week').value;
@@ -394,7 +395,7 @@ async function submitPlan() {
     return;
   }
 
-  // ✅ แก้ไข: loading ธรรมดา ไม่ขึ้น AI กำลังวิเคราะห์
+  // ✅ แก้ไข: loading ธรรมดา ไม่ขึ้น "AI กำลังวิเคราะห์"
   Swal.fire({
     title: '<span style="font-family:Kanit">กำลังส่งแผนการสอน...</span>',
     html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่</p>',
@@ -403,13 +404,14 @@ async function submitPlan() {
     didOpen: () => Swal.showLoading()
   });
 
-  // URL ของ Google Apps Script (GAS)
+  // ✅ URL ของ Google Apps Script (GAS)
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbyi3mrOYV5o-47ITAQosbXNDklhgMu43bwNakoT7bH1QT4P-ThwxXRQp9PkbY5xPl_N/exec';
 
   try {
-    await uploadPlanViaGAS(subject, weekNum, selectedFile, GAS_URL);
+    // ✅ เรียก uploadPlanViaGAS จาก supabase_integration.js
+    await uploadPlanViaGAS(subject, weekNum, selectedFile, GAS_URL); // ✅ ไม่ต้องรับ result แล้ว
 
-    // ✅ แก้ไข: ไม่แสดง AI summary (ผู้อำนวยการใช้เอง)
+    // ✅ แก้ไข: ไม่แสดง AI summary ในหน้าครู (ผู้อำนวยการเป็นคนใช้)
     await Swal.fire({
       icon: 'success',
       title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>',
