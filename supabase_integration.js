@@ -122,6 +122,7 @@ async function addNewUser({ name, role, subject_group, username, temp_password }
     role:          role,
     subject_group: subject_group || null,
     username:      username,
+    temp_password: temp_password,   // ✅ FIX: เพิ่ม temp_password (NOT NULL column)
     created_at:    new Date().toISOString(),
   });
 
@@ -324,6 +325,26 @@ async function updateUser(userId, { name, role, subject_group }) {
     .eq('id', userId);
 
   if (error) throw new Error(`แก้ไขผู้ใช้ไม่สำเร็จ: ${error.message}`);
+}
+
+// ✅ FIX: เพิ่มฟังก์ชัน deleteUserById
+async function deleteUserById(userId) {
+  const { error } = await db
+    .from('users')
+    .delete()
+    .eq('id', userId);
+
+  if (error) throw new Error(`ลบผู้ใช้ไม่สำเร็จ: ${error.message}`);
+}
+
+// ✅ FIX: เพิ่มฟังก์ชัน updateUserPassword
+async function updateUserPassword(userId, newPassword) {
+  const { error } = await db
+    .from('users')
+    .update({ temp_password: newPassword })
+    .eq('id', userId);
+
+  if (error) throw new Error(`รีเซ็ตรหัสผ่านไม่สำเร็จ: ${error.message}`);
 }
 
 
