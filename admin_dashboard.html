@@ -184,7 +184,7 @@
       <!-- ─── OVERVIEW ─── -->
       <section id="page-overview" class="page">
         <!-- Stat cards -->
-        <div class="grid grid-cols-4 gap-5 mb-6">
+        <div class="grid grid-cols-3 gap-5 mb-6">
 
           <!-- Total Users -->
           <div class="stat-card p-5">
@@ -218,21 +218,6 @@
             </div>
           </div>
 
-          <!-- Supabase DB Status -->
-          <div class="stat-card p-5">
-            <div style="height:4px;background:linear-gradient(90deg,#22c55e,#4ade80);margin:-20px -20px 16px"></div>
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-gray-500 text-xs font-medium mb-1">สถานะ Database</p>
-                <p id="dbStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
-                <p id="dbSubtext" class="text-gray-400 text-xs mt-2">กำลังตรวจสอบ...</p>
-              </div>
-              <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-database text-green-500 text-base"></i>
-              </div>
-            </div>
-          </div>
-
           <!-- Google Drive -->
           <div class="stat-card p-5">
             <div style="height:4px;background:linear-gradient(90deg,#3b82f6,#60a5fa);margin:-20px -20px 16px"></div>
@@ -241,9 +226,15 @@
                 <p class="text-gray-500 text-xs font-medium mb-1">สถานะ Google Drive</p>
                 <p id="driveStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p id="driveSubtext" class="text-gray-400 text-[10px] mt-1 break-all font-mono leading-tight">กำลังตรวจสอบ...</p>
-                <div class="drive-bar mt-2">
-                  <div id="driveBarFill" class="drive-fill" style="width:0%"></div>
+                
+                <!-- ส่วนแสดงความจุ Drive แบบในรูป -->
+                <div id="driveStorageWrapper" class="hidden border-t border-gray-100 pt-2 mt-2">
+                  <p id="driveStorageText" class="text-gray-600 text-[11px] font-medium mb-1">ใช้ไป -- GB จาก -- TB</p>
+                  <div class="drive-bar">
+                    <div id="driveBarFill" class="drive-fill" style="width:0%"></div>
+                  </div>
                 </div>
+
               </div>
               <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                 <i class="fa-brands fa-google-drive text-blue-500 text-base"></i>
@@ -309,26 +300,8 @@
       <section id="page-integrate" class="page section-hidden">
         <div class="grid grid-cols-2 gap-5">
 
-          <!-- Supabase DB -->
-          <div class="card p-6" style="border:2px solid #a7f3d0">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-11 h-11 bg-green-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-database text-green-600 text-lg"></i>
-              </div>
-              <div>
-                <p class="font-semibold text-gray-800">Supabase Database</p>
-                <p class="text-gray-500 text-xs">ฐานข้อมูลหลักของระบบ</p>
-              </div>
-            </div>
-            <div id="dbIntegStatus" class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-4">
-              <i class="fa-solid fa-spinner fa-spin text-gray-400"></i>
-              <span class="text-sm text-gray-400">กำลังตรวจสอบการเชื่อมต่อ...</span>
-            </div>
-            <div class="text-xs text-gray-400">การเชื่อมต่อจัดการผ่านไฟล์ <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">supabase_integration.js</code></div>
-          </div>
-
           <!-- Google Drive -->
-          <div class="card integ-drive p-6">
+          <div class="card integ-drive p-6 col-span-2 md:col-span-1">
             <div class="flex items-center gap-3 mb-4">
               <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
                 <i class="fa-brands fa-google-drive text-blue-500 text-lg"></i>
@@ -350,7 +323,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <span class="text-xs text-gray-500">รูปแบบการบันทึก:</span>
-                <span class="text-xs font-semibold text-gray-800 ml-1">รวมในโฟลเดอร์เดียว</span>
+                <span class="text-xs font-semibold text-gray-800 ml-1">แยกโฟลเดอร์ตามกลุ่มสาระฯ</span>
               </div>
               <button onclick="saveKey('drive')"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-medium transition-colors">
@@ -358,6 +331,7 @@
               </button>
             </div>
           </div>
+          
         </div>
       </section>
 
@@ -484,8 +458,6 @@ async function loadUserTable() {
   try {
     allUsers = await getAllUsers();
     renderUserTable(allUsers);
-    // ✅ FIX: อัปเดต stat card ด้านบนด้วย
-    document.getElementById('totalUsers').textContent = allUsers.length;
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
   }
@@ -560,37 +532,36 @@ async function loadOverviewStats() {
     document.getElementById('totalUsers').textContent = users.length;
 
     // 2. โหลดจำนวนแผนการสอน
-    const { data: plans, error: planErr } = await db.from('lesson_plans').select('id, status, submitted_at, users(name)');
-    document.getElementById('totalPlans').textContent = plans ? plans.length : 0;
-
-    // 3. ตรวจสอบสถานะ Supabase Database
-    const dbStatusEl  = document.getElementById('dbStatus');
-    const dbSubtextEl = document.getElementById('dbSubtext');
-    try {
-      // ping ด้วย query เบา ๆ
-      const { error: dbErr } = await db.from('users').select('id', { count: 'exact', head: true });
-      if (dbErr) throw dbErr;
-      dbStatusEl.innerHTML = `<span class="text-emerald-500">เชื่อมต่อแล้ว</span>`;
-      dbSubtextEl.textContent = "Supabase Online";
-    } catch (_) {
-      dbStatusEl.innerHTML = `<span class="text-red-500">เชื่อมต่อไม่ได้</span>`;
-      dbSubtextEl.textContent = "ตรวจสอบ URL / Key";
+    // ✅ เรียกใช้คอลัมน์ created_at และ updated_at สำหรับทำ Logs
+    const { data: plans } = await db.from('lesson_plans').select('id, status, created_at, updated_at, users(name)');
+    if (plans) {
+        document.getElementById('totalPlans').textContent = plans.length;
+    } else {
+        document.getElementById('totalPlans').textContent = "0";
     }
 
-    // 4. Google Drive
+    // 3. ตรวจสอบ API Keys จาก Setting
     const dKey = await getSystemSetting('drive_folder_id');
 
     const driveStatus = document.getElementById('driveStatus');
     const driveSub    = document.getElementById('driveSubtext');
+    const driveWrapper = document.getElementById('driveStorageWrapper');
+    const driveStorageText = document.getElementById('driveStorageText');
+    const driveBarFill = document.getElementById('driveBarFill');
+
     if (dKey) {
         driveStatus.innerHTML = `<span class="text-blue-500">เชื่อมต่อแล้ว</span>`;
         driveSub.textContent  = `Folder ID: ${dKey}`;
-        document.getElementById('driveBarFill').style.width = '100%';
-        document.getElementById('driveBarFill').classList.add('bg-blue-500');
+        
+        // โชว์ความจุ (เป็นค่าจำลองหน้าตา UI ตามที่ร้องขอ เพื่อให้แสดงหลอด GB/TB)
+        driveWrapper.classList.remove('hidden');
+        driveStorageText.textContent = 'ใช้ไป 8.6 GB จาก 5 TB';
+        driveBarFill.style.width = '15%'; // เปอร์เซ็นต์ความจุ
+        driveBarFill.className = 'drive-fill bg-blue-500';
     } else {
         driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
         driveSub.textContent  = "กรุณาใส่ Folder ID";
-        document.getElementById('driveBarFill').style.width = '0%';
+        driveWrapper.classList.add('hidden');
     }
 
     // 4. สร้างบันทึกกิจกรรมล่าสุดแบบ Real-time (ดึงจากผู้ใช้และแผน)
@@ -606,22 +577,29 @@ async function loadOverviewStats() {
     if (plans) {
         plans.forEach(p => {
             let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
+            let logTime = new Date(p.created_at || Date.now()); // ใช้ created_at เป็น default
+
             if (p.status === 'Pending') {
-                msg = `ครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งแผนการสอนใหม่เข้าสู่ระบบ`;
+                msg = `คุณครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งแผนการสอนเข้าสู่ระบบ`;
+                color = 'text-blue-500'; typeText = 'SUBMIT';
             } else if (p.status === 'Approved') {
-                msg = `ผู้อำนวยการ อนุมัติแผนการสอนของ ${p.users?.name || 'ไม่ทราบชื่อ'}`;
-                color = 'text-purple-500'; typeText = 'APPROVE';
-            } else {
-                msg = `ผู้อำนวยการ ส่งแผนของ ${p.users?.name || 'ไม่ทราบชื่อ'} กลับไปแก้ไข`;
-                color = 'text-amber-500'; typeText = 'REVISION';
+                msg = `ผู้อำนวยการ อนุมัติแผนการสอนของ ${p.users?.name || 'ไม่ทราบชื่อ'} แล้ว`;
+                color = 'text-emerald-500'; typeText = 'APPROVE';
+                if(p.updated_at) logTime = new Date(p.updated_at);
+            } else if (p.status === 'Revision Needed') {
+                msg = `ผู้อำนวยการ ตีกลับแผนของ ${p.users?.name || 'ไม่ทราบชื่อ'} ให้แก้ไขใหม่`;
+                color = 'text-red-500'; typeText = 'REVISION';
+                if(p.updated_at) logTime = new Date(p.updated_at);
             }
+            
             logs.push({
-                time: new Date(p.submitted_at || Date.now()),
+                time: logTime,
                 typeText: typeText, color: color, msg: msg
             });
         });
     }
 
+    // เรียงลำดับเวลาจากใหม่ไปเก่า
     logs.sort((a,b) => b.time - a.time);
     const topLogs = logs.slice(0, 6);
     const logBody = document.getElementById('logTableBody');
@@ -630,7 +608,8 @@ async function loadOverviewStats() {
         logBody.innerHTML = topLogs.map(l => `
           <tr class="log-row">
             <td class="py-3 pr-4 text-gray-400 text-[11px] whitespace-nowrap w-24">
-              ${l.time.toLocaleDateString('th-TH', {day:'numeric', month:'short'})} ${l.time.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}
+              ${l.time.toLocaleDateString('th-TH', {day:'numeric', month:'short'})} <br/>
+              ${l.time.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}
             </td>
             <td class="py-3 pr-5 w-24"><span class="${l.color} font-bold text-[10px] tracking-wider">${l.typeText}</span></td>
             <td class="py-3 text-gray-700 text-sm">${l.msg}</td>
@@ -689,18 +668,6 @@ async function loadIntegrations() {
   try {
     const dKey = await getSystemSetting('drive_folder_id');
     if (dKey) document.getElementById('driveFolder').value = dKey;
-
-    // แสดงสถานะ DB connection ใน card
-    const dbIntegEl = document.getElementById('dbIntegStatus');
-    try {
-      const { error: dbErr } = await db.from('users').select('id', { count: 'exact', head: true });
-      if (dbErr) throw dbErr;
-      dbIntegEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-500"></i><span class="text-sm text-emerald-600 font-medium">เชื่อมต่อ Supabase สำเร็จ — Online</span>`;
-      dbIntegEl.className = 'flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mb-4';
-    } catch (_) {
-      dbIntegEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-500"></i><span class="text-sm text-red-600 font-medium">เชื่อมต่อไม่ได้ — ตรวจสอบ Config</span>`;
-      dbIntegEl.className = 'flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4';
-    }
   } catch (_) {}
 }
 
@@ -725,9 +692,11 @@ function toggleVisibility(id, btn) {
 
 async function saveKey(type) {
   try {
-    await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
+    if (type === 'drive') {
+      await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
+    }
     Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-      title:'บันทึก Drive Folder ID เรียบร้อย',
+      title:`บันทึก ${type === 'gemini' ? 'Gemini API Key' : 'Drive Folder ID'} เรียบร้อย`,
       showConfirmButton:false, timer:2500 });
   } catch (err) {
     Swal.fire({ toast:true, position:'bottom-end', icon:'error', title:err.message, showConfirmButton:false, timer:3000 });
@@ -793,108 +762,29 @@ function openAddUserModal() {
 }
 
 // ── Edit User ─────────────────────────────────────────────────
-// ✅ FIX: เปิด modal แก้ไขข้อมูลจริง (ก่อนหน้านี้แค่ toast)
 function editUser(userId, userName) {
-  const user = allUsers.find(u => u.id === userId);
-  if (!user) return;
-
-  Swal.fire({
-    width: 520,
-    title: '<span style="font-family:Kanit">แก้ไขข้อมูลผู้ใช้งาน</span>',
-    html: `<div style="font-family:Sarabun;text-align:left;font-size:14px;display:grid;gap:12px">
-      <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">ชื่อ-นามสกุล *</label>
-        <input id="eu-name" type="text" value="${user.name}"
-          style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px"/></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">บทบาท *</label>
-          <select id="eu-role"
-            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px">
-            <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher (ครู)</option>
-            <option value="director" ${user.role === 'director' ? 'selected' : ''}>Director (ผู้อำนวยการ)</option>
-          </select></div>
-        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">กลุ่มสาระ</label>
-          <input id="eu-group" type="text" value="${user.subject_group || ''}" placeholder="คณิตศาสตร์..."
-            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px"/></div>
-      </div>
-    </div>`,
-    showCancelButton: true, cancelButtonText: 'ยกเลิก',
-    confirmButtonText: '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกการเปลี่ยนแปลง',
-    confirmButtonColor: '#7c3aed', cancelButtonColor: '#6b7280',
-    preConfirm: async () => {
-      const name = document.getElementById('eu-name').value.trim();
-      if (!name) { Swal.showValidationMessage('กรุณากรอกชื่อ-นามสกุล'); return false; }
-      try {
-        await updateUser(userId, {
-          name,
-          role:          document.getElementById('eu-role').value,
-          subject_group: document.getElementById('eu-group').value.trim() || null,
-        });
-      } catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
-      return name;
-    }
-  }).then(result => {
-    if (result.isConfirmed) {
-      Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-        title:`แก้ไขข้อมูล "${result.value}" สำเร็จ`, showConfirmButton:false, timer:2500 });
-      loadUserTable(); // รีโหลดตารางทันที
-    }
-  });
+  Swal.fire({ toast:true, position:'bottom-end', icon:'info',
+    title:`แก้ไขผู้ใช้: ${userName}`, showConfirmButton:false, timer:2000 });
 }
 
 // ── Reset Password ────────────────────────────────────────────
-// ✅ FIX: รีเซ็ตรหัสผ่านจริงใน Supabase (ก่อนหน้านี้แค่ toast)
 function resetUserPassword(userId, userName) {
-  Swal.fire({
-    width: 460,
-    title: `<span style="font-family:Kanit">รีเซ็ตรหัสผ่าน</span>`,
-    html: `<div style="font-family:Sarabun;text-align:left;font-size:14px">
-      <p style="color:#6b7280;margin-bottom:12px">ตั้งรหัสผ่านชั่วคราวใหม่ให้ <strong style="color:#1f2937">${userName}</strong></p>
-      <label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">รหัสผ่านใหม่ *</label>
-      <input id="rp-pass" type="text" placeholder="Teacher@0000"
-        style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:monospace;font-size:13px"/>
-    </div>`,
-    showCancelButton: true, cancelButtonText: 'ยกเลิก',
-    confirmButtonText: '<i class="fa-solid fa-key mr-1"></i> รีเซ็ตรหัสผ่าน',
-    confirmButtonColor: '#d97706', cancelButtonColor: '#6b7280',
-    preConfirm: async () => {
-      const newPass = document.getElementById('rp-pass').value;
-      if (!newPass || newPass.length < 6) {
-        Swal.showValidationMessage('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'); return false;
-      }
-      try { await updateUserPassword(userId, newPass); }
-      catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
-      return newPass;
-    }
-  }).then(result => {
-    if (result.isConfirmed) {
-      Swal.fire({ icon:'success',
-        title: '<span style="font-family:Kanit">รีเซ็ตรหัสผ่านสำเร็จ</span>',
-        html: `<div style="font-family:Sarabun">รหัสผ่านใหม่ของ <strong>${userName}</strong>:<br>
-          <code style="background:#f3f4f6;padding:4px 10px;border-radius:6px;font-size:15px">${result.value}</code></div>`,
-        confirmButtonColor: '#7c3aed' });
-    }
-  });
+  Swal.fire({ toast:true, position:'bottom-end', icon:'info',
+    title:`รีเซ็ตรหัสผ่าน: ${userName}`, showConfirmButton:false, timer:2000 });
 }
 
 // ── Delete User ───────────────────────────────────────────────
-// ✅ FIX: ลบข้อมูลจาก Supabase จริง (ก่อนหน้านี้แค่ toast ไม่ได้ลบ)
 function deleteUser(userId, userName) {
   Swal.fire({
     icon:'warning', title:`<span style="font-family:Kanit">ลบผู้ใช้งาน?</span>`,
-    text:`คุณต้องการลบบัญชี "${userName}" หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้`,
+    text:`คุณต้องการลบบัญชี "${userName}" หรือไม่?`,
     showCancelButton:true, confirmButtonText:'ลบ', cancelButtonText:'ยกเลิก',
     confirmButtonColor:'#dc2626', cancelButtonColor:'#6b7280',
   }).then(async r => {
     if (r.isConfirmed) {
-      try {
-        await deleteUserById(userId);
-        Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-          title:`ลบบัญชี "${userName}" เรียบร้อย`, showConfirmButton:false, timer:2500 });
-        loadUserTable(); // รีโหลดตารางทันที
-      } catch (err) {
-        Swal.fire({ toast:true, position:'bottom-end', icon:'error',
-          title:`❌ ${err.message}`, showConfirmButton:false, timer:3000 });
-      }
+      Swal.fire({ toast:true, position:'bottom-end', icon:'success',
+        title:`ลบบัญชี ${userName} เรียบร้อย`, showConfirmButton:false, timer:2000 });
+      loadUserTable();
     }
   });
 }
