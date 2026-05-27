@@ -22,9 +22,19 @@
   }
   body { background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 40%, #e0f2fe 100%); min-height: 100vh; }
   .sidebar { background: linear-gradient(180deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%); }
+  
+  /* Navigation */
   .nav-item { transition: all .2s ease; border-radius: 12px; }
   .nav-item:hover { background: rgba(255,255,255,.15); transform: translateX(4px); }
   .nav-item.active { background: rgba(255,255,255,.2); box-shadow: 0 4px 15px rgba(0,0,0,.2); }
+  
+  /* Dropdown Sub-menu */
+  .sub-menu { transition: max-height 0.3s ease-in-out, opacity 0.3s; overflow: hidden; }
+  .sub-nav-item { transition: all .2s ease; border-radius: 10px; }
+  .sub-nav-item:hover { background: rgba(255,255,255,.1); }
+  .sub-nav-item.active { background: rgba(255,255,255,.2); font-weight: 600; }
+
+  /* Cards */
   .glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -45,6 +55,7 @@
     transform: scale(1.01);
     box-shadow: 0 0 0 4px rgba(59,130,246,.15);
   }
+
   .badge-approved  { background:#dcfce7; color:#166534; }
   .badge-pending   { background:#fef9c3; color:#854d0e; }
   .badge-revision  { background:#fee2e2; color:#991b1b; }
@@ -52,23 +63,23 @@
   .page { animation: fadeIn .35s ease; }
   .section-hidden { display:none!important; }
   
-  /* Input Customizations for the memory fields */
+  /* Custom Datalist Arrow */
   input[list] {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
   }
-  input[list]::-webkit-calendar-picker-indicator {
-    opacity: 0;
-  }
-  
+  input[list]::-webkit-calendar-picker-indicator { opacity: 0; }
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:3px; }
+  
+  /* Custom Range Slider for Avatar Adjuster */
+  input[type=range] { accent-color: #3b82f6; cursor: pointer; }
 </style>
 </head>
 <body>
 <div class="flex h-screen overflow-hidden">
 
-  <!-- SIDEBAR -->
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 text-white overflow-y-auto">
     <div class="mb-8 mt-2">
       <div class="flex items-center gap-3 mb-1">
@@ -83,22 +94,57 @@
       <p class="text-xs text-blue-300 mt-1 ml-1">ระบบตรวจแผนการสอน</p>
     </div>
 
-    <!-- User info -->
+    <!-- User info (Clickable for Photo Upload) -->
     <div class="glass-card bg-white/10 border-white/20 p-3 mb-6 flex items-center gap-3">
-      <div id="avatarInitials" class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center font-bold text-sm">--</div>
+      <div class="relative group cursor-pointer" onclick="openAvatarSettings()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
+        <!-- Overflow hidden สำหรับวงกลมด้านนอกสุด -->
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center font-bold text-sm overflow-hidden relative border border-blue-200/50">
+          <span id="avatarInitials">--</span>
+          <img id="avatarImg" class="hidden absolute inset-0 w-full h-full object-cover" />
+        </div>
+        <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <i class="fa-solid fa-camera text-xs text-white"></i>
+        </div>
+      </div>
       <div class="flex-1 min-w-0">
         <p id="teacherName" class="font-semibold text-sm truncate">กำลังโหลด...</p>
         <p id="teacherGroup" class="text-xs text-blue-300 truncate">—</p>
       </div>
     </div>
 
-    <nav class="space-y-1 flex-1">
+    <!-- Navigation with Advanced Sub-menu -->
+    <nav class="space-y-2 flex-1">
+      
+      <!-- ปุ่มหน้าส่งแผน (Main Menu) -->
       <button onclick="showPage('upload')" id="nav-upload" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
         <i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i> ส่งแผนการสอนใหม่
       </button>
-      <button onclick="showPage('history')" id="nav-history" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
-        <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> ประวัติและสถานะ
-      </button>
+
+      <!-- เมนูติดตามสถานะ (มี Sub-menu ย่อย) -->
+      <div>
+        <button onclick="toggleSubmenu('submenu-history', 'icon-history')" id="nav-history-main" class="nav-item w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-white/10 rounded-xl transition-colors">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-folder-open w-5 text-center text-blue-100"></i> ติดตามสถานะงาน
+          </div>
+          <i id="icon-history" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+        </button>
+        
+        <div id="submenu-history" class="sub-menu max-h-0 pl-4 pr-1 space-y-1 mt-1">
+          <button onclick="showPage('history', 'all')" id="nav-history-all" class="sub-nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-blue-100 hover:text-white">
+            <i class="fa-solid fa-list w-4 text-center"></i> ประวัติทั้งหมด
+          </button>
+          <button onclick="showPage('history', 'Pending')" id="nav-history-pending" class="sub-nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-yellow-200 hover:text-yellow-100">
+            <i class="fa-solid fa-hourglass-half w-4 text-center"></i> รอการตรวจ
+          </button>
+          <button onclick="showPage('history', 'Approved')" id="nav-history-approved" class="sub-nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-green-300 hover:text-green-200">
+            <i class="fa-solid fa-check-circle w-4 text-center"></i> อนุมัติแล้ว
+          </button>
+          <button onclick="showPage('history', 'Revision Needed')" id="nav-history-revision" class="sub-nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-red-300 hover:text-red-200">
+            <i class="fa-solid fa-rotate-left w-4 text-center"></i> ต้องแก้ไข
+          </button>
+        </div>
+      </div>
+      
     </nav>
 
     <div class="mt-auto pt-4 border-t border-white/20">
@@ -114,10 +160,10 @@
     </div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
   <main class="flex-1 overflow-y-auto p-6">
 
-    <!-- PAGE: Upload -->
+    <!-- ─── PAGE: Upload ─────────────────────── -->
     <section id="page-upload" class="page">
       <div class="mb-6">
         <h1 class="font-display text-2xl font-bold text-blue-900">ส่งแผนการสอนใหม่</h1>
@@ -146,17 +192,40 @@
           <i class="fa-solid fa-file-circle-plus text-blue-500 mr-2"></i>รายละเอียดรายวิชา
         </h2>
 
-        <!-- เปลี่ยนเป็นระบบ Datalist พิมพ์แล้วจำ -->
+        <!-- ระบบ Datalist พิมพ์แล้วจำ + มีตัวเลือกอัตโนมัติ (ระบบสะกดอัจฉริยะ) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">หมวดสาระการเรียนรู้ <span class="text-red-500">*</span></label>
-            <input type="text" id="inpGroup" list="groupList" required placeholder="เช่น วิทยาศาสตร์" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <datalist id="groupList"></datalist>
+            <input type="text" id="inpGroup" list="groupList" required placeholder="พิมพ์เพื่อค้นหา (เช่น วิทยาศาสตร์)" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <datalist id="groupList">
+              <option value="วิทยาศาสตร์และเทคโนโลยี"></option>
+              <option value="คณิตศาสตร์"></option>
+              <option value="ภาษาไทย"></option>
+              <option value="ภาษาต่างประเทศ"></option>
+              <option value="สังคมศึกษา ศาสนาและวัฒนธรรม"></option>
+              <option value="สุขศึกษาและพลศึกษา"></option>
+              <option value="ศิลปะ"></option>
+              <option value="การงานอาชีพ"></option>
+            </datalist>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อรายวิชา <span class="text-red-500">*</span></label>
-            <input type="text" id="inpSubject" list="subjectList" required placeholder="เช่น วิทยาศาสตร์พื้นฐาน" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <datalist id="subjectList"></datalist>
+            <input type="text" id="inpSubject" list="subjectList" required placeholder="พิมพ์เพื่อค้นหา (เช่น วิทยาศาสตร์พื้นฐาน)" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <datalist id="subjectList">
+              <option value="วิทยาศาสตร์พื้นฐาน"></option>
+              <option value="วิทยาศาสตร์เพิ่มเติม"></option>
+              <option value="คณิตศาสตร์พื้นฐาน"></option>
+              <option value="คณิตศาสตร์เพิ่มเติม"></option>
+              <option value="ภาษาไทย"></option>
+              <option value="ภาษาอังกฤษพื้นฐาน"></option>
+              <option value="ภาษาอังกฤษเพื่อการสื่อสาร"></option>
+              <option value="สังคมศึกษา"></option>
+              <option value="ประวัติศาสตร์"></option>
+              <option value="สุขศึกษาและพลศึกษา"></option>
+              <option value="ศิลปะและดนตรี"></option>
+              <option value="วิทยาการคำนวณ"></option>
+              <option value="การออกแบบและเทคโนโลยี"></option>
+            </datalist>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">ระดับชั้น <span class="text-red-500">*</span></label>
@@ -168,7 +237,7 @@
             <input type="number" id="inpWeek" min="1" max="40" required placeholder="เช่น 1" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
           </div>
         </div>
-        <p class="text-xs text-blue-500 mb-6 italic"><i class="fa-solid fa-circle-info mr-1"></i>ระบบจะจดจำคำตอบของคุณไว้เป็นตัวเลือก (Dropdown) ในการส่งครั้งต่อไป</p>
+        <p class="text-xs text-blue-500 mb-6 italic"><i class="fa-solid fa-circle-info mr-1"></i>ระบบช่วยสะกดอัตโนมัติจะทำงานเมื่อคุณเริ่มพิมพ์ และระบบจะจดจำคำตอบใหม่ๆ ของคุณไว้เสมอ</p>
 
         <!-- Drag & Drop zone -->
         <div id="dropZone" class="drop-zone p-10 text-center mb-5"
@@ -198,11 +267,11 @@
       </div>
     </section>
 
-    <!-- PAGE: History -->
+    <!-- ─── PAGE: History ─────────────────────── -->
     <section id="page-history" class="page section-hidden">
       <div class="mb-6">
-        <h1 class="font-display text-2xl font-bold text-blue-900">ประวัติการส่งแผนการสอน</h1>
-        <p class="text-gray-500 text-sm mt-1">ตรวจสอบสถานะแผนการสอนและแก้ไขงานที่ถูกตีกลับ</p>
+        <h1 class="font-display text-2xl font-bold text-blue-900">ติดตามประวัติและสถานะแผน</h1>
+        <p class="text-gray-500 text-sm mt-1">ตรวจสอบสถานะแผนการสอนและแก้ไขงานที่ถูกผู้อำนวยการตีกลับ</p>
       </div>
 
       <div class="glass-card p-6">
@@ -222,7 +291,7 @@
               <tr class="border-b border-blue-100">
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">สัปดาห์</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">รายวิชา</th>
-                <th class="text-left py-3 px-2 text-gray-500 font-medium">วันที่ส่ง/แก้ไข</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">วันที่อัปเดตล่าสุด</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">สถานะ</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">ข้อเสนอแนะ ผอ.</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">เอกสารและคำสั่ง</th>
@@ -256,6 +325,7 @@ let selectedFile = null;
     document.getElementById('teacherGroup').textContent = profile.subject_group || 'ครูผู้สอน';
     const initials = profile.name.replace(/^(นาย|นาง|นางสาว)\s?/, '').slice(0, 2);
     document.getElementById('avatarInitials').textContent = initials || '--';
+    loadAvatar();
   }
 
   try {
@@ -270,20 +340,184 @@ let selectedFile = null;
     }
   } catch (_) {}
 
-  // โหลดความจำช่องกรอก
   loadMemory();
   await loadStats();
 })();
 
-// ── Memory System (จดจำสิ่งที่เคยพิมพ์) ────────────────────────
+// ── Avatar Setup (Custom Position & Zoom) ────────────────────────
+async function openAvatarSettings() {
+  // 1. กดเลือกไฟล์จากเครื่อง
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/png, image/jpeg';
+  fileInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const base64 = ev.target.result;
+
+      // 2. เด้งหน้าต่างปรับแต่งรูป (Zoom, X, Y)
+      await Swal.fire({
+        title: '<span class="font-display">ปรับแต่งรูปโปรไฟล์</span>',
+        html: `
+          <div class="flex flex-col items-center">
+            <!-- กรอบแสดงผลการปรับแต่งแบบวงกลม -->
+            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-200 shadow-inner mb-5 relative" style="background:#f3f4f6;">
+              <img id="swalAvatarPreview" src="${base64}" style="width:100%; height:100%; object-fit:cover; object-position:50% 50%; transform:scale(1); transform-origin:center;" />
+            </div>
+            
+            <div class="w-full text-left space-y-4 px-2">
+              <div>
+                <label class="text-xs text-gray-500 font-semibold flex justify-between"><span>ซูมขยาย (Zoom)</span> <span id="valZ" class="text-blue-600">1x</span></label>
+                <input type="range" id="zoomAvatar" min="1" max="3" step="0.05" value="1" class="w-full">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนซ้าย-ขวา (X)</span> <span id="valX" class="text-blue-600">50%</span></label>
+                <input type="range" id="posXAvatar" min="0" max="100" value="50" class="w-full">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนบน-ล่าง (Y)</span> <span id="valY" class="text-blue-600">50%</span></label>
+                <input type="range" id="posYAvatar" min="0" max="100" value="50" class="w-full">
+              </div>
+            </div>
+          </div>
+        `,
+        didOpen: () => {
+          // ผูก Event ให้สไลเดอร์อัปเดตภาพแบบ Real-time
+          const img = document.getElementById('swalAvatarPreview');
+          const z = document.getElementById('zoomAvatar');
+          const x = document.getElementById('posXAvatar');
+          const y = document.getElementById('posYAvatar');
+
+          const vz = document.getElementById('valZ');
+          const vx = document.getElementById('valX');
+          const vy = document.getElementById('valY');
+
+          const updateImg = () => {
+            img.style.transform = `scale(${z.value})`;
+            img.style.objectPosition = `${x.value}% ${y.value}%`;
+            vz.textContent = z.value + 'x';
+            vx.textContent = x.value + '%';
+            vy.textContent = y.value + '%';
+          };
+
+          z.oninput = updateImg;
+          x.oninput = updateImg;
+          y.oninput = updateImg;
+        },
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกรูปภาพ',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#3b82f6'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // เมื่อกดบันทึก ดึงค่าพิกัดทั้งหมดเก็บลง LocalStorage
+          const z = document.getElementById('zoomAvatar').value;
+          const x = document.getElementById('posXAvatar').value;
+          const y = document.getElementById('posYAvatar').value;
+
+          const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+          if (profile.id) {
+            localStorage.setItem('avatar_' + profile.id, JSON.stringify({
+              img: base64,
+              zoom: z,
+              posX: x,
+              posY: y
+            }));
+            loadAvatar();
+            Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ', showConfirmButton: false, timer: 2000 });
+          }
+        }
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+  fileInput.click();
+}
+
+function loadAvatar() {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) return;
+  const saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
+  const imgEl = document.getElementById('avatarImg');
+  const txtEl = document.getElementById('avatarInitials');
+  
+  if (saved && saved.img) {
+    imgEl.src = saved.img;
+    imgEl.style.objectPosition = `${saved.posX || 50}% ${saved.posY || 50}%`;
+    imgEl.style.transform = `scale(${saved.zoom || 1})`;
+    imgEl.classList.remove('hidden');
+    txtEl.classList.add('hidden');
+  }
+}
+
+// ── Sidebar Menu Toggle (เชื่อมการกดเมนูย่อยให้เปิดหน้าและกรองตาราง) ──────
+function toggleSubmenu(menuId, iconId) {
+  const menu = document.getElementById(menuId);
+  const icon = document.getElementById(iconId);
+  if (menu.style.maxHeight === '0px' || menu.style.maxHeight === '') {
+    menu.style.maxHeight = '250px';
+    icon.classList.add('rotate-180');
+  } else {
+    menu.style.maxHeight = '0px';
+    icon.classList.remove('rotate-180');
+  }
+}
+
+// ── Tab navigation ────────────────────────────────────────────
+function showPage(name, filter = 'all') {
+  // ซ่อนทุกหน้า
+  document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
+  
+  // ลบ Active ออกจากทุกปุ่มเมนูหลัก/ย่อย
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('active'));
+
+  // เปิดหน้าที่เลือก
+  document.getElementById('page-' + name).classList.remove('section-hidden');
+
+  if (name === 'upload') {
+    document.getElementById('nav-upload').classList.add('active');
+  } else if (name === 'history') {
+    document.getElementById('nav-history-main').classList.add('active');
+    
+    // ไฮไลต์ปุ่มเมนูย่อยตามฟิลเตอร์
+    const filterMap = {
+      'all': 'nav-history-all',
+      'Pending': 'nav-history-pending',
+      'Approved': 'nav-history-approved',
+      'Revision Needed': 'nav-history-revision'
+    };
+    const activeSub = document.getElementById(filterMap[filter]);
+    if(activeSub) activeSub.classList.add('active');
+
+    // ให้มั่นใจว่ากล่องเมนูย่อยกางอยู่เสมอ
+    const menu = document.getElementById('submenu-history');
+    const icon = document.getElementById('icon-history');
+    menu.style.maxHeight = '250px';
+    icon.classList.add('rotate-180');
+
+    // กรองตารางตามที่คลิกมาจากเมนู
+    loadHistory().then(() => { filterTable(filter); });
+  }
+}
+
+// ── Memory System (จดจำสิ่งที่เคยพิมพ์ + ข้อมูลพื้นฐาน) ──────────
 function loadMemory() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
   const mem = JSON.parse(localStorage.getItem('teacher_mem_' + profile.id) || '{"groups":[], "subjects":[], "grades":[]}');
 
-  document.getElementById('groupList').innerHTML = mem.groups.map(g => `<option value="${g}">`).join('');
-  document.getElementById('subjectList').innerHTML = mem.subjects.map(s => `<option value="${s}">`).join('');
-  document.getElementById('gradeList').innerHTML = mem.grades.map(g => `<option value="${g}">`).join('');
+  const groupList = document.getElementById('groupList');
+  mem.groups.forEach(g => { if(!groupList.querySelector(`option[value="${g}"]`)) groupList.innerHTML += `<option value="${g}"></option>`; });
+  
+  const subjectList = document.getElementById('subjectList');
+  mem.subjects.forEach(s => { if(!subjectList.querySelector(`option[value="${s}"]`)) subjectList.innerHTML += `<option value="${s}"></option>`; });
+
+  const gradeList = document.getElementById('gradeList');
+  mem.grades.forEach(g => { if(!gradeList.querySelector(`option[value="${g}"]`)) gradeList.innerHTML += `<option value="${g}"></option>`; });
 
   if (document.getElementById('inpGroup').value === '' && profile.subject_group) {
     document.getElementById('inpGroup').value = profile.subject_group;
@@ -317,19 +551,10 @@ async function loadStats() {
   }
 }
 
-// ── Tab navigation ────────────────────────────────────────────
-function showPage(name) {
-  document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
-  document.querySelectorAll('button[id^="nav-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.remove('section-hidden');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'history') loadHistory();
-}
-
-// ── History ───────────────────────────────────────────────────
+// ── History & Tables ──────────────────────────────────────────
 async function loadHistory() {
   const tbody = document.getElementById('historyTable');
-  tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>`;
   try {
     allPlans = await getMyPlans();
     renderTable(allPlans);
@@ -341,11 +566,10 @@ async function loadHistory() {
 function renderTable(data) {
   const tbody = document.getElementById('historyTable');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ยังไม่มีประวัติการส่งแผนการสอน</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ยังไม่มีประวัติแผนในหมวดหมู่นี้</td></tr>`;
     return;
   }
   tbody.innerHTML = data.map(p => {
-    // ใช้วันที่อัปเดตล่าสุด จะได้รู้ว่าส่งแก้ไปตอนไหน
     const date = p.updated_at || p.created_at
       ? new Date(p.updated_at || p.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
       : '—';
@@ -354,7 +578,6 @@ function renderTable(data) {
       ? `<a href="${p.file_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs font-semibold mr-2 border border-blue-200 bg-white px-2 py-1 rounded shadow-sm"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์เก่า</a>`
       : `<span class="text-gray-400 text-xs mr-2">—</span>`;
       
-    // ปุ่มส่งแก้ สำหรับสถานะตีกลับ
     let extraAction = '';
     if (p.status === 'Revision Needed') {
       extraAction = `<button onclick="resubmitPlan('${p.id}', '${p.subject_name}', '${p.week_number}')" class="text-white hover:bg-red-600 text-xs font-semibold bg-red-500 px-3 py-1.5 rounded-lg shadow-md transition-colors whitespace-nowrap"><i class="fa-solid fa-upload mr-1"></i>ส่งไฟล์แก้ไข</button>`;
@@ -455,10 +678,7 @@ async function submitPlan() {
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbyi3mrOYV5o-47ITAQosbXNDklhgMu43bwNakoT7bH1QT4P-ThwxXRQp9PkbY5xPl_N/exec';
 
   try {
-    // เซฟความจำ
     saveMemory(group, subj, grade);
-
-    // อัปโหลดเข้าสู่ระบบ (GAS + Supabase Insert)
     await uploadPlanViaGAS(fullSubjectName, weekNum, selectedFile, GAS_URL);
 
     await Swal.fire({
@@ -466,7 +686,7 @@ async function submitPlan() {
       title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>',
       html: '<p style="font-family:Sarabun;font-size:14px">แผนของคุณเข้าสู่ระบบและรอผู้อำนวยการตรวจสอบแล้ว</p>',
       confirmButtonColor: '#3b82f6',
-      confirmButtonText: 'รับทราบ',
+      confirmButtonText: 'ดูประวัติการส่ง',
     });
 
     clearFile(null);
@@ -475,7 +695,7 @@ async function submitPlan() {
     document.getElementById('inpWeek').value    = '';
     
     await loadStats();
-    showPage('history');
+    showPage('history', 'Pending'); // นำไปสู่หน้ารอตรวจอัตโนมัติ
 
   } catch (error) {
     Swal.fire({
@@ -504,7 +724,7 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
     cancelButtonColor: '#94a3b8'
   });
 
-  if (!file) return; // กดยกเลิก
+  if (!file) return; 
   if (file.type !== 'application/pdf') {
      return Swal.fire({ icon:'error', title:'ไฟล์ไม่ถูกต้อง', text:'กรุณาอัปโหลดไฟล์ PDF เท่านั้น', confirmButtonColor:'#3b82f6'});
   }
@@ -523,7 +743,7 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
   try {
     const base64 = await _fileToBase64(file);
     const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxncvxZ2KbRVRE2Osn_6LV3mGtne5NIxdGvrbnIkzf1YExO2B_-wCv2aqm0gcHApu8/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyi3mrOYV5o-47ITAQosbXNDklhgMu43bwNakoT7bH1QT4P-ThwxXRQp9PkbY5xPl_N/exec';
 
     const payload = {
       fileName:    file.name,
@@ -535,17 +755,15 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
       teacherName: profile.name,
     };
 
-    // 1. ส่งไฟล์ไปฝากที่ Google Drive (GAS) ใหม่
     const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
     if (!response.ok) throw new Error(`การเชื่อมต่อขัดข้อง (Status ${response.status})`);
     const result = await response.json();
     if (!result.success) throw new Error(result.message);
 
-    // 2. อัปเดตตารางฐานข้อมูล Supabase ด้วยลิงก์ไฟล์ใหม่ ล้างคอมเมนต์และรีเซ็ตสถานะเป็นรอตรวจ
     const { error } = await db.from('lesson_plans').update({
       file_url: result.fileUrl,
       status: 'Pending',
-      director_feedback: null, // รีเซ็ตเพื่อรอ ผอ. ตรวจใหม่
+      director_feedback: null, 
       updated_at: new Date().toISOString()
     }).eq('id', planId);
 
@@ -553,9 +771,8 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
 
     Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', text: 'ส่งแผนการสอนฉบับแก้ไขเรียบร้อยแล้ว', confirmButtonColor: '#3b82f6' });
     
-    // โหลดหน้าใหม่
     await loadStats();
-    loadHistory();
+    loadHistory().then(() => { filterTable('Pending'); }); // พาไปหน้ารอตรวจเพื่อดูว่าเปลี่ยนสถานะแล้ว
 
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'การส่งไฟล์ล้มเหลว', text: err.message, confirmButtonColor: '#3b82f6' });
