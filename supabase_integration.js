@@ -10,7 +10,7 @@
 const SUPABASE_URL      = 'https://aamnvfnhtvmxwypgiorq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhbW52Zm5odHZteHd5cGdpb3JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTYwNDAsImV4cCI6MjA5NTE5MjA0MH0.dkvN9FVrz_ekrmvOUFOgGZxewG0S_tQyTJTp_kZeTVI';
 
-// 🌟 แก้ไขจุดที่ทำให้เกิด Error 404: ปรับชื่อไฟล์ให้ตรงกับบน GitHub ของคุณครูเป๊ะๆ 🌟
+// ปรับชื่อไฟล์ให้ตรงกับบน GitHub ของคุณครู
 const ROLE_ROUTES = { 
   teacher: 'teacher_dashboard.html', 
   director: 'director_dashboard.html', 
@@ -105,16 +105,14 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   const aiSummary = result.summary || '-';
   const weekNumber = parseInt(weekLabel.replace(/[^0-9]/g, '')) || 0;
 
+  // 🌟 แก้ไขบัค: ตัด file_name, subject, submitted_at ทิ้ง ให้ตรงกับตารางของคุณครู 🌟
   const { error: insertErr } = await window.db.from('lesson_plans').insert({
     teacher_id:    profile.id,
-    subject:       subject,
     subject_name:  subject, 
     week_number:   weekNumber,
-    file_name:     file.name,
     file_url:      driveUrl, 
     ai_summary:    aiSummary,
-    status:        'Pending',
-    submitted_at:  new Date().toISOString(),
+    status:        'Pending'
   });
 
   if (insertErr) throw new Error(`บันทึกข้อมูลแผนลงระบบไม่สำเร็จ: ${insertErr.message}`);
