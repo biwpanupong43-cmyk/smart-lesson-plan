@@ -262,19 +262,19 @@
                 <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Google Drive" class="w-7 h-7 object-contain">
               </div>
               <div>
-                <p class="font-semibold text-gray-800">Google Drive Storage</p>
-                <p class="text-gray-500 text-xs">พื้นที่จัดเก็บไฟล์ PDF แผนการสอน</p>
+                <p class="font-semibold text-gray-800">Google Apps Script API</p>
+                <p class="text-gray-500 text-xs">ลิงก์สำหรับอัปโหลดไฟล์และตรวจความจุ Drive</p>
               </div>
             </div>
-            <label class="block text-xs text-gray-500 mb-2 font-medium">Folder ID (โฟลเดอร์หลัก)</label>
+            <label class="block text-xs text-gray-500 mb-2 font-medium">Web App URL (ลิงก์ที่ได้จากการ Deploy)</label>
             <div class="relative mb-4">
-              <input type="text" id="driveFolder" value="" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-mono pr-10" placeholder="1A2B3C4D5E_xxxxxxxxx"/>
-              <button onclick="openDriveFolder()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+              <input type="text" id="gasUrlInput" value="" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-mono pr-10" placeholder="https://script.google.com/macros/s/.../exec"/>
+              <button onclick="testGasUrl()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors" title="ทดสอบเปิดลิงก์">
+                <i class="fa-solid fa-link text-sm"></i>
               </button>
             </div>
             <div class="flex items-center justify-between">
-              <div><span class="text-xs text-gray-500">รูปแบบการบันทึก:</span><span class="text-xs font-semibold text-gray-800 ml-1">แยกโฟลเดอร์ตามกลุ่มสาระฯ</span></div>
+              <div><span class="text-xs text-gray-500">สถานะ API:</span><span id="apiStatusText" class="text-xs font-semibold text-gray-800 ml-1">รอการบันทึก</span></div>
               <button onclick="saveKey('drive')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-medium transition-colors shadow-sm">บันทึกเชื่อมต่อ</button>
             </div>
           </div>
@@ -785,7 +785,7 @@ async function loadOverviewStats() {
     const { data: plans } = await db.from('lesson_plans').select('id, status, created_at, updated_at, users(name)');
     document.getElementById('totalPlans').textContent = plans ? plans.length : "0";
 
-    const dKey = await getSystemSetting('drive_folder_id');
+    const gasUrl = await getSystemSetting('gas_url');
     const driveStatus = document.getElementById('driveStatus');
     const driveSub    = document.getElementById('driveSubtext');
     const driveWrapper = document.getElementById('driveStorageWrapper');
@@ -793,17 +793,14 @@ async function loadOverviewStats() {
     const driveStorageText = document.getElementById('driveStorageText');
 
     // 🌟 ดึงข้อมูลพื้นที่ใช้งานจริงจาก Google Apps Script 🌟
-    if (dKey) {
+    if (gasUrl) {
         driveStatus.innerHTML = `<span class="text-blue-600">เชื่อมต่อแล้ว</span>`;
-        driveSub.textContent  = `Folder ID: ${dKey}`;
+        driveSub.textContent  = `API: เชื่อมต่อสำเร็จ`;
         driveWrapper.classList.remove('hidden');
         driveStorageText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบพื้นที่จาก Google Drive...';
         
-        // ลิงก์ที่ใช้งานจริงในระบบ (ตามที่แอดมินเซ็ตไว้ในระบบอัปโหลด)
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxgKsXukkQz_f_XQATfnDyzfKiNG48CS1dsAEY5ZEChtg9zVkhXfdTuBoloAKLrvRdH/exec';
-        
         try {
-            const res = await fetch(GAS_URL + '?action=getQuota');
+            const res = await fetch(gasUrl + '?action=getQuota');
             if(res.ok) {
                 const quota = await res.json();
                 if(quota && quota.limit) {
@@ -821,13 +818,13 @@ async function loadOverviewStats() {
                 throw new Error("Fetch failed");
             }
         } catch(e) {
-             driveStorageText.innerHTML = `<span class="text-red-500 text-[10px]">⚠️ ไม่สามารถดึงพื้นที่ได้ (โปรดเพิ่มโค้ด doGet ใน Google Apps Script)</span>`;
+             driveStorageText.innerHTML = `<span class="text-red-500 text-[10px]">⚠️ ไม่สามารถดึงพื้นที่ได้ (โปรดเช็ค URL หรือโค้ด doGet)</span>`;
              driveBarFill.style.width = '0%';
         }
 
     } else {
         driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
-        driveSub.textContent  = "กรุณาใส่ Folder ID ปลายทาง";
+        driveSub.textContent  = "กรุณาตั้งค่า Web App URL ในเมนูเชื่อมต่อ API";
         driveWrapper.classList.add('hidden');
     }
 
@@ -929,8 +926,12 @@ async function loadSettings() {
 
 async function loadIntegrations() {
   try {
-    const dKey = await getSystemSetting('drive_folder_id');
-    if (dKey) document.getElementById('driveFolder').value = dKey;
+    const url = await getSystemSetting('gas_url');
+    if (url) {
+      document.getElementById('gasUrlInput').value = url;
+      document.getElementById('apiStatusText').textContent = 'เชื่อมต่อแล้ว';
+      document.getElementById('apiStatusText').classList.replace('text-gray-800', 'text-green-600');
+    }
   } catch (_) {}
 }
 
@@ -947,18 +948,20 @@ async function saveTerm() {
 async function saveKey(type) {
   try {
     if (type === 'drive') {
-      await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
+      await saveSystemSetting('gas_url', document.getElementById('gasUrlInput').value.trim());
+      document.getElementById('apiStatusText').textContent = 'บันทึกสำเร็จ';
+      document.getElementById('apiStatusText').classList.replace('text-gray-800', 'text-green-600');
     }
-    Toast.fire({ icon:'success', title:`บันทึก Folder ID เรียบร้อย` });
+    Toast.fire({ icon:'success', title:`บันทึก URL เชื่อมต่อเรียบร้อย` });
     loadOverviewStats(); 
   } catch (err) {
     modernPopup.fire({ icon:'error', title:err.message });
   }
 }
 
-function openDriveFolder() {
-  const folderId = document.getElementById('driveFolder').value.trim();
-  if (folderId) window.open(`https://drive.google.com/drive/folders/${folderId}`, '_blank');
+function testGasUrl() {
+  const url = document.getElementById('gasUrlInput').value.trim();
+  if (url) window.open(url, '_blank');
 }
 
 function archiveData() {
