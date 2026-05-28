@@ -743,7 +743,7 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
   try {
     const base64 = await _fileToBase64(file);
     const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxncvxZ2KbRVRE2Osn_6LV3mGtne5NIxdGvrbnIkzf1YExO2B_-wCv2aqm0gcHApu8/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwMS56SOXeKRxlT83Zuwj7wzSsRcoL0V0PE37hnVNy7gabEqoSHDMIzFn35O5xdub6B/exec';
 
     const payload = {
       fileName:    file.name,
