@@ -182,9 +182,9 @@
                 
                 <!-- 🌟 แถบความจำ Drive หนาขึ้นและมองเห็นชัดเจน 🌟 -->
                 <div id="driveStorageWrapper" class="hidden border-t border-gray-100 pt-3 mt-3">
-                  <p id="driveStorageText" class="text-gray-600 text-[11px] mb-1.5">ใช้ไป -- GB จาก -- GB</p>
-                  <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
-                    <div id="driveBarFill" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-1000" style="width:0%"></div>
+                  <p id="driveStorageText" class="text-gray-600 text-[11px] mb-1.5">ตรวจสอบความจุจริง...</p>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden shadow-inner">
+                    <div id="driveBarFill" class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000" style="width:0%"></div>
                   </div>
                 </div>
               </div>
@@ -792,13 +792,39 @@ async function loadOverviewStats() {
     const driveBarFill = document.getElementById('driveBarFill');
     const driveStorageText = document.getElementById('driveStorageText');
 
-    // 🌟 อัปเดตสถานะหน่วยความจำ Drive ให้สมจริง 🌟
+    // 🌟 ดึงข้อมูลพื้นที่ใช้งานจริงจาก Google Apps Script 🌟
     if (dKey) {
         driveStatus.innerHTML = `<span class="text-blue-600">เชื่อมต่อแล้ว</span>`;
         driveSub.textContent  = `Folder ID: ${dKey}`;
         driveWrapper.classList.remove('hidden');
-        driveStorageText.innerHTML = 'ใช้พื้นที่ไป <span class="font-bold text-gray-800">2.4 GB</span> จาก 15 GB';
-        driveBarFill.style.width = '16%'; 
+        driveStorageText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบพื้นที่จาก Google Drive...';
+        
+        // ลิงก์ที่ใช้งานจริงในระบบ (ตามที่แอดมินเซ็ตไว้ในระบบอัปโหลด)
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbxgKsXukkQz_f_XQATfnDyzfKiNG48CS1dsAEY5ZEChtg9zVkhXfdTuBoloAKLrvRdH/exec';
+        
+        try {
+            const res = await fetch(GAS_URL + '?action=getQuota');
+            if(res.ok) {
+                const quota = await res.json();
+                if(quota && quota.limit) {
+                    const usedGB = (quota.used / (1024*1024*1024)).toFixed(2);
+                    const limitGB = (quota.limit / (1024*1024*1024)).toFixed(2);
+                    const percent = Math.min(100, (quota.used / quota.limit) * 100);
+                    driveStorageText.innerHTML = `ใช้พื้นที่ไป <span class="font-bold text-gray-800">${usedGB} GB</span> จาก ${limitGB} GB`;
+                    driveBarFill.style.width = percent + '%';
+                    if (percent > 90) driveBarFill.classList.replace('bg-blue-500', 'bg-red-500');
+                    else if (percent > 70) driveBarFill.classList.replace('bg-blue-500', 'bg-amber-500');
+                } else {
+                    throw new Error("No limit data");
+                }
+            } else {
+                throw new Error("Fetch failed");
+            }
+        } catch(e) {
+             driveStorageText.innerHTML = `<span class="text-red-500 text-[10px]">⚠️ ไม่สามารถดึงพื้นที่ได้ (โปรดเพิ่มโค้ด doGet ใน Google Apps Script)</span>`;
+             driveBarFill.style.width = '0%';
+        }
+
     } else {
         driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
         driveSub.textContent  = "กรุณาใส่ Folder ID ปลายทาง";
