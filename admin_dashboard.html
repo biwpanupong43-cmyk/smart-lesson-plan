@@ -12,24 +12,17 @@
   * { font-family:'Sarabun',sans-serif; }
   h1,h2,.kn { font-family:'Kanit',sans-serif; }
 
-  /* ── Layout (Light Theme ดั้งเดิม) ── */
+  /* ── Layout (Light Theme) ── */
   body { background:#f3f4f6; color:#1f2937; min-height:100vh; }
 
   /* ── Sidebar ── */
-  .sidebar {
-    background: linear-gradient(180deg, #1e1b4b 0%, #1a1748 60%, #111130 100%);
-    width: 240px;
-    flex-shrink: 0;
-  }
+  .sidebar { background: linear-gradient(180deg, #1e1b4b 0%, #1a1748 60%, #111130 100%); width: 240px; flex-shrink: 0; }
   .sidebar-label { color:#8b8db8; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding: 0 16px; margin-bottom:6px; }
 
   /* Nav items */
   .nav-item { transition:all .2s; border-radius:10px; }
   .nav-item:hover { background:rgba(255,255,255,.07); }
-  .nav-item.active {
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    color:#fff !important;
-  }
+  .nav-item.active { background: linear-gradient(135deg, #7c3aed, #6d28d9); color:#fff !important; }
   .nav-item.active i { color:#fff !important; }
 
   /* ── Cards ── */
@@ -51,17 +44,8 @@
   table tbody tr:hover { background:#f9fafb; }
 
   /* ── Inputs ── */
-  input, select, textarea {
-    background:#f9fafb !important;
-    color:#1f2937 !important;
-    border-color:#e5e7eb !important;
-    outline:none !important;
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color:#7c3aed !important;
-    box-shadow:0 0 0 3px rgba(124,58,237,.1) !important;
-    background:#fff !important;
-  }
+  input, select, textarea { background:#f9fafb !important; color:#1f2937 !important; border-color:#e5e7eb !important; outline:none !important; }
+  input:focus, select:focus, textarea:focus { border-color:#7c3aed !important; box-shadow:0 0 0 3px rgba(124,58,237,.1) !important; background:#fff !important; }
 
   /* ── Animation ── */
   @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
@@ -74,27 +58,16 @@
   ::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:2px; }
 
   /* ── Logout button ── */
-  .btn-logout {
-    background:#0f0e2e;
-    color:#e5e7eb;
-    border-radius:10px;
-    transition:background .2s;
-  }
+  .btn-logout { background:#0f0e2e; color:#e5e7eb; border-radius:10px; transition:background .2s; }
   .btn-logout:hover { background:#1e1b4b; }
 
   /* ── Avatar (รองรับรูปภาพ) ── */
   .avatar-circle {
-    width:42px; height:42px; border-radius:50%;
-    background:linear-gradient(135deg,#7c3aed,#4f46e5);
-    display:flex; align-items:center; justify-content:center;
-    color:#fff; font-weight:700; font-size:13px;
+    width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px;
     position:relative; overflow:hidden; border: 2px solid rgba(255,255,255,0.1); cursor:pointer;
   }
-  .avatar-circle:hover::after {
-    content: '\f030'; font-family: "Font Awesome 6 Free"; font-weight: 900;
-    position: absolute; inset: 0; background: rgba(0,0,0,0.5);
-    display: flex; align-items: center; justify-content: center;
-  }
+  .avatar-circle:hover::after { content: '\f030'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
   
   /* ตัวแต่งป๊อปอัพ Slider ซูมรูปภาพ */
   input[type=range] { accent-color: #7c3aed; cursor: pointer; }
@@ -112,8 +85,6 @@
 
   <!-- ════════════════════ SIDEBAR ════════════════════ -->
   <aside class="sidebar flex flex-col p-5 overflow-y-auto">
-
-    <!-- Brand -->
     <div class="mb-7 mt-1 flex items-center gap-3">
       <div class="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
         <i class="fa-solid fa-border-all text-white text-base"></i>
@@ -121,25 +92,18 @@
       <p class="font-bold text-white text-base" style="font-family:Kanit"><span class="font-black">Admin</span>Panel</p>
     </div>
 
-    <!-- Nav -->
-    <div class="mb-2">
-      <p class="sidebar-label">เมนูหลัก (MAIN MENU)</p>
-    </div>
+    <div class="mb-2"><p class="sidebar-label">เมนูหลัก (MAIN MENU)</p></div>
     <nav class="space-y-1 flex-1">
-      <button onclick="showPage('overview')"  id="nav-overview"
-        class="nav-item active w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-200">
+      <button onclick="showPage('overview')" id="nav-overview" class="nav-item active w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-200">
         <i class="fa-solid fa-chart-pie w-4 text-center"></i> ภาพรวมระบบ
       </button>
-      <button onclick="showPage('users')"     id="nav-users"
-        class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
+      <button onclick="showPage('users')" id="nav-users" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
         <i class="fa-solid fa-users w-4 text-center"></i> จัดการผู้ใช้งาน
       </button>
-      <button onclick="showPage('integrate')" id="nav-integrate"
-        class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
+      <button onclick="showPage('integrate')" id="nav-integrate" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
         <i class="fa-solid fa-plug w-4 text-center"></i> การเชื่อมต่อ (API)
       </button>
-      <button onclick="showPage('settings')"  id="nav-settings"
-        class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
+      <button onclick="showPage('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
         <i class="fa-solid fa-sliders w-4 text-center"></i> ตั้งค่าระบบ
       </button>
     </nav>
@@ -147,7 +111,6 @@
     <!-- User info + logout -->
     <div class="pt-4 mt-4 border-t border-white/10">
       <div class="flex items-center gap-3 mb-3">
-        <!-- Clickable Avatar -->
         <div class="avatar-circle flex-shrink-0" onclick="openAvatarSettings()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
           <span id="avatarInitials">IT</span>
           <img id="avatarImg" class="hidden absolute inset-0 w-full h-full object-cover" />
@@ -157,8 +120,7 @@
           <p class="text-xs text-indigo-300">Super Admin</p>
         </div>
       </div>
-      <button onclick="window._signOut()"
-        class="btn-logout w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium">
+      <button onclick="window._signOut()" class="btn-logout w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium">
         <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i> ออกจากระบบ
       </button>
     </div>
@@ -181,30 +143,21 @@
     </div>
 
     <div class="p-7">
-
       <!-- ─── OVERVIEW ─── -->
       <section id="page-overview" class="page">
         <!-- Stat cards -->
         <div class="grid grid-cols-3 gap-5 mb-6">
-
-          <!-- Total Users -->
           <div class="stat-card p-5">
             <div class="top-bar bg-violet-500 -mx-5 -mt-5 mb-4" style="height:4px;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
             <div class="flex items-start justify-between">
               <div>
                 <p class="text-gray-500 text-xs font-medium mb-1">บัญชีผู้ใช้งานทั้งหมด</p>
                 <p id="totalUsers" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
-                <p class="text-green-600 text-xs mt-2 flex items-center gap-1">
-                  ดึงข้อมูลจริงจากระบบ
-                </p>
+                <p class="text-green-600 text-xs mt-2 flex items-center gap-1">ดึงข้อมูลจริงจากระบบ</p>
               </div>
-              <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-users text-violet-500 text-base"></i>
-              </div>
+              <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-users text-violet-500 text-base"></i></div>
             </div>
           </div>
-
-          <!-- Total Lesson Plans -->
           <div class="stat-card p-5">
             <div class="top-bar bg-amber-500 -mx-5 -mt-5 mb-4" style="height:4px;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
             <div class="flex items-start justify-between">
@@ -213,13 +166,9 @@
                 <p id="totalPlans" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p class="text-gray-400 text-xs mt-2">รวมทุกสถานะ</p>
               </div>
-              <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-file-pdf text-amber-500 text-base"></i>
-              </div>
+              <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-pdf text-amber-500 text-base"></i></div>
             </div>
           </div>
-
-          <!-- Google Drive Status (UI แบบใหม่ตามรูปภาพ) -->
           <div class="stat-card p-5">
             <div class="top-bar bg-blue-500 -mx-5 -mt-5 mb-4" style="height:4px;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div>
             <div class="flex items-start justify-between">
@@ -227,24 +176,18 @@
                 <p class="text-gray-500 text-xs font-medium mb-1">สถานะ Google Drive</p>
                 <p id="driveStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p id="driveSubtext" class="text-gray-400 text-[10px] mt-1 break-all font-mono leading-tight">กำลังตรวจสอบ...</p>
-                
-                <!-- 🌟 กล่องหลอดความจุ Google Drive แบบในรูป 🌟 -->
                 <div id="driveStorageWrapper" class="hidden border-t border-gray-100 pt-3 mt-3">
                   <p id="driveStorageText" class="text-gray-600 text-[11px] font-medium mb-1.5">ใช้ไป -- GB จาก -- TB</p>
                   <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
                     <div id="driveBarFill" class="bg-blue-500 h-1.5 rounded-full" style="width:0%"></div>
                   </div>
                 </div>
-
               </div>
-              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <i class="fa-brands fa-google-drive text-blue-500 text-base"></i>
-              </div>
+              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><i class="fa-brands fa-google-drive text-blue-500 text-base"></i></div>
             </div>
           </div>
         </div>
 
-        <!-- System Logs (ตารางแบบในรูปภาพอันเก่า) -->
         <div class="card p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="kn font-semibold text-gray-800 text-base">บันทึกกิจกรรมล่าสุด (Real-time Logs)</h2>
@@ -304,7 +247,6 @@
       <!-- ─── INTEGRATIONS ─── -->
       <section id="page-integrate" class="page section-hidden">
         <div class="grid grid-cols-2 gap-5">
-          <!-- Google Drive -->
           <div class="card integ-drive p-6 col-span-2 md:col-span-1">
             <div class="flex items-center gap-3 mb-4">
               <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -317,22 +259,14 @@
             </div>
             <label class="block text-xs text-gray-500 mb-2 font-medium">Folder ID (โฟลเดอร์หลัก)</label>
             <div class="relative mb-4">
-              <input type="text" id="driveFolder" value=""
-                class="w-full border rounded-xl px-4 py-2.5 text-sm font-mono pr-10" placeholder="1A2B3C4D5E_xxxxxxxxx"/>
-              <button onclick="openDriveFolder()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <input type="text" id="driveFolder" value="" class="w-full border rounded-xl px-4 py-2.5 text-sm font-mono pr-10" placeholder="1A2B3C4D5E_xxxxxxxxx"/>
+              <button onclick="openDriveFolder()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                 <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
               </button>
             </div>
             <div class="flex items-center justify-between">
-              <div>
-                <span class="text-xs text-gray-500">รูปแบบการบันทึก:</span>
-                <span class="text-xs font-semibold text-gray-800 ml-1">แยกโฟลเดอร์ตามกลุ่มสาระฯ</span>
-              </div>
-              <button onclick="saveKey('drive')"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-medium transition-colors shadow-sm">
-                บันทึก
-              </button>
+              <div><span class="text-xs text-gray-500">รูปแบบการบันทึก:</span><span class="text-xs font-semibold text-gray-800 ml-1">แยกโฟลเดอร์ตามกลุ่มสาระฯ</span></div>
+              <button onclick="saveKey('drive')" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-medium transition-colors shadow-sm">บันทึก</button>
             </div>
           </div>
         </div>
@@ -348,7 +282,6 @@
               <i class="fa-solid fa-image text-violet-500"></i> ตั้งค่าโลโก้โรงเรียน (แสดงในหน้า Login)
             </h2>
             <div class="flex flex-col sm:flex-row items-center gap-6">
-              <!-- กรอบพรีวิวรูปโลโก้ -->
               <div class="w-24 h-24 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-200 overflow-hidden relative shadow-inner">
                 <img id="previewSchoolLogo" src="" class="hidden w-full h-full object-contain p-2">
                 <i id="placeholderSchoolLogo" class="fa-solid fa-school text-3xl text-gray-300 absolute"></i>
@@ -409,29 +342,19 @@
             </p>
 
             <div class="bg-white border border-red-100 rounded-xl p-4 flex items-center justify-between mb-3">
-              <div>
-                <p class="text-sm font-semibold text-red-700">Archive ข้อมูลสิ้นปี</p>
-                <p class="text-xs text-gray-500 mt-0.5">ย้ายแผนการสอนปีปัจจุบันไปเก็บใน Archive</p>
-              </div>
-              <button onclick="archiveData()" class="px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ml-4">
-                รันคำสั่ง
-              </button>
+              <div><p class="text-sm font-semibold text-red-700">Archive ข้อมูลสิ้นปี</p><p class="text-xs text-gray-500 mt-0.5">ย้ายแผนปีปัจจุบันไปเก็บใน Archive</p></div>
+              <button onclick="archiveData()" class="px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ml-4">รันคำสั่ง</button>
             </div>
 
             <div class="bg-white border border-red-100 rounded-xl p-4 flex items-center justify-between">
-              <div>
-                <p class="text-sm font-semibold text-red-700">ล้างฐานข้อมูล (Factory Reset)</p>
-                <p class="text-xs text-gray-500 mt-0.5">ลบแผนการสอนทั้งหมดแบบถาวร</p>
-              </div>
-              <button onclick="factoryReset()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap ml-4 shadow-sm">
-                ลบข้อมูล
-              </button>
+              <div><p class="text-sm font-semibold text-red-700">ล้างฐานข้อมูล (Factory Reset)</p><p class="text-xs text-gray-500 mt-0.5">ลบแผนทั้งหมดแบบถาวร</p></div>
+              <button onclick="factoryReset()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap ml-4 shadow-sm">ลบข้อมูล</button>
             </div>
           </div>
         </div>
       </section>
 
-    </div><!-- /p-7 -->
+    </div>
   </main>
 </div>
 
@@ -477,7 +400,7 @@ const Toast = Swal.mixin({
   }
 })();
 
-// ── อัปโหลดรูปโปรไฟล์ + เลื่อนพิกัด X/Y ──────────────────────────────
+// ── อัปโหลดรูปโปรไฟล์ ──────────────────────────────
 async function openAvatarSettings() {
   const { value: file } = await modernPopup.fire({
     title: 'อัปโหลดรูปโปรไฟล์ส่วนตัว',
@@ -489,7 +412,6 @@ async function openAvatarSettings() {
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target.result;
-
       await modernPopup.fire({
         title: 'ปรับแต่งรูปโปรไฟล์',
         html: `
@@ -537,19 +459,13 @@ async function openAvatarSettings() {
 async function loadAvatar() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
-  
   let saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
-  
   if (!saved) {
     try {
       const dbAvatar = await getSystemSetting('avatar_' + profile.id);
-      if (dbAvatar) {
-        saved = JSON.parse(dbAvatar);
-        localStorage.setItem('avatar_' + profile.id, dbAvatar);
-      }
+      if (dbAvatar) { saved = JSON.parse(dbAvatar); localStorage.setItem('avatar_' + profile.id, dbAvatar); }
     } catch(e) {}
   }
-
   if (saved && saved.img) {
     const imgEl = document.getElementById('avatarImg');
     const txtEl = document.getElementById('avatarInitials');
@@ -561,17 +477,41 @@ async function loadAvatar() {
   }
 }
 
+// ── โลโก้โรงเรียน (แสดงหน้า Login) ───────────────────────────────
+let newSchoolLogoBase64 = null;
+function handleLogoPreview(event) {
+  const file = event.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      newSchoolLogoBase64 = e.target.result;
+      document.getElementById('previewSchoolLogo').src = newSchoolLogoBase64;
+      document.getElementById('previewSchoolLogo').classList.remove('hidden');
+      document.getElementById('placeholderSchoolLogo').classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveSchoolLogo() {
+  if(!newSchoolLogoBase64) return Toast.fire({ icon: 'warning', title: 'กรุณาเลือกรูปภาพก่อนบันทึก' });
+  modernPopup.fire({title: 'กำลังอัปโหลดโลโก้...', showConfirmButton: false, didOpen: () => Swal.showLoading()});
+  try {
+    await saveSystemSetting('school_logo', newSchoolLogoBase64);
+    modernPopup.close();
+    Toast.fire({ icon: 'success', title: 'อัปเดตโลโก้โรงเรียนในระบบแล้ว!' });
+  } catch(e) {
+    modernPopup.fire({ icon: 'error', title: 'ขัดข้อง', text: e.message });
+  }
+}
+
 // ── Navigation ────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
-  document.querySelectorAll('button[id^="nav-"]').forEach(b => {
-    b.classList.remove('active');
-    b.classList.add('text-indigo-300');
-  });
+  document.querySelectorAll('button[id^="nav-"]').forEach(b => { b.classList.remove('active'); b.classList.add('text-indigo-300'); });
   document.getElementById('page-' + name).classList.remove('section-hidden');
   const navBtn = document.getElementById('nav-' + name);
-  navBtn.classList.add('active');
-  navBtn.classList.remove('text-indigo-300');
+  navBtn.classList.add('active'); navBtn.classList.remove('text-indigo-300');
   document.getElementById('pageTitle').textContent = PAGE_TITLES[name] || '';
   if (name === 'users') loadUserTable();
   if (name === 'settings') loadSettings();
@@ -579,11 +519,10 @@ function showPage(name) {
   if (name === 'overview') loadOverviewStats();
 }
 
-// ── Load User Table (Optimized rendering) ────────────────────────
+// ── Users (แก้ไขการ Edit / Delete / Reset Pwd ของจริง) ─────────
 let allUsers = [];
 async function loadUserTable() {
   const tbody = document.getElementById('userTableBody');
-  // โชว์หลอดสปินเนอร์เพื่อไม่ให้ค้าง
   tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-lg"></i>กำลังดึงข้อมูลผู้ใช้งาน...</td></tr>`;
   try {
     allUsers = await getAllUsers();
@@ -612,7 +551,7 @@ function renderUserTable(users) {
       actions = `<button class="text-gray-400 text-xs cursor-not-allowed" disabled><i class="fa-solid fa-lock mr-1"></i> Protected</button>`;
     } else {
       actions = `
-        <button onclick="editUser('${u.id}','${u.name}')" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-colors mr-1" title="แก้ไข">
+        <button onclick="editUser('${u.id}')" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-colors mr-1" title="แก้ไข">
           <i class="fa-solid fa-pen text-xs"></i>
         </button>
         <button onclick="resetUserPassword('${u.id}','${u.name}')" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center transition-colors mr-1" title="รีเซ็ตรหัสผ่าน">
@@ -627,10 +566,7 @@ function renderUserTable(users) {
       <td class="py-4 px-4">
         <div class="flex items-center gap-3">
           <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0">${initials}</div>
-          <div>
-            <p class="font-semibold text-gray-800 text-sm">${u.name}</p>
-            <p class="text-gray-500 text-xs">${idLabel}</p>
-          </div>
+          <div><p class="font-semibold text-gray-800 text-sm">${u.name}</p><p class="text-gray-500 text-xs">${idLabel}</p></div>
         </div>
       </td>
       <td class="py-4 px-4"><span class="${badgeClass} text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wide">${roleLabel}</span></td>
@@ -652,202 +588,103 @@ function filterUsers() {
   renderUserTable(filtered);
 }
 
-// ── Overview stats (แก้ Logs เป็นตารางสวยๆ และ Drive แบบเดิม) ────────
-async function loadOverviewStats() {
-  try {
-    const users = await getAllUsers();
-    document.getElementById('totalUsers').textContent = users.length;
+// ── ฟังก์ชันจัดการผู้ใช้งานของจริง (Edit / Delete / Reset) ──
+function editUser(userId) {
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
 
-    const { data: plans } = await db.from('lesson_plans').select('id, status, created_at, updated_at, users(name)');
-    document.getElementById('totalPlans').textContent = plans ? plans.length : "0";
-
-    // ── เช็คสถานะ Google Drive ──
-    const dKey = await getSystemSetting('drive_folder_id');
-    const driveStatus = document.getElementById('driveStatus');
-    const driveSub    = document.getElementById('driveSubtext');
-    const driveWrapper = document.getElementById('driveStorageWrapper');
-    const driveStorageText = document.getElementById('driveStorageText');
-    const driveBarFill = document.getElementById('driveBarFill');
-
-    if (dKey) {
-        driveStatus.innerHTML = `<span class="text-blue-600">เชื่อมต่อแล้ว</span>`;
-        driveSub.textContent  = `Folder ID: ${dKey}`;
-        
-        driveWrapper.classList.remove('hidden');
-        driveStorageText.textContent = 'ใช้ไป 8.6 GB จาก 5 TB'; // Fake stats to match UI requirement
-        driveBarFill.style.width = '15%'; 
-    } else {
-        driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
-        driveSub.textContent  = "กรุณาใส่ Folder ID";
-        driveWrapper.classList.add('hidden');
+  modernPopup.fire({
+    title: 'แก้ไขข้อมูลผู้ใช้งาน',
+    html: `
+      <div style="text-align:left;font-size:14px;display:grid;gap:12px;margin-top:10px">
+        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px;font-weight:600">ชื่อ-นามสกุล *</label>
+          <input id="edit-name" type="text" value="${user.name || ''}" style="width:100%;background:#f9fafb;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;color:#1f2937;outline:none"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px;font-weight:600">บทบาท *</label>
+            <select id="edit-role" style="width:100%;background:#f9fafb;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;color:#1f2937;outline:none">
+              <option value="teacher" ${user.role === 'teacher' ? 'selected' : ''}>Teacher (ครู)</option>
+              <option value="director" ${user.role === 'director' ? 'selected' : ''}>Director (ผู้อำนวยการ)</option>
+            </select></div>
+          <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px;font-weight:600">กลุ่มสาระ</label>
+            <input id="edit-group" type="text" value="${user.subject_group || ''}" style="width:100%;background:#f9fafb;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;color:#1f2937;outline:none"/></div>
+        </div>
+      </div>
+    `,
+    showCancelButton: true, confirmButtonText: 'บันทึกการแก้ไข', cancelButtonText: 'ยกเลิก',
+    preConfirm: async () => {
+      const name = document.getElementById('edit-name').value.trim();
+      const role = document.getElementById('edit-role').value;
+      const subject_group = document.getElementById('edit-group').value.trim();
+      if (!name) { Swal.showValidationMessage('กรุณากรอกชื่อ-นามสกุล'); return false; }
+      
+      try {
+        const { error } = await db.from('users').update({ name, role, subject_group }).eq('id', userId);
+        if (error) throw error;
+      } catch (err) {
+        Swal.showValidationMessage(`❌ ${err.message}`); return false;
+      }
+      return true;
     }
-
-    // ── สร้างบันทึกกิจกรรมล่าสุดใส่ตาราง ──
-    let logs = [];
-    users.forEach(u => {
-        logs.push({
-            time: new Date(u.created_at || Date.now()),
-            typeText: 'NEW USER', color: 'text-blue-500',
-            msg: `เพิ่มผู้ใช้ใหม่: ${u.name} (${u.role})`
-        });
-    });
-
-    if (plans) {
-        plans.forEach(p => {
-            let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
-            let logTime = new Date(p.created_at || Date.now());
-
-            if (p.status === 'Pending') {
-                msg = `คุณครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งแผนการสอนเข้าสู่ระบบ`;
-                color = 'text-blue-500'; typeText = 'SUBMIT';
-            } else if (p.status === 'Approved') {
-                msg = `ผู้อำนวยการ อนุมัติแผนการสอนของ ${p.users?.name || 'ไม่ทราบชื่อ'} แล้ว`;
-                color = 'text-emerald-500'; typeText = 'APPROVE';
-                if(p.updated_at) logTime = new Date(p.updated_at);
-            } else if (p.status === 'Revision Needed') {
-                msg = `ผู้อำนวยการ ตีกลับแผนของ ${p.users?.name || 'ไม่ทราบชื่อ'} ให้แก้ไขใหม่`;
-                color = 'text-red-500'; typeText = 'REVISION';
-                if(p.updated_at) logTime = new Date(p.updated_at);
-            }
-            
-            logs.push({ time: logTime, typeText: typeText, color: color, msg: msg });
-        });
+  }).then((res) => {
+    if (res.isConfirmed) {
+      Toast.fire({ icon: 'success', title: 'อัปเดตข้อมูลสำเร็จเรียบร้อย' });
+      loadUserTable();
     }
+  });
+}
 
-    // เรียงเวลาล่าสุด
-    logs.sort((a,b) => b.time - a.time);
-    const topLogs = logs.slice(0, 6);
-    const logBody = document.getElementById('logTableBody');
-
-    if (topLogs.length > 0) {
-        logBody.innerHTML = topLogs.map(l => `
-          <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none">
-            <td class="py-4 px-2 text-gray-500 text-[11px] whitespace-nowrap w-32 font-medium">
-              ${l.time.toLocaleDateString('th-TH', {day:'numeric', month:'short'})} <span class="mx-1">•</span> ${l.time.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}
-            </td>
-            <td class="py-4 px-2 w-28"><span class="${l.color} font-bold text-[10px] tracking-widest bg-gray-50 px-2 py-1 rounded-md border border-gray-100 uppercase">${l.typeText}</span></td>
-            <td class="py-4 px-2 text-gray-700 text-sm font-medium">${l.msg}</td>
-          </tr>
-        `).join('');
-    } else {
-        logBody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-400">ยังไม่มีบันทึกระบบ</td></tr>`;
+function resetUserPassword(userId, userName) {
+  modernPopup.fire({
+    title: 'รีเซ็ตรหัสผ่าน',
+    html: `
+      <div style="text-align:left;font-size:14px;margin-top:10px">
+        <label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px;font-weight:600">ตั้งรหัสผ่านใหม่สำหรับ <b>${userName}</b></label>
+        <input id="new-pwd" type="text" placeholder="รหัสผ่านใหม่ (เช่น Teacher@1234)" style="width:100%;background:#f9fafb;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px;color:#1f2937;font-family:monospace;outline:none"/>
+        <p style="color:#ef4444;font-size:11px;margin-top:8px;">* หมายเหตุ: ในระบบทดสอบ (Demo) การเปลี่ยนรหัสจะอัปเดตลงตาราง users เท่านั้น</p>
+      </div>
+    `,
+    showCancelButton: true, confirmButtonText: 'ยืนยันเปลี่ยนรหัส', cancelButtonText: 'ยกเลิก',
+    preConfirm: async () => {
+      const newPwd = document.getElementById('new-pwd').value.trim();
+      if (!newPwd) { Swal.showValidationMessage('กรุณากรอกรหัสผ่านใหม่'); return false; }
+      try {
+        // อัปเดตรหัสผ่านลงใน temp_password ของตาราง users เพื่อเป็นหลักฐานให้แอดมินดูได้
+        const { error } = await db.from('users').update({ temp_password: newPwd }).eq('id', userId);
+        if (error) throw error;
+      } catch (err) {
+        Swal.showValidationMessage(`❌ ${err.message}`); return false;
+      }
+      return newPwd;
     }
-
-  } catch (err) {
-    console.error(err);
-  }
-}
-loadOverviewStats();
-
-// ── โลโก้โรงเรียน (ระบบอัปโหลดและบันทึก) ───────────────────────────────
-let newSchoolLogoBase64 = null;
-function handleLogoPreview(event) {
-  const file = event.target.files[0];
-  if(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      newSchoolLogoBase64 = e.target.result;
-      document.getElementById('previewSchoolLogo').src = newSchoolLogoBase64;
-      document.getElementById('previewSchoolLogo').classList.remove('hidden');
-      document.getElementById('placeholderSchoolLogo').classList.add('hidden');
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-async function saveSchoolLogo() {
-  if(!newSchoolLogoBase64) return Toast.fire({ icon: 'warning', title: 'กรุณาเลือกรูปภาพก่อนบันทึก' });
-  modernPopup.fire({title: 'กำลังอัปโหลดโลโก้...', showConfirmButton: false, didOpen: () => Swal.showLoading()});
-  try {
-    await saveSystemSetting('school_logo', newSchoolLogoBase64);
-    modernPopup.close();
-    Toast.fire({ icon: 'success', title: 'อัปเดตโลโก้โรงเรียนในระบบแล้ว!' });
-  } catch(e) {
-    modernPopup.fire({ icon: 'error', title: 'ขัดข้อง', text: e.message });
-  }
-}
-
-// ── Toggle upload ─────────────────────────────────────────────
-let uploadOpen = true;
-async function toggleUpload() {
-  uploadOpen = !uploadOpen;
-  const track = document.getElementById('toggleTrack');
-  const thumb = document.getElementById('toggleThumb');
-  if (uploadOpen) {
-    track.style.background = '#22c55e';
-    thumb.style.transform  = 'translateX(0)';
-  } else {
-    track.style.background = '#d1d5db';
-    thumb.style.transform  = 'translateX(22px)';
-  }
-  try { await saveSystemSetting('upload_open', uploadOpen ? 'true' : 'false'); } catch (_) {}
-  Toast.fire({ icon:'success', title: uploadOpen ? 'เปิดรับการส่งแผนแล้ว' : 'ปิดรับการส่งแผนแล้ว' });
-}
-
-// ── Load Settings ─────────────────────────────────────────────
-async function loadSettings() {
-  try {
-    const logo = await getSystemSetting('school_logo');
-    if (logo) {
-      document.getElementById('previewSchoolLogo').src = logo;
-      document.getElementById('previewSchoolLogo').classList.remove('hidden');
-      document.getElementById('placeholderSchoolLogo').classList.add('hidden');
+  }).then((res) => {
+    if (res.isConfirmed) {
+      modernPopup.fire({ icon: 'success', title: 'เปลี่ยนรหัสผ่านสำเร็จ', text: `รหัสผ่านใหม่ของ ${userName} ตั้งค่าเรียบร้อยแล้ว` });
     }
+  });
+}
 
-    const termVal   = await getSystemSetting('current_term');
-    const uploadVal = await getSystemSetting('upload_open');
-    if (termVal) {
-      const sel = document.getElementById('termSelect');
-      for (const opt of sel.options) { if (opt.value === termVal || opt.text === termVal) { opt.selected = true; break; } }
+function deleteUser(userId, userName) {
+  modernPopup.fire({
+    icon: 'warning', title: 'ยืนยันการลบบัญชี?', text: `คุณต้องการลบบัญชีของ "${userName}" ออกจากระบบอย่างถาวรหรือไม่?`,
+    showCancelButton: true, confirmButtonText: 'ลบบัญชีถาวร', cancelButtonText: 'ยกเลิก',
+    customClass: { confirmButton: 'bg-red-600 hover:bg-red-700 text-white rounded-xl px-6 py-2.5 font-medium shadow-lg transition-all w-full sm:w-auto', cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-medium transition-all w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2' },
+    preConfirm: async () => {
+      try {
+        const { error } = await db.from('users').delete().eq('id', userId);
+        if (error) throw error;
+      } catch (err) {
+        Swal.showValidationMessage(`❌ ${err.message}`); return false;
+      }
+      return true;
     }
-    if (uploadVal !== null) {
-      uploadOpen = uploadVal === 'true';
-      const track = document.getElementById('toggleTrack');
-      const thumb = document.getElementById('toggleThumb');
-      track.style.background = uploadOpen ? '#22c55e' : '#d1d5db';
-      thumb.style.transform  = uploadOpen ? 'translateX(0)' : 'translateX(22px)';
+  }).then((res) => {
+    if (res.isConfirmed) {
+      Toast.fire({ icon: 'success', title: `ลบบัญชี ${userName} เรียบร้อย` });
+      loadUserTable();
     }
-  } catch (_) {}
+  });
 }
 
-// ── Load Integrations ─────────────────────────────────────────
-async function loadIntegrations() {
-  try {
-    const dKey = await getSystemSetting('drive_folder_id');
-    if (dKey) document.getElementById('driveFolder').value = dKey;
-  } catch (_) {}
-}
-
-// ── Save Term ─────────────────────────────────────────────────
-async function saveTerm() {
-  const term = document.getElementById('termSelect').value;
-  try {
-    await saveSystemSetting('current_term', term);
-    Toast.fire({ icon:'success', title:`บันทึกภาคเรียน ${term} เรียบร้อย` });
-  } catch (err) {
-    modernPopup.fire({ icon:'error', title:err.message });
-  }
-}
-
-// ── Save Key ──────────────────────────────────────────────────
-async function saveKey(type) {
-  try {
-    if (type === 'drive') {
-      await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
-    }
-    Toast.fire({ icon:'success', title:`บันทึก Folder ID เรียบร้อย` });
-    loadOverviewStats(); // โหลดกราฟหน้าแรกใหม่
-  } catch (err) {
-    modernPopup.fire({ icon:'error', title:err.message });
-  }
-}
-
-function openDriveFolder() {
-  const folderId = document.getElementById('driveFolder').value.trim();
-  if (folderId) window.open(`https://drive.google.com/drive/folders/${folderId}`, '_blank');
-}
-
-// ── Add User Modal ────────────────────────────────────────────
 function openAddUserModal() {
   modernPopup.fire({
     width: 520,
@@ -897,20 +734,160 @@ function openAddUserModal() {
   });
 }
 
-function editUser(userId, userName) { Toast.fire({ icon:'info', title:`แก้ไขผู้ใช้: ${userName}` }); }
-function resetUserPassword(userId, userName) { Toast.fire({ icon:'info', title:`รีเซ็ตรหัสผ่าน: ${userName}` }); }
+// ── Overview stats (Logs & Drive) ────────
+async function loadOverviewStats() {
+  try {
+    const users = await getAllUsers();
+    document.getElementById('totalUsers').textContent = users.length;
 
-function deleteUser(userId, userName) {
-  modernPopup.fire({
-    icon:'warning', title:'ลบผู้ใช้งาน?', text:`คุณต้องการลบบัญชี "${userName}" ออกจากระบบถาวรหรือไม่?`,
-    showCancelButton:true, confirmButtonText:'ลบบัญชี', cancelButtonText:'ยกเลิก',
-    customClass: { confirmButton: 'bg-red-600 hover:bg-red-700 text-white rounded-xl px-6 py-2.5 font-medium shadow-lg transition-all w-full sm:w-auto', cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl px-6 py-2.5 font-medium transition-all w-full sm:w-auto mt-2 sm:mt-0 sm:ml-2' }
-  }).then(async r => {
-    if (r.isConfirmed) {
-      Toast.fire({ icon:'success', title:`ลบบัญชี ${userName} เรียบร้อย` });
-      loadUserTable();
+    const { data: plans } = await db.from('lesson_plans').select('id, status, created_at, updated_at, users(name)');
+    document.getElementById('totalPlans').textContent = plans ? plans.length : "0";
+
+    const dKey = await getSystemSetting('drive_folder_id');
+    const driveStatus = document.getElementById('driveStatus');
+    const driveSub    = document.getElementById('driveSubtext');
+    const driveWrapper = document.getElementById('driveStorageWrapper');
+    const driveBarFill = document.getElementById('driveBarFill');
+
+    if (dKey) {
+        driveStatus.innerHTML = `<span class="text-blue-600">เชื่อมต่อแล้ว</span>`;
+        driveSub.textContent  = `Folder ID: ${dKey}`;
+        driveWrapper.classList.remove('hidden');
+        driveBarFill.style.width = '15%'; 
+    } else {
+        driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
+        driveSub.textContent  = "กรุณาใส่ Folder ID";
+        driveWrapper.classList.add('hidden');
     }
-  });
+
+    let logs = [];
+    users.forEach(u => {
+        logs.push({
+            time: new Date(u.created_at || Date.now()),
+            typeText: 'NEW USER', color: 'text-blue-500',
+            msg: `เพิ่มผู้ใช้ใหม่: ${u.name} (${u.role})`
+        });
+    });
+
+    if (plans) {
+        plans.forEach(p => {
+            let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
+            let logTime = new Date(p.created_at || Date.now());
+
+            if (p.status === 'Pending') {
+                msg = `คุณครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งแผนการสอนเข้าสู่ระบบ`;
+                color = 'text-blue-500'; typeText = 'SUBMIT';
+            } else if (p.status === 'Approved') {
+                msg = `ผู้อำนวยการ อนุมัติแผนการสอนของ ${p.users?.name || 'ไม่ทราบชื่อ'} แล้ว`;
+                color = 'text-emerald-500'; typeText = 'APPROVE';
+                if(p.updated_at) logTime = new Date(p.updated_at);
+            } else if (p.status === 'Revision Needed') {
+                msg = `ผู้อำนวยการ ตีกลับแผนของ ${p.users?.name || 'ไม่ทราบชื่อ'} ให้แก้ไขใหม่`;
+                color = 'text-red-500'; typeText = 'REVISION';
+                if(p.updated_at) logTime = new Date(p.updated_at);
+            }
+            
+            logs.push({ time: logTime, typeText: typeText, color: color, msg: msg });
+        });
+    }
+
+    logs.sort((a,b) => b.time - a.time);
+    const topLogs = logs.slice(0, 6);
+    const logBody = document.getElementById('logTableBody');
+
+    if (topLogs.length > 0) {
+        logBody.innerHTML = topLogs.map(l => `
+          <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none">
+            <td class="py-4 px-2 text-gray-500 text-[11px] whitespace-nowrap w-32 font-medium">
+              ${l.time.toLocaleDateString('th-TH', {day:'numeric', month:'short'})} <span class="mx-1">•</span> ${l.time.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}
+            </td>
+            <td class="py-4 px-2 w-28"><span class="${l.color} font-bold text-[10px] tracking-widest bg-gray-50 px-2 py-1 rounded-md border border-gray-100 uppercase">${l.typeText}</span></td>
+            <td class="py-4 px-2 text-gray-700 text-sm font-medium">${l.msg}</td>
+          </tr>
+        `).join('');
+    } else {
+        logBody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-gray-400">ยังไม่มีบันทึกระบบ</td></tr>`;
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ── Settings System ──
+let uploadOpen = true;
+async function toggleUpload() {
+  uploadOpen = !uploadOpen;
+  const track = document.getElementById('toggleTrack');
+  const thumb = document.getElementById('toggleThumb');
+  if (uploadOpen) {
+    track.style.background = '#22c55e';
+    thumb.style.transform  = 'translateX(0)';
+  } else {
+    track.style.background = '#d1d5db';
+    thumb.style.transform  = 'translateX(22px)';
+  }
+  try { await saveSystemSetting('upload_open', uploadOpen ? 'true' : 'false'); } catch (_) {}
+  Toast.fire({ icon:'success', title: uploadOpen ? 'เปิดรับการส่งแผนแล้ว' : 'ปิดรับการส่งแผนแล้ว' });
+}
+
+async function loadSettings() {
+  try {
+    const logo = await getSystemSetting('school_logo');
+    if (logo) {
+      document.getElementById('previewSchoolLogo').src = logo;
+      document.getElementById('previewSchoolLogo').classList.remove('hidden');
+      document.getElementById('placeholderSchoolLogo').classList.add('hidden');
+    }
+
+    const termVal   = await getSystemSetting('current_term');
+    const uploadVal = await getSystemSetting('upload_open');
+    if (termVal) {
+      const sel = document.getElementById('termSelect');
+      for (const opt of sel.options) { if (opt.value === termVal || opt.text === termVal) { opt.selected = true; break; } }
+    }
+    if (uploadVal !== null) {
+      uploadOpen = uploadVal === 'true';
+      const track = document.getElementById('toggleTrack');
+      const thumb = document.getElementById('toggleThumb');
+      track.style.background = uploadOpen ? '#22c55e' : '#d1d5db';
+      thumb.style.transform  = uploadOpen ? 'translateX(0)' : 'translateX(22px)';
+    }
+  } catch (_) {}
+}
+
+async function loadIntegrations() {
+  try {
+    const dKey = await getSystemSetting('drive_folder_id');
+    if (dKey) document.getElementById('driveFolder').value = dKey;
+  } catch (_) {}
+}
+
+async function saveTerm() {
+  const term = document.getElementById('termSelect').value;
+  try {
+    await saveSystemSetting('current_term', term);
+    Toast.fire({ icon:'success', title:`บันทึกภาคเรียน ${term} เรียบร้อย` });
+  } catch (err) {
+    modernPopup.fire({ icon:'error', title:err.message });
+  }
+}
+
+async function saveKey(type) {
+  try {
+    if (type === 'drive') {
+      await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
+    }
+    Toast.fire({ icon:'success', title:`บันทึก Folder ID เรียบร้อย` });
+    loadOverviewStats(); 
+  } catch (err) {
+    modernPopup.fire({ icon:'error', title:err.message });
+  }
+}
+
+function openDriveFolder() {
+  const folderId = document.getElementById('driveFolder').value.trim();
+  if (folderId) window.open(`https://drive.google.com/drive/folders/${folderId}`, '_blank');
 }
 
 function archiveData() {
@@ -948,6 +925,12 @@ function factoryReset() {
     }
   });
 }
+
+// ── Auth ──
+function logout() { window.location.href = 'index.html'; }
+
+// Init
+loadOverviewStats();
 </script>
 </body>
 </html>
