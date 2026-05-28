@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>เข้าสู่ระบบ — ระบบแผนการสอน</title>
+<title>เข้าสู่ระบบ — Smart Lesson Plan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -35,6 +37,8 @@
     display:flex; align-items:center; justify-content:center;
     overflow:hidden; position:relative;
   }
+  h1,h2,.font-display { font-family: 'Kanit', sans-serif; }
+
   body::before {
     content:''; position:fixed; inset:0;
     background:
@@ -81,10 +85,12 @@
   }
   .brand-text h1 { color:var(--white); font-size:18px; font-weight:700; line-height:1.2; }
   .brand-text p  { color:rgba(255,255,255,0.55); font-size:12.5px; font-weight:400; margin-top:2px; }
+  
   .left-content  { position:relative; z-index:1; }
   .left-content h2 { color:var(--white); font-size:30px; font-weight:800; line-height:1.3; margin-bottom:16px; }
   .left-content h2 span { color:var(--gold-light); }
   .left-content p  { color:rgba(255,255,255,0.65); font-size:15px; line-height:1.7; }
+  
   .role-badges { display:flex; flex-direction:column; gap:10px; margin-top:28px; position:relative; z-index:1; }
   .role-badge {
     display:flex; align-items:center; gap:12px;
@@ -101,10 +107,11 @@
   .role-badge-info span   { color:rgba(255,255,255,0.5); font-size:12px; }
 
   .right-panel { background:var(--white); padding:56px 44px; display:flex; flex-direction:column; justify-content:center; }
-  .form-header { margin-bottom:36px; }
+  .form-header { margin-bottom:36px; display: flex; justify-content: space-between; align-items: flex-start; }
   .form-header .welcome { font-size:13px; font-weight:600; color:var(--blue); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
   .form-header h2 { font-size:26px; font-weight:800; color:var(--gray-800); margin-bottom:6px; }
   .form-header p  { font-size:14px; color:var(--gray-400); }
+  
   .field-group { margin-bottom:20px; }
   .field-group label { display:block; font-size:13.5px; font-weight:600; color:var(--gray-600); margin-bottom:8px; }
   .input-wrap { position:relative; }
@@ -128,6 +135,7 @@
   .field-error { display:none; font-size:12px; color:var(--danger); margin-top:5px; padding-left:4px; }
   .field-group.has-error .input-wrap input { border-color:var(--danger); }
   .field-group.has-error .field-error { display:block; }
+  
   #btnLogin {
     width:100%; padding:14px;
     background:linear-gradient(135deg,var(--navy-mid),var(--blue));
@@ -141,6 +149,7 @@
   #btnLogin:hover:not(:disabled)::after { background:rgba(255,255,255,0.08); }
   #btnLogin:active:not(:disabled) { transform:scale(0.985); }
   #btnLogin:disabled { opacity:0.65; cursor:not-allowed; }
+  
   .btn-spinner {
     display:none; width:18px; height:18px;
     border:2px solid rgba(255,255,255,0.3); border-top-color:white;
@@ -149,9 +158,11 @@
   @keyframes spin { to { transform:rotate(360deg); } }
   #btnLogin.loading .btn-text    { display:none; }
   #btnLogin.loading .btn-spinner { display:block; }
+  
   .form-footer { margin-top:28px; padding-top:20px; border-top:1px solid var(--gray-200); text-align:center; }
   .form-footer p { font-size:12.5px; color:var(--gray-400); }
   .form-footer strong { color:var(--navy); }
+  
   @media (max-width:680px) {
     .card-wrapper { grid-template-columns:1fr; }
     .left-panel { display:none; }
@@ -165,15 +176,17 @@
   <!-- LEFT PANEL -->
   <div class="left-panel">
     <div class="brand-logo">
-      <div class="logo-icon">📚</div>
+      <div class="logo-icon relative z-10">📚</div>
       <div class="brand-text">
         <h1>EduPlan</h1>
         <p>ระบบแผนการสอนออนไลน์</p>
       </div>
     </div>
-    <div class="left-content">
-      <h2>จัดการ<span>แผนการสอน</span><br/>ได้ทุกที่ ทุกเวลา</h2>
+    
+    <div class="left-content mt-10">
+      <h2 class="font-display">จัดการ<span>แผนการสอน</span><br/>ได้ทุกที่ ทุกเวลา</h2>
       <p>ระบบบริหารจัดการแผนการสอนที่ครบวงจร<br/>ตั้งแต่ครูผู้สอน จนถึงผู้บริหาร</p>
+      
       <div class="role-badges">
         <div class="role-badge">
           <div class="role-badge-icon teacher">👨‍🏫</div>
@@ -193,44 +206,70 @@
 
   <!-- RIGHT PANEL -->
   <div class="right-panel">
+    
+    <!-- Header แบบ Flexbox ทำให้โลโก้ไปอยู่ขวาบนพอดี -->
     <div class="form-header">
-      <p class="welcome">ยินดีต้อนรับ</p>
-      <h2>เข้าสู่ระบบ</h2>
-      <p>กรอกชื่อผู้ใช้และรหัสผ่านเพื่อดำเนินการต่อ</p>
+      <div>
+        <p class="welcome font-display">ยินดีต้อนรับ</p>
+        <h2 class="font-display">เข้าสู่ระบบ</h2>
+        <p>กรอกชื่อผู้ใช้และรหัสผ่านเพื่อดำเนินการต่อ</p>
+      </div>
+      
+      <!-- โลโก้โรงเรียน (ดึงจากฐานข้อมูลมาแสดงตรงนี้) -->
+      <div class="flex-shrink-0 ml-4">
+        <img id="schoolLogoImg" src="" class="hidden w-[64px] h-[64px] object-contain bg-white rounded-[14px] shadow-sm border border-gray-100 p-1">
+      </div>
     </div>
+    
     <form id="loginForm" novalidate>
       <div class="field-group" id="grpUsername">
         <label for="username">ชื่อผู้ใช้งาน</label>
         <div class="input-wrap">
-          <span class="input-icon">👤</span>
+          <span class="input-icon"><i class="fa-solid fa-user"></i></span>
           <input type="text" id="username" placeholder="กรอกชื่อผู้ใช้งาน" autocomplete="username" autocapitalize="none"/>
         </div>
         <span class="field-error" id="errUsername">กรุณากรอกชื่อผู้ใช้งาน</span>
       </div>
+      
       <div class="field-group" id="grpPassword">
         <label for="password">รหัสผ่าน</label>
         <div class="input-wrap">
-          <span class="input-icon">🔒</span>
+          <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
           <input type="password" id="password" placeholder="กรอกรหัสผ่าน" autocomplete="current-password"/>
-          <button type="button" class="toggle-password" id="togglePwd" title="แสดง/ซ่อนรหัสผ่าน">👁</button>
+          <button type="button" class="toggle-password" id="togglePwd" title="แสดง/ซ่อนรหัสผ่าน"><i class="fa-solid fa-eye"></i></button>
         </div>
         <span class="field-error" id="errPassword">กรุณากรอกรหัสผ่าน</span>
       </div>
+      
       <button type="submit" id="btnLogin">
         <span class="btn-text">เข้าสู่ระบบ</span>
         <div class="btn-spinner"></div>
       </button>
     </form>
+    
     <div class="form-footer">
       <p>หากลืมรหัสผ่าน ติดต่อ <strong>ผู้ดูแลระบบ</strong> เพื่อรีเซ็ต</p>
     </div>
   </div>
 </div>
 
-<!-- ✅ โหลด supabase_integration.js ก่อน script หลัก -->
+<!-- โหลด supabase_integration.js ก่อน script หลัก -->
 <script src="supabase_integration.js"></script>
 <script>
 'use strict';
+
+// ── สไตล์ป๊อปอัพให้สวยล้ำยุค ทิ้งกรอบสีดำ ──────────────────────────
+const modernPopup = Swal.mixin({
+    customClass: {
+        popup: 'rounded-3xl shadow-2xl border border-gray-100',
+        title: 'font-display text-gray-800 text-2xl',
+        htmlContainer: 'text-gray-500 font-medium',
+        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-2.5 font-medium shadow-lg shadow-blue-200 transition-all w-full mt-2',
+    },
+    buttonsStyling: false,
+    background: 'rgba(255, 255, 255, 0.98)',
+    backdrop: 'rgba(15, 23, 42, 0.4)' 
+});
 
 // ── ตรวจ session ที่มีอยู่แล้ว ──────────────────────────────
 (async () => {
@@ -247,6 +286,20 @@
   }
 })();
 
+// ── โหลดโลโก้โรงเรียน (ดึงจากฐานข้อมูล Supabase มาแสดงฝั่งขวา) ────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const logoBase64 = await getSystemSetting('school_logo');
+        if (logoBase64) {
+            const img = document.getElementById('schoolLogoImg');
+            img.src = logoBase64;
+            img.classList.remove('hidden');
+        }
+    } catch(e) {
+        console.error("ไม่สามารถดึงโลโก้โรงเรียนได้", e);
+    }
+});
+
 // ── UI Elements ──────────────────────────────────────────────
 const form      = document.getElementById('loginForm');
 const inputUser = document.getElementById('username');
@@ -259,7 +312,7 @@ const grpPwd    = document.getElementById('grpPassword');
 togglePwd.addEventListener('click', () => {
   const isHidden = inputPwd.type === 'password';
   inputPwd.type  = isHidden ? 'text' : 'password';
-  togglePwd.textContent = isHidden ? '🙈' : '👁';
+  togglePwd.innerHTML = isHidden ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
 });
 
 inputUser.addEventListener('input', () => grpUser.classList.remove('has-error'));
@@ -302,10 +355,10 @@ form.addEventListener('submit', async (e) => {
   try {
     const profile = await login(username, password);
 
-    await Swal.fire({
+    await modernPopup.fire({
       toast:true, position:'bottom-end', icon:'success',
       title:`ยินดีต้อนรับ, ${profile.name} 👋`,
-      showConfirmButton:false, timer:1800, timerProgressBar:true,
+      showConfirmButton:false, timer:1500, timerProgressBar:true,
     });
 
     const route = ROLE_ROUTES[profile.role];
@@ -320,9 +373,9 @@ form.addEventListener('submit', async (e) => {
     if (msg.includes('Invalid login credentials')) msg = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
     else if (msg.includes('Email not confirmed'))  msg = 'บัญชียังไม่ได้รับการยืนยัน กรุณาติดต่อผู้ดูแลระบบ';
 
-    Swal.fire({
+    modernPopup.fire({
       icon:'error', title:'เข้าสู่ระบบไม่สำเร็จ', text:msg,
-      confirmButtonColor:'#2563eb', confirmButtonText:'ลองอีกครั้ง',
+      confirmButtonText:'ลองอีกครั้ง',
     });
     inputUser.focus();
 
