@@ -122,6 +122,11 @@
       <button onclick="showPage('archive')" id="nav-archive" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-slate-300 font-medium">
         <i class="fa-solid fa-folder-open w-5 text-center text-emerald-400"></i> คลังแผนการสอน
       </button>
+
+      <!-- 🌟 ปุ่มตั้งค่าลายเซ็นหลักถูกนำกลับมาใช้งานแล้ว 🌟 -->
+      <button onclick="openEsigSettings()" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-slate-300 font-medium">
+        <i class="fa-solid fa-signature w-5 text-center text-violet-400"></i> ตั้งค่าลายเซ็นหลัก
+      </button>
     </nav>
 
     <div class="pt-4 border-t border-slate-700/50">
@@ -411,6 +416,59 @@
     </div>
   </div>
 
+  <!-- ══ E-SIGNATURE SETTINGS MODAL (หน้าต่างลายเซ็นหลักที่กู้กลับคืนมา) ══ -->
+  <div id="esigSettingsModal" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+      
+      <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+        <h2 class="font-display text-lg font-bold text-white">
+          <i class="fa-solid fa-signature text-indigo-400 mr-2"></i> ตั้งค่าลายเซ็นหลัก
+        </h2>
+        <button onclick="closeEsigSettings()" class="text-slate-400 hover:text-white transition-colors">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      
+      <div class="p-6 space-y-4">
+        <div class="flex gap-2 mb-4 bg-slate-900/50 p-1.5 rounded-xl border border-slate-700/50">
+          <button id="btnEsigUpload" onclick="switchEsigTab('upload')" class="tab-btn active py-2 rounded-lg w-1/2">อัปโหลดรูปภาพ</button>
+          <button id="btnEsigDraw" onclick="switchEsigTab('draw')" class="tab-btn py-2 rounded-lg w-1/2">วาดด้วยมือ</button>
+        </div>
+
+        <!-- Tab: Upload Image -->
+        <div id="esigTabUpload" class="space-y-3">
+          <div class="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-slate-900/30" onclick="document.getElementById('sigImageInput').click()">
+            <input type="file" id="sigImageInput" accept="image/png, image/jpeg" class="hidden" onchange="handleSigImage(event)">
+            <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
+            <p id="sigImageText" class="text-sm text-slate-300 font-medium">คลิกเพื่อเลือกไฟล์รูปล่าสุด</p>
+            <p class="text-xs text-slate-500 mt-1">(รองรับ .jpg, .png)</p>
+            <img id="sigImagePreview" class="hidden mx-auto mt-4 max-h-32 rounded bg-white p-2 border border-slate-200">
+          </div>
+        </div>
+
+        <!-- Tab: Draw Canvas -->
+        <div id="esigTabDraw" class="hidden space-y-3">
+          <p class="text-sm text-slate-400">กรุณาลากเส้นวาดลายเซ็นหลักของท่านในช่องด้านล่าง</p>
+          <div class="relative rounded-xl overflow-hidden signature-pad">
+            <canvas id="settingsSigCanvas" class="w-full h-[150px] touch-none bg-slate-950"></canvas>
+            <button onclick="clearSettingsCanvas()" class="absolute top-2 right-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs px-3 py-1.5 rounded-lg shadow-sm transition-colors border border-slate-600 flex items-center gap-1">
+              <i class="fa-solid fa-eraser"></i> ล้างออก
+            </button>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-slate-700 gap-3">
+          <button onclick="closeEsigSettings()" class="px-5 py-2 rounded-xl text-sm font-medium text-slate-300 bg-slate-700 hover:bg-slate-600 transition-colors">
+            ยกเลิก
+          </button>
+          <button onclick="saveEsigSettings()" class="px-6 py-2 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-950/50">
+            <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกลายเซ็นหลัก
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Supabase SDK & Setup -->
@@ -440,11 +498,12 @@ const Toast = Swal.mixin({
 // ── Global State ──
 let allReviewPlans = [];
 let _chartInstance = null;
-let currentReviewId = null;
 let _currentPlanId = null;
 let _currentPlanData = null;
 let _sigMode = 'esign';
 let _sigCanvasData = null; 
+let _settingsCanvasData = null;
+let _settingsSigType = 'upload';
 let _cachedEsig = null;    
 
 // ── Profile & Avatar Init ──
@@ -458,7 +517,7 @@ let _cachedEsig = null;
   }
 })();
 
-// 🌟 ระบบแต่งรูปและบีบอัดภาพก่อนบันทึก (แก้ปัญหาค้าง) 🌟
+// ระบบแต่งรูปและบีบอัดภาพก่อนบันทึก
 async function openAvatarSettings() {
   const { value: file } = await modernPopup.fire({
     title: 'อัปโหลดรูปโปรไฟล์ส่วนตัว',
@@ -469,12 +528,10 @@ async function openAvatarSettings() {
   if (file) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      
-      // -- การบีบอัดรูปภาพด้วย Canvas --
       const imgObj = new Image();
       imgObj.onload = async () => {
         const canvas = document.createElement('canvas');
-        const MAX_SIZE = 300; // ย่อขนาดให้เล็กสุดๆ เพื่อให้โหลดและเซฟไว
+        const MAX_SIZE = 300; 
         let w = imgObj.width;
         let h = imgObj.height;
         if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } 
@@ -482,8 +539,7 @@ async function openAvatarSettings() {
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(imgObj, 0, 0, w, h);
-        const base64Compressed = canvas.toDataURL('image/jpeg', 0.7); // บีบเป็น JPEG คุณภาพ 70%
-      // -----------------------------
+        const base64Compressed = canvas.toDataURL('image/jpeg', 0.7); 
 
         await modernPopup.fire({
           title: 'ปรับแต่งรูปโปรไฟล์',
@@ -505,7 +561,6 @@ async function openAvatarSettings() {
             const vz = document.getElementById('valZ'), vx = document.getElementById('valX'), vy = document.getElementById('valY');
             
             const updateImg = () => { 
-              // 🌟 แปลงการเลื่อนเป็นแกน Transform Translate แทน 🌟
               img.style.transform = `scale(${z.value}) translate(${x.value}%, ${y.value}%)`; 
               vz.textContent = z.value + 'x'; 
               vx.textContent = x.value; 
@@ -553,7 +608,6 @@ async function loadAvatar() {
     const imgEl = document.getElementById('avatarImg');
     const txtEl = document.getElementById('avatarInitials');
     imgEl.src = saved.img;
-    // 🌟 ดึงค่าการซูมและเลื่อนมาแสดงผลให้เป๊ะเหมือนตอนแต่งรูป 🌟
     imgEl.style.transform = `scale(${saved.zoom || 1}) translate(${saved.posX || 0}%, ${saved.posY || 0}%)`;
     imgEl.classList.remove('hidden');
     txtEl.classList.add('hidden');
@@ -577,7 +631,6 @@ function toggleSubmenu(menuId, iconId) {
 function showPage(name, filter = null) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
   
-  // ล้างสถานะ active ทุกปุ่มใน Sidebar
   document.querySelectorAll('.nav-item').forEach(b => {
     b.classList.remove('active');
     b.classList.add('text-slate-300');
@@ -597,7 +650,6 @@ function showPage(name, filter = null) {
     const navMain = document.getElementById('nav-review-main');
     navMain.classList.add('active'); navMain.classList.remove('text-slate-300');
     
-    // เปิด Sub-menu เสมอเมื่ออยู่หน้านี้
     const menu = document.getElementById('submenu-review');
     const icon = document.getElementById('icon-review');
     menu.style.maxHeight = '250px';
@@ -605,7 +657,6 @@ function showPage(name, filter = null) {
 
     const targetFilter = filter || 'Pending';
     
-    // ไฮไลต์ปุ่ม Sub-menu ที่กำลังกด
     const filterMap = {
       'Pending': 'nav-rev-pending',
       'Approved': 'nav-rev-approved',
@@ -617,11 +668,7 @@ function showPage(name, filter = null) {
       activeSub.classList.remove('text-slate-400');
     }
 
-    if (allReviewPlans.length === 0) {
-       loadReviewPlans(targetFilter);
-    } else {
-       filterReviewTable(targetFilter);
-    }
+    loadReviewPlans(targetFilter);
 
   } else if (name === 'archive') {
     const navBtn = document.getElementById('nav-archive');
@@ -634,7 +681,6 @@ function showPage(name, filter = null) {
 async function loadDashboard() {
   try {
     document.getElementById('dash-total').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i>';
-    // ดึงแผนทั้งหมดจาก DB
     const { data, error } = await db.from('lesson_plans').select('status, subject_name, week_number, id, created_at, users(name, subject_group)');
     
     let plansData = data || [];
@@ -667,7 +713,6 @@ async function loadDashboard() {
       else if (p.status === 'Revision Needed') { summaryData[gName].revision++; urgentPlans.push(p); }
     });
 
-    // เรนเดอร์ตารางกลุ่มสาระ
     const summaryTbody = document.getElementById('groupSummaryTableBody');
     const groupKeys = Object.keys(summaryData);
     
@@ -687,12 +732,10 @@ async function loadDashboard() {
       }).join('');
     }
 
-    // เรนเดอร์ตารางงานด่วน (Pending + Revision)
     const urgentTbody = document.getElementById('urgentPlansTableBody');
     if (urgentPlans.length === 0) {
       urgentTbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-500">🎉 เรียบร้อยดี ไม่มีภาระงานรอตรวจ/แก้ไข</td></tr>`;
     } else {
-      // โชว์แค่ 5 รายการล่าสุด
       urgentTbody.innerHTML = urgentPlans.slice(0, 5).map(p => {
         const name = p.users?.name || 'ไม่ทราบชื่อ';
         const group = p.users?.subject_group || 'ไม่ระบุ';
@@ -701,18 +744,22 @@ async function loadDashboard() {
           <tr>
             <td class="font-medium text-white">${name}</td>
             <td class="text-slate-400">${group}</td>
-            <td class="text-slate-300">${p.subject_name || p.subject || '—'} (สัปดาห์ ${p.week_number || p.week || '—'})</td>
+            <td class="text-slate-300">${p.subject_name || '—'} (สัปดาห์ ${p.week_number || '—'})</td>
             <td>${stBadge}</td>
-            <td><button onclick="showPage('review', 'Pending')" class="text-indigo-400 hover:text-indigo-300 font-medium bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors">ตรวจเลย</button></td>
+            <td><button onclick="openUrgentReview('${p.id}')" class="text-indigo-400 hover:text-indigo-300 font-medium bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors">ตรวจเลย</button></td>
           </tr>`;
       }).join('');
     }
 
-    // วาดกราฟเส้น
     renderDirectorChart(summaryData);
   } catch (err) {
     console.error(err);
   }
+}
+
+async function openUrgentReview(planId) {
+  await showPage('review', 'Pending');
+  openReviewModal(planId);
 }
 
 function renderDirectorChart(summaryData) {
@@ -772,7 +819,6 @@ async function loadReviewPlans(defaultFilter = 'Pending') {
 }
 
 function filterReviewTable(status) {
-  // สลับสไตล์ปุ่มแท็บในหน้า Review
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.remove('bg-indigo-600/20', 'border-indigo-500/50', 'text-indigo-300');
     b.classList.add('border-slate-700', 'text-slate-400');
@@ -785,7 +831,6 @@ function filterReviewTable(status) {
     activeBtn.classList.add('bg-indigo-600/20', 'border-indigo-500/50', 'text-indigo-300');
   }
 
-  // อัปเดตไฮไลต์ใน Sidebar Sub-menu ให้ตรงกันด้วย
   document.querySelectorAll('.sub-nav-item').forEach(b => {
     b.classList.remove('active', 'text-indigo-400');
     b.classList.add('text-slate-400');
@@ -814,11 +859,12 @@ function filterReviewTable(status) {
     else if (p.status === 'Approved') badge = '<span class="badge-approved">อนุมัติแล้ว</span>';
     else badge = '<span class="badge-revision">รอแก้ไข</span>';
     
+    // 🌟 แก้ปัญหาปุ่มค้าง: ค้นหาข้อมูลผ่าน ID แทนส่ง String ยาวๆ 🌟
     let actionBtn = '';
     if (p.status === 'Pending' || p.status === 'Revision Needed') {
-        actionBtn = `<button onclick='openReviewModal(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors shadow-lg shadow-indigo-900/30"><i class="fa-solid fa-file-signature mr-1"></i> ตรวจเลย</button>`;
+        actionBtn = `<button onclick="openReviewModal('${p.id}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors shadow-lg shadow-indigo-900/30"><i class="fa-solid fa-file-signature mr-1"></i> ตรวจเลย</button>`;
     } else {
-        actionBtn = `<button onclick='openReviewModal(${JSON.stringify(p).replace(/'/g, "&apos;")})' class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors border border-slate-600"><i class="fa-solid fa-eye mr-1"></i> ดูรีวิว</button>`;
+        actionBtn = `<button onclick="openReviewModal('${p.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-xs font-medium transition-colors border border-slate-600"><i class="fa-solid fa-eye mr-1"></i> ดูรีวิว</button>`;
     }
 
     return `<tr>
@@ -882,19 +928,40 @@ async function loadApprovedPlans() {
 }
 
 // ── CUSTOM REVIEW MODAL SYSTEM ──
-async function openReviewModal(plan) {
+async function openReviewModal(planId) {
+  const plan = allReviewPlans.find(p => p.id === planId) || _currentPlanData;
+  if (!plan) return;
+
   _currentPlanId   = plan.id;
   _currentPlanData = plan;
   _sigMode = 'esign';
   _sigCanvasData = null;
 
   document.querySelector('input[name="signType"][value="esign"]').checked = true;
-  document.getElementById('drawSection').style.display  = 'none';
-  document.getElementById('uploadSection').style.display = 'none';
   document.getElementById('sign-esign').classList.remove('hidden');
+  document.getElementById('sign-upload').classList.add('hidden');
+  document.getElementById('sign-draw').classList.add('hidden');
   
-  document.getElementById('dirFeedback').value = plan.director_feedback || '';
-  document.querySelectorAll('#customReviewModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+  // 🌟 ถอดรหัสประวัติการประเมินแบบ Checklist 🌟
+  const feedbackRaw = plan.director_feedback || '';
+  let feedbackText = feedbackRaw;
+  let checks = [false, false, false, false];
+
+  if (feedbackRaw.startsWith('[CHECK:')) {
+    const match = feedbackRaw.match(/^\[CHECK:([01],[01],[01],[01])\](.*)/s);
+    if (match) {
+      checks = match[1].split(',').map(v => v === '1');
+      feedbackText = match[2];
+    }
+  }
+
+  // นำค่าเกณฑ์ประเมินเดิมกลับมาติ๊กอัตโนมัติ
+  const checkboxes = document.querySelectorAll('#customReviewModal input[type="checkbox"]');
+  checkboxes.forEach((cb, idx) => {
+    if (cb) cb.checked = checks[idx];
+  });
+
+  document.getElementById('dirFeedback').value = feedbackText;
 
   const name = plan.users?.name || 'ไม่ทราบชื่อ';
   document.getElementById('modalTeacherName').textContent = name;
@@ -994,7 +1061,8 @@ function initCanvasDrawing(canvasId) {
   function stop() { 
     if(isDrawing) {
       isDrawing = false; 
-      _sigCanvasData = canvas.toDataURL('image/png');
+      if (canvasId === 'signatureCanvas') _sigCanvasData = canvas.toDataURL('image/png');
+      if (canvasId === 'settingsSigCanvas') _settingsCanvasData = canvas.toDataURL('image/png');
     }
   }
 
@@ -1055,8 +1123,12 @@ async function submitApproval() {
     }
   }
 
+  // 🌟 บีบอัดข้อมูลเกณฑ์ประเมิน (Checklist) ไปพร้อมกับคำอธิบายข้อเสนอแนะ ผอ. 🌟
   const notes = document.getElementById('dirFeedback').value.trim();
-  const feedback = notes || `ผ่านการพิจารณาตรวจสอบและรับรองโดยผู้อำนวยการ`;
+  const checkboxes = document.querySelectorAll('#customReviewModal input[type="checkbox"]');
+  const checksString = Array.from(checkboxes).map(cb => cb.checked ? '1' : '0').join(',');
+  const feedback = `[CHECK:${checksString}]${notes || 'ผ่านการพิจารณาตรวจสอบและรับรองโดยผู้อำนวยการ'}`;
+
   const btn = document.getElementById('btnApprove');
   btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> บันทึก...';
 
@@ -1065,7 +1137,6 @@ async function submitApproval() {
     closeReviewModal();
     Toast.fire({ icon: 'success', title: 'ลงนามอนุมัติแผนการสอนสำเร็จ' });
     
-    // โหลดตารางใหม่และคงอยู่ที่ Tab เดิม
     const currentTab = document.querySelector('.tab-btn.bg-indigo-600\\/20');
     let targetFilter = 'Pending';
     if(currentTab) {
@@ -1087,13 +1158,18 @@ async function submitReview(type) {
   if (!_currentPlanId) return;
   const notes = document.getElementById('dirFeedback').value.trim();
 
-  const { value: feedback, isConfirmed } = await modernPopup.fire({
+  const { value: feedbackText, isConfirmed } = await modernPopup.fire({
     title: 'ส่งคำสั่งให้ครูปรับปรุงงาน', input: 'textarea', inputLabel: 'พิมพ์คำชี้แนะ/สาเหตุการส่งกลับแก้ไข', inputValue: notes,
     showCancelButton: true, confirmButtonText: 'ยืนยันตีกลับแผน', cancelButtonText: 'ยกเลิก',
     confirmButtonColor: '#ef4444',
     inputValidator: v => !v.trim() && 'กรุณาระบุรายละเอียดให้ครูนำไปแก้ไข'
   });
   if (!isConfirmed) return;
+
+  // 🌟 บีบอัดข้อมูลประเมินพ่วงด้วยเมื่อกดส่งกลับแก้ไข 🌟
+  const checkboxes = document.querySelectorAll('#customReviewModal input[type="checkbox"]');
+  const checksString = Array.from(checkboxes).map(cb => cb.checked ? '1' : '0').join(',');
+  const feedback = `[CHECK:${checksString}]${feedbackText}`;
 
   try {
     await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback);
@@ -1111,6 +1187,83 @@ async function submitReview(type) {
   } catch (err) {
     modernPopup.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message });
   }
+}
+
+// ── E-SIGNATURE SETTINGS MODAL FUNCTIONS ──
+function openEsigSettings() {
+  document.getElementById('esigSettingsModal').classList.remove('hidden');
+  switchEsigTab('upload'); 
+}
+
+function closeEsigSettings() {
+  document.getElementById('esigSettingsModal').classList.add('hidden');
+}
+
+function switchEsigTab(tab) {
+  _settingsSigType = tab;
+  _settingsCanvasData = null; 
+  
+  document.getElementById('btnEsigUpload').classList.toggle('active', tab === 'upload');
+  document.getElementById('btnEsigDraw').classList.toggle('active', tab === 'draw');
+  document.getElementById('esigTabUpload').classList.toggle('hidden', tab !== 'upload');
+  document.getElementById('esigTabDraw').classList.toggle('hidden', tab !== 'draw');
+
+  const img = document.getElementById('sigImagePreview');
+  if (img) { img.src = ""; img.classList.add('hidden'); }
+  
+  const txt = document.getElementById('sigImageText');
+  if (txt) txt.textContent = "คลิกเพื่อเลือกไฟล์รูปล่าสุด (JPG, PNG)";
+
+  const input = document.getElementById('sigImageInput');
+  if (input) input.value = '';
+
+  clearSettingsCanvas();
+
+  if (tab === 'draw') {
+    setTimeout(() => { initCanvasDrawing('settingsSigCanvas'); }, 150);
+  }
+}
+
+function handleSigImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    _settingsCanvasData = ev.target.result; 
+    const img = document.getElementById('sigImagePreview');
+    img.src = _settingsCanvasData;
+    img.classList.remove('hidden');
+    document.getElementById('sigImageText').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveEsigSettings() {
+  if (!_settingsCanvasData) {
+    modernPopup.fire({ icon: 'warning', title: 'ไม่พบชุดข้อมูล', text: 'กรุณาอัปโหลดรูปภาพ หรือวาดเส้นชื่อก่อนกดตกลง' });
+    return;
+  }
+  
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) {
+    modernPopup.fire({ icon: 'error', title: 'ข้อผิดพลาดเกี่ยวกับ Session', text: 'ไม่พบประวัติการ Login กรุณาล็อกอินใหม่' });
+    return;
+  }
+
+  try {
+    await saveSystemSetting('esig_' + profile.id, _settingsCanvasData);
+    _cachedEsig = _settingsCanvasData; 
+    closeEsigSettings();
+    Toast.fire({ icon: 'success', title: 'อัปเดตระบบลายเซ็นประจำตัวสำเร็จ' });
+  } catch (err) {
+    modernPopup.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message });
+  }
+}
+
+function clearSettingsCanvas() {
+  const canvas = document.getElementById('settingsSigCanvas');
+  if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  _settingsCanvasData = null;
 }
 
 function logout() { window.location.href = 'index.html'; }
