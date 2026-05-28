@@ -10,18 +10,20 @@
 const SUPABASE_URL      = 'https://aamnvfnhtvmxwypgiorq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhbW52Zm5odHZteHd5cGdpb3JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTYwNDAsImV4cCI6MjA5NTE5MjA0MH0.dkvN9FVrz_ekrmvOUFOgGZxewG0S_tQyTJTp_kZeTVI';
 
-// ปรับให้ตรงกับชื่อไฟล์ที่คุณครูใช้งานจริง (รองรับทั้งแบบสั้นและแบบยาว)
+// ปรับให้ตรงกับชื่อไฟล์ที่คุณครูใช้งานจริง
 const ROLE_ROUTES = { 
   teacher: 'teacher.html', 
   director: 'director.html', 
   admin: 'admin.html' 
 };
 
-// ป้องกันการโหลดซ้ำซ้อน
+// 🌟 แก้บัค db is not defined: บังคับให้เป็น Global Variable 🌟
 const db = (typeof window._supabaseClient !== 'undefined') ? window._supabaseClient : (() => {
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  window._supabaseClient = client; return client;
+  window._supabaseClient = client; 
+  return client;
 })();
+window.db = db; // <- บรรทัดนี้สำคัญมาก ทำให้หน้าอื่นมองเห็น db ได้เสมอ
 
 // ตรวจสอบสิทธิ์การเข้าหน้าเว็บ (Session Check)
 (async () => {
@@ -31,13 +33,13 @@ const db = (typeof window._supabaseClient !== 'undefined') ? window._supabaseCli
   // ถ้าไม่ใช่หน้าที่ต้องล็อกอิน ปล่อยผ่าน
   if (!protectedPages.includes(currentPage)) return;
 
-  const { data: { session } } = await db.auth.getSession();
+  const { data: { session } } = await window.db.auth.getSession();
   if (!session) { window.location.href = 'index.html'; return; }
 
   let profile = JSON.parse(sessionStorage.getItem('userProfile') || 'null');
   if (!profile) {
-    const { data, error } = await db.from('users').select('id, name, role, subject_group').eq('id', session.user.id).single();
-    if (error || !data) { await db.auth.signOut(); window.location.href = 'index.html'; return; }
+    const { data, error } = await window.db.from('users').select('id, name, role, subject_group').eq('id', session.user.id).single();
+    if (error || !data) { await window.db.auth.signOut(); window.location.href = 'index.html'; return; }
     profile = data; 
     sessionStorage.setItem('userProfile', JSON.stringify(profile));
   }
@@ -46,13 +48,13 @@ const db = (typeof window._supabaseClient !== 'undefined') ? window._supabaseCli
 // ── ฟังก์ชันจัดการผู้ใช้งาน ──────────────────────────────
 async function addNewUser({ name, role, subject_group, username, temp_password }) {
   const email = `${username}@school.local`;
-  const { data: authData, error: authErr } = await db.auth.signUp({ 
+  const { data: authData, error: authErr } = await window.db.auth.signUp({ 
     email, password: temp_password, options: { data: { username, role } } 
   });
   if (authErr) throw new Error(`สร้าง Auth user ไม่สำเร็จ: ${authErr.message}`);
 
   const userId = authData.user?.id;
-  const { error: insertErr } = await db.from('users').insert({ 
+  const { error: insertErr } = await window.db.from('users').insert({ 
     id: userId, name: name, role: role, subject_group: subject_group || null, username: username, created_at: new Date().toISOString() 
   });
   if (insertErr) throw new Error(`บันทึก profile ไม่สำเร็จ: ${insertErr.message}`);
@@ -60,29 +62,29 @@ async function addNewUser({ name, role, subject_group, username, temp_password }
 }
 
 async function getAllUsers() {
-  const { data, error } = await db.from('users').select('id, name, role, subject_group, username, created_at').order('created_at', { ascending: true });
+  const { data, error } = await window.db.from('users').select('id, name, role, subject_group, username, created_at').order('created_at', { ascending: true });
   if (error) throw new Error(`ดึงข้อมูลผู้ใช้ไม่สำเร็จ: ${error.message}`);
   return data || [];
 }
 
 // ── ฟังก์ชันจัดการระบบและฐานข้อมูล ──────────────────────────────
 async function getSystemSetting(key) {
-  const { data, error } = await db.from('system_settings').select('value').eq('key', key).single();
+  const { data, error } = await window.db.from('system_settings').select('value').eq('key', key).single();
   if (error) return null; 
   return data?.value ?? null;
 }
 
 async function saveSystemSetting(key, value) {
-  const { error } = await db.from('system_settings').upsert({ key, value }, { onConflict: 'key' });
+  const { error } = await window.db.from('system_settings').upsert({ key, value }, { onConflict: 'key' });
   if (error) throw new Error(`บันทึกการตั้งค่าไม่สำเร็จ: ${error.message}`);
 }
 
 async function resetDatabase() {
-  const { error: plansErr } = await db.from('lesson_plans').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  const { error: plansErr } = await window.db.from('lesson_plans').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   if (plansErr) throw new Error(`ล้างข้อมูลแผนไม่สำเร็จ: ${plansErr.message}`);
 }
 
-// ── ฟังก์ชันการส่งและจัดการแผนการสอน (ลบ drive_url ออกแล้ว) ─────────────────
+// ── ฟังก์ชันการส่งและจัดการแผนการสอน ─────────────────
 async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) throw new Error('ไม่พบข้อมูลผู้ใช้ กรุณา login ใหม่');
@@ -103,13 +105,13 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
   const aiSummary = result.summary || '-';
   const weekNumber = parseInt(weekLabel.replace(/[^0-9]/g, '')) || 0;
 
-  const { error: insertErr } = await db.from('lesson_plans').insert({
+  const { error: insertErr } = await window.db.from('lesson_plans').insert({
     teacher_id:    profile.id,
     subject:       subject,
     subject_name:  subject, 
     week_number:   weekNumber,
     file_name:     file.name,
-    file_url:      driveUrl, // บันทึกเฉพาะ file_url (แก้บัค drive_url เรียบร้อย)
+    file_url:      driveUrl, 
     ai_summary:    aiSummary,
     status:        'Pending',
     submitted_at:  new Date().toISOString(),
@@ -121,20 +123,20 @@ async function uploadPlanViaGAS(subject, weekLabel, file, gasUrl) {
 
 async function getMyPlans() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-  const { data, error } = await db.from('lesson_plans').select('*').eq('teacher_id', profile.id).order('created_at', { ascending: false });
+  const { data, error } = await window.db.from('lesson_plans').select('*').eq('teacher_id', profile.id).order('created_at', { ascending: false });
   if (error) throw new Error(`ดึงข้อมูลแผนของฉันไม่สำเร็จ: ${error.message}`);
   return data || [];
 }
 
 async function getAllPendingPlans() {
-  const { data, error } = await db.from('lesson_plans').select(`*, users ( name, subject_group )`).eq('status', 'Pending').order('created_at', { ascending: true });
+  const { data, error } = await window.db.from('lesson_plans').select(`*, users ( name, subject_group )`).eq('status', 'Pending').order('created_at', { ascending: true });
   if (error) throw new Error(`ดึงข้อมูลแผนที่รอตรวจไม่สำเร็จ: ${error.message}`);
   return data || [];
 }
 
 async function updatePlanStatus(planId, status, feedback = '') {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-  const { error } = await db.from('lesson_plans').update({ 
+  const { error } = await window.db.from('lesson_plans').update({ 
     status: status, 
     director_feedback: feedback, 
     reviewed_by: profile.id, 
@@ -146,7 +148,7 @@ async function updatePlanStatus(planId, status, feedback = '') {
 
 // ── ฟังก์ชันอรรถประโยชน์ ──────────────────────────────
 async function signOut() {
-  await db.auth.signOut();
+  await window.db.auth.signOut();
   sessionStorage.removeItem('userProfile');
   window.location.href = 'index.html';
 }
@@ -160,5 +162,4 @@ function _fileToBase64(file) {
     reader.onerror = () => reject(new Error('อ่านไฟล์ไม่สำเร็จ'));
     reader.readAsDataURL(file);
   });
-}
 }
