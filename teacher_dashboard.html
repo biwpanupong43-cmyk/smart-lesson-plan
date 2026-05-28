@@ -464,12 +464,14 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
     if (!response.ok) throw new Error(`การเชื่อมต่อขัดข้อง (Status ${response.status})`);
     const result = await response.json();
     
+    // 🌟 รองรับค่าแบบใหม่และเก่า
     if (!result.success && result.status !== 'success') {
       throw new Error(result.message || result.error || 'Google Drive ขัดข้อง ส่งไฟล์ไม่สำเร็จ');
     }
 
     const finalFileUrl = result.fileUrl || result.url;
-    const { error } = await db.from('lesson_plans').update({ file_url: finalFileUrl, drive_url: finalFileUrl, status: 'Pending', director_feedback: null, updated_at: new Date().toISOString() }).eq('id', planId);
+    // เอา drive_url ออกจากการ update เพื่อป้องกัน error จาก Supabase
+    const { error } = await db.from('lesson_plans').update({ file_url: finalFileUrl, status: 'Pending', director_feedback: null, updated_at: new Date().toISOString() }).eq('id', planId);
     if (error) throw error;
 
     Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', text: 'ส่งแผนฉบับแก้ไขเรียบร้อยแล้ว', confirmButtonColor: '#3b82f6' });
