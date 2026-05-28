@@ -456,7 +456,7 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
     const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
     
     // 🌟 ลิงก์ GAS URL ตัวจริงของคุณครู (คืนค่าเดิมให้แล้วครับ) 🌟
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6dLqqHcA7yffz_NzIx8afmMIRuolLePV_HipwkDV9u1LAd5WqeOibqIfYGP8oiqQT/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxgKsXukkQz_f_XQATfnDyzfKiNG48CS1dsAEY5ZEChtg9zVkhXfdTuBoloAKLrvRdH/exec';
 
     const payload = { fileName: file.name, base64: base64, mimeType: file.type, subject: subjectName, week: weekNumber, teacherId: profile.id, teacherName: profile.name };
     const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
