@@ -8,11 +8,13 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- 🌟 เพิ่มไลบรารี html2pdf สำหรับสร้างไฟล์ PDF ใบประเมิน 🌟 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { font-family: 'Sarabun', sans-serif; box-sizing: border-box; }
   h1, h2, h3, .kn { font-family: 'Kanit', sans-serif; }
-  body { background: #0d1526; min-height: 100vh; color: #e2e8f0; }
+  body { background: #0d1526; min-height: 100vh; color: #e2e8f0; overflow-x: hidden; }
 
   /* ── Sidebar ── */
   .sidebar { background: linear-gradient(180deg, #111827 0%, #0d1526 100%); border-right: 1px solid rgba(255,255,255,.07); }
@@ -97,8 +99,31 @@
   .tab-btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; border: 1px solid transparent; color: #94a3b8; background: transparent; width: 100%; text-align: center; }
   .tab-btn.active { background: rgba(99,102,241,.25); border-color: rgba(99,102,241,.5); color: #a5b4fc; }
   
-  /* ตัวแต่งป๊อปอัพ Slider */
   input[type=range] { accent-color: #818cf8; cursor: pointer; }
+
+  /* 🌟 รูปแบบเอกสาร PDF สำหรับการพิมพ์ 🌟 */
+  #pdf-export-container {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+  }
+  .pdf-a4 {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 25mm 20mm;
+      background-color: white;
+      color: black;
+      font-family: 'Sarabun', sans-serif;
+      box-sizing: border-box;
+  }
+  .pdf-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 25px; }
+  .pdf-info { margin-bottom: 20px; font-size: 16px; line-height: 1.6; }
+  .pdf-section-title { font-size: 18px; font-weight: 700; margin-top: 20px; margin-bottom: 10px; }
+  .pdf-checkbox-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 16px; }
+  .pdf-box { width: 18px; height: 18px; border: 1px solid #000; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+  .pdf-comment-box { width: 100%; min-height: 100px; border: 1px solid #000; padding: 15px; font-size: 16px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 40px; border-radius: 4px; }
+  .pdf-signature-area { width: 100%; display: flex; flex-direction: column; align-items: flex-end; margin-top: 50px; padding-right: 20px; }
+  .pdf-signature-img { max-height: 70px; max-width: 150px; object-fit: contain; margin-bottom: 5px; }
 </style>
 </head>
 <body>
@@ -106,7 +131,6 @@
 
   <!-- ══ SIDEBAR ══ -->
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 text-white overflow-y-auto">
-    <!-- School Logo Dynamic Update -->
     <div class="mb-7 mt-1">
       <div class="flex items-center gap-3 mb-1">
         <div id="logoContainer" class="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border border-white/10" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
@@ -120,7 +144,7 @@
       </div>
     </div>
 
-    <!-- User profile with Image Upload Feature (Enlarged) -->
+    <!-- User profile with Image Upload Feature -->
     <div class="dark-card p-4 mb-6 flex items-center gap-4">
       <div class="relative group cursor-pointer flex-shrink-0" onclick="openAvatarSettings()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
         <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden relative border-2 border-indigo-400/30 shadow-md">
@@ -143,7 +167,6 @@
         <span>Dashboard ระบบ</span>
       </button>
 
-      <!-- เมนูย่อย ตรวจสอบแผน (Accordion) -->
       <div>
         <button onclick="toggleSubmenu('submenu-review', 'icon-review')" id="nav-review-main" class="nav-item w-full flex items-center justify-between px-4 py-3 text-left text-sm text-slate-300 hover:bg-white/5 transition-colors">
           <div class="flex items-center gap-3">
@@ -221,9 +244,7 @@
         </div>
       </div>
 
-      <!-- Graph & Subject Group Breakdown Split Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-        <!-- กราฟ Chart.js ด้านซ้าย -->
         <div class="dark-card p-5 lg:col-span-7 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-chart-line text-indigo-400 mr-2"></i>แผนภูมิเปรียบเทียบการส่งแผนแยกตามกลุ่มสาระฯ</h2>
@@ -234,7 +255,6 @@
           </div>
         </div>
 
-        <!-- ตารางรายละเอียดด้านขวา -->
         <div class="dark-card p-5 lg:col-span-5 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-table-list text-emerald-400 mr-2"></i>สรุปสถานะรายกลุ่มสาระฯ</h2>
@@ -251,14 +271,13 @@
                 </tr>
               </thead>
               <tbody id="groupSummaryTableBody" class="divide-y divide-slate-800/40">
-                <tr><td colspan="4" class="py-4 text-center text-slate-500">กำลังดึงข้อมูลสถิติ...</td></tr>
+                <tr><td colspan="4" class="py-4 text-center text-slate-500">กำลังประมวลผลข้อมูล...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- ส่วนงานด่วน -->
       <div class="dark-card p-5">
         <h2 class="kn font-semibold text-white text-base mb-3"><i class="fa-solid fa-bell-concierge text-amber-400 mr-2"></i>งานด่วนค้างพิจารณา / ติดตามความคืบหน้า</h2>
         <div class="overflow-x-auto">
@@ -404,7 +423,7 @@
         <!-- Radio Group (ถูกซ่อนถ้าอยู่ในโหมด View-Only) -->
         <div id="sigRadioGroup" class="flex flex-col gap-1 mb-3">
           <label class="sig-radio">
-            <input type="radio" name="sigMode" value="esign" onchange="switchSigMode('esign')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
+            <input type="radio" name="sigMode" value="esign" checked onchange="switchSigMode('esign')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
             <span class="text-sm text-slate-300">ใช้ลายเซ็นหลัก <span class="text-slate-500 text-xs">(ที่ตั้งค่าไว้ในระบบ)</span></span>
           </label>
           <label class="sig-radio">
@@ -464,7 +483,7 @@
   </div>
 </div>
 
-<!-- ══ E-SIGNATURE SETTINGS MODAL (หน้าต่างตั้งค่าลายเซ็นหลัก มีแค่อัปโหลด/วาดถูกเอาออกแล้วตามรีเควสก่อนหน้า) ══ -->
+<!-- ══ E-SIGNATURE SETTINGS MODAL (เฉพาะอัปโหลดรูป) ══ -->
 <div id="esigSettingsModal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width:520px">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
@@ -498,6 +517,37 @@
         <button onclick="saveEsigSettings()" id="btnSaveEsig" class="btn-approve text-sm px-6 py-2.5">
           <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูลลายเซ็นลงฐาน
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🌟 HTML TEMPLATE ซ่อนไว้สำหรับ Generate PDF ใบประเมิน 🌟 -->
+<div id="pdf-export-container">
+  <div id="pdf-content" class="pdf-a4">
+    <div class="pdf-title">ความเห็นของผู้บริหารสถานศึกษา / ผู้ที่ได้รับมอบหมาย</div>
+    
+    <div class="pdf-info" id="pdf-header-info">
+      <strong>ผู้สอน:</strong> <span id="pdf-teacher-name"></span><br>
+      <strong>วิชา:</strong> <span id="pdf-subject-name"></span><br>
+      <strong>สัปดาห์ที่:</strong> <span id="pdf-week-num"></span>
+    </div>
+
+    <div class="pdf-section-title">ผลการประเมินแผนการจัดการเรียนรู้</div>
+    <div style="margin-bottom: 25px;" id="pdf-checklist-container">
+      <!-- จะถูกเติมด้วย Javascript -->
+    </div>
+
+    <div class="pdf-section-title">ข้อเสนอแนะเพิ่มเติม</div>
+    <div class="pdf-comment-box" id="pdf-feedback-text">
+      <!-- ข้อความจาก ผอ. -->
+    </div>
+
+    <div class="pdf-signature-area">
+      <img id="pdf-signature-img" class="pdf-signature-img" src="" style="display: none;">
+      <div style="text-align: center;">
+        <p style="margin: 0; font-size: 16px;">( <span id="pdf-sign-name">...................................................</span> )</p>
+        <p style="margin: 5px 0 0 0; font-size: 16px;" id="pdf-sign-role">ผู้อำนวยการสถานศึกษา</p>
       </div>
     </div>
   </div>
@@ -545,7 +595,6 @@ async function loadSchoolLogo() {
   } catch(e) {}
 }
 
-// 🌟 ระบบอัปโหลดและปรับแต่งรูปโปรไฟล์แบบลากอิสระ (Drag to Pan) 🌟
 async function openAvatarSettings() {
   const { value: file } = await Swal.fire({
     title: '<span class="font-display">อัปโหลดรูปโปรไฟล์</span>',
@@ -739,16 +788,19 @@ function showPage(name, filter = null) {
       activeSub.classList.remove('text-slate-400');
     }
 
-    loadReviewPlans(targetFilter);
-
-  } else if (name === 'approved') {
+    if (allReviewPlans.length === 0) {
+       loadReviewPlans(targetFilter);
+    } else {
+       filterReviewTable(targetFilter);
+    }
+  } else if (name === 'archive') {
     const navBtn = document.getElementById('nav-approved');
     navBtn.classList.add('active'); navBtn.classList.remove('text-slate-300');
     loadApprovedPlans();
   }
 }
 
-// 🌟 GLOBAL DATA FETCHER: โหลดข้อมูลครั้งเดียวเก็บลง Memory ให้แอปเร็วสุดขีด 🌟
+// 🌟 GLOBAL DATA FETCHER 🌟
 async function refreshGlobalData() {
   try {
     const { data, error } = await db.from('lesson_plans')
@@ -782,7 +834,7 @@ async function forceRefreshData() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  YAK-KREUANG DASHBOARD: ประมวลผลกลุ่มสาระเชิงลึกและวาดกราฟเส้น
+//  EXECUTIVE DASHBOARD
 // ══════════════════════════════════════════════════════════════
 async function loadDashboard() {
   document.getElementById('dash-total').innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i>';
@@ -857,7 +909,6 @@ async function loadDashboard() {
   renderDirectorChart(summaryData);
 }
 
-// กราฟเส้น
 function renderDirectorChart(summaryData) {
   const ctx = document.getElementById('directorChart');
   if (!ctx) return;
@@ -956,9 +1007,9 @@ function filterReviewTable(status) {
     
     let actionBtn = '';
     if (p.status === 'Pending') {
-        actionBtn = `<button onclick="openReviewModal('${p.id}')" class="btn-review bg-indigo-600 hover:bg-indigo-500"><i class="fa-solid fa-magnifying-glass mr-1"></i>ตรวจประเมิน</button>`;
+        actionBtn = `<button onclick="openReviewModal('${p.id}')" class="btn-review bg-indigo-600 hover:bg-indigo-500"><i class="fa-solid fa-magnifying-glass mr-1"></i> ตรวจประเมิน</button>`;
     } else {
-        actionBtn = `<button onclick="openReviewModal('${p.id}')" class="btn-review bg-slate-600 hover:bg-slate-500"><i class="fa-solid fa-eye mr-1"></i>เรียกดูข้อมูล</button>`;
+        actionBtn = `<button onclick="openReviewModal('${p.id}')" class="btn-review bg-slate-600 hover:bg-slate-500"><i class="fa-solid fa-eye mr-1"></i> เรียกดูข้อมูล</button>`;
     }
 
     return `<tr>
@@ -990,7 +1041,7 @@ async function loadApprovedPlans() {
     return;
   }
 
-  // 🌟 จัดกลุ่มตามหมวดสาระ 🌟
+  // จัดกลุ่มตามหมวดสาระ
   const grouped = {};
   approvedPlans.forEach(p => {
     const gName = p.users?.subject_group || 'ไม่ระบุหมวดสาระ';
@@ -1010,7 +1061,7 @@ async function loadApprovedPlans() {
     html += plans.map(p => {
       const date = p.updated_at ? new Date(p.updated_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
       const fileLink = p.file_url
-        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold bg-indigo-500/10 w-fit px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors mr-2"><i class="fa-solid fa-file-pdf"></i>เปิดดูไฟล์บนไดรฟ์</a>`
+        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold bg-indigo-500/10 w-fit px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors mr-2"><i class="fa-solid fa-file-pdf"></i> ไฟล์ต้นฉบับ</a>`
         : `<span class="text-slate-600 text-xs mr-2">ไม่พบไฟล์เอกสาร</span>`;
       return `<tr class="border-b border-slate-700/50 hover:bg-slate-800/40 transition-colors">
         <td class="pl-8"><span class="font-medium text-white">${p.users?.name || '—'}</span></td>
@@ -1018,7 +1069,7 @@ async function loadApprovedPlans() {
         <td class="text-slate-400">${date}</td>
         <td class="flex items-center gap-2">
             ${fileLink}
-            <button onclick="openReviewModal('${p.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-slate-600 flex items-center gap-1"><i class="fa-solid fa-eye"></i> เรียกดูข้อมูล</button>
+            <button onclick="openReviewModal('${p.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-slate-600 flex items-center gap-1"><i class="fa-solid fa-eye"></i> ใบประเมิน</button>
         </td>
       </tr>`;
     }).join('');
@@ -1028,7 +1079,7 @@ async function loadApprovedPlans() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  WORK WORKSPACE: ควบคุมการเปิดปิดกล่องอนุมัติแผน (Read-only + Edit)
+//  WORK WORKSPACE: ควบคุมการเปิดปิดกล่องอนุมัติแผน (Read-only + Edit + PDF)
 // ══════════════════════════════════════════════════════════════
 async function openReviewModal(planId) {
   const plan = globalPlans.find(p => p.id === planId);
@@ -1037,42 +1088,29 @@ async function openReviewModal(planId) {
   _currentPlanId   = plan.id;
   _currentPlanData = plan;
   
-  // 🌟 โหลดค่าการเลือกลายเซ็นที่ ผอ. เคยเลือกไว้ (ถ้าไม่มีให้ค่าเริ่มต้นเป็น esign) 🌟
-  _sigMode = localStorage.getItem('preferredDirectorSigMode') || 'esign';
-  _uploadedModalSig = null;
-  _sigCanvasData = null; 
-
-  const sigRadio = document.querySelector(`input[name="sigMode"][value="${_sigMode}"]`);
-  if (sigRadio) sigRadio.checked = true;
-  switchSigMode(_sigMode);
-  
   let feedbackText = plan.director_feedback || '';
   let checks = [false, false, false, false];
-  let savedSigMode = 'esign'; // Default
+  let savedSigMode = 'esign'; 
 
-  // ถอดรหัส Checklist และ SigMode ออกจาก feedbackText
   if (feedbackText.startsWith('[CHECK:')) {
     const match = feedbackText.match(/^\[CHECK:([01],[01],[01],[01])\](?:\[SIG:([^\]]+)\])?(.*)/s);
     if (match) {
       checks = match[1].split(',').map(v => v === '1');
-      savedSigMode = match[2] || 'esign'; // ดึงประเภทลายเซ็นที่เคยบันทึกไว้
+      savedSigMode = match[2] || 'esign'; 
       feedbackText = match[3];
     }
   }
 
+  // ตรวจสอบว่าแผนนี้ได้รับการพิจารณาไปแล้วหรือยัง
   const isLocked = (plan.status !== 'Pending');
 
-  // จัดการกล่องข้อความและตัวเลือก Checkbox (ล็อคถ้าไม่ใช่ Pending)
   const notesEl = document.getElementById('manualNotes');
   notesEl.value = feedbackText;
   notesEl.disabled = isLocked;
 
   const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
   checkboxes.forEach((cb, i) => { 
-      if(cb) {
-          cb.checked = checks[i]; 
-          cb.disabled = isLocked;
-      }
+      if(cb) { cb.checked = checks[i]; cb.disabled = isLocked; }
   });
 
   const sigSection = document.getElementById('modalSigSection');
@@ -1082,7 +1120,7 @@ async function openReviewModal(planId) {
   const savedStatus = document.getElementById('savedSigStatus');
 
   if (isLocked) {
-      // 🌟 โหมดอ่านอย่างเดียว: ซ่อนกล่องเลือกการเซ็น และโชว์เฉพาะลายเซ็นที่เคยใช้ 🌟
+      // 🌟 โหมดอ่านอย่างเดียว (Locked) 🌟
       sigSection.style.opacity = '1';
       sigRadioGroup.style.display = 'none';
       document.getElementById('sign-esign').style.display = 'none';
@@ -1102,7 +1140,6 @@ async function openReviewModal(planId) {
       } else if (savedSigMode === 'custom') {
           savedStatus.textContent = 'กำลังโหลดลายเซ็น...';
           savedImg.style.display = 'none';
-          // ดึงลายเซ็นเฉพาะแผนนี้ที่อัปโหลดไว้
           getSystemSetting('plan_sig_' + plan.id).then(res => {
               if (res) {
                   savedImg.src = res;
@@ -1113,8 +1150,19 @@ async function openReviewModal(planId) {
               }
           });
       }
+
+      const footerActions = document.getElementById('modalFooterActions');
+      footerActions.innerHTML = `
+        <button onclick="downloadEvaluationPDF()" class="btn-approve" style="background: linear-gradient(135deg, #3b82f6, #06b6d4);">
+          <i class="fa-solid fa-download mr-1"></i> ดาวน์โหลดใบประเมิน (PDF)
+        </button>
+        <button onclick="unlockReviewModal()" class="btn-approve" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+          <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขการประเมิน
+        </button>
+      `;
+
   } else {
-      // 🌟 โหมดพร้อมประเมิน (Pending): โหลดความชอบส่วนตัวของ ผอ. 🌟
+      // 🌟 โหมดพร้อมประเมิน (Pending) 🌟
       sigSection.style.opacity = '1';
       sigRadioGroup.style.display = 'flex';
       signSavedBox.style.display = 'none';
@@ -1126,17 +1174,8 @@ async function openReviewModal(planId) {
       const sigRadio = document.querySelector(`input[name="sigMode"][value="${_sigMode}"]`);
       if (sigRadio) sigRadio.checked = true;
       switchSigMode(_sigMode);
-  }
 
-  // เปลี่ยนแปลงปุ่มด้านล่างตามโหมด
-  const footerActions = document.getElementById('modalFooterActions');
-  if (isLocked) {
-      footerActions.innerHTML = `
-        <button onclick="unlockReviewModal()" class="btn-approve" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-          <i class="fa-solid fa-lock-open mr-1"></i> ปลดล็อกแก้ไขการประเมิน
-        </button>
-      `;
-  } else {
+      const footerActions = document.getElementById('modalFooterActions');
       footerActions.innerHTML = `
         <button onclick="submitRevisionFromModal()" class="btn-revision">
           <i class="fa-solid fa-rotate-left mr-1"></i> ตีกลับให้แก้ไข
@@ -1165,7 +1204,6 @@ async function openReviewModal(planId) {
 
   await loadESignatureDisplay();
   
-  // กรณีที่มีลายเซ็นหลักอยู่แล้วและเป็น Read-only ให้แสดงผลเลยถ้าใช้ esign
   if (isLocked && savedSigMode === 'esign' && _cachedEsig) {
       savedImg.src = _cachedEsig;
       savedImg.style.display = 'block';
@@ -1174,14 +1212,12 @@ async function openReviewModal(planId) {
   document.getElementById('reviewModal').classList.remove('hidden');
 }
 
-// 🌟 ฟังก์ชันปลดล็อกกล่องประเมิน เมื่อกด "แก้ไขการประเมิน" 🌟
 function unlockReviewModal() {
     const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
     checkboxes.forEach(cb => cb.disabled = false);
     
     document.getElementById('manualNotes').disabled = false;
     
-    // คืนค่ากล่องเลือกลายเซ็นกลับมา
     document.getElementById('sigRadioGroup').style.display = 'flex';
     document.getElementById('sign-saved').style.display = 'none';
 
@@ -1208,7 +1244,6 @@ function closeReviewModal() {
 
 function switchSigMode(mode) {
   _sigMode = mode;
-  // จำตัวเลือกล่าสุดที่ ผอ. เลือกว่าถนัดใช้แบบไหน
   localStorage.setItem('preferredDirectorSigMode', mode);
 
   document.getElementById('sign-esign').style.display  = mode === 'esign' ? 'flex' : 'none';
@@ -1350,7 +1385,6 @@ async function submitApproval() {
   const notes = document.getElementById('manualNotes').value.trim();
   const feedbackText = notes || `ผ่านการพิจารณาตรวจสอบและอนุมัติจากผู้อำนวยการเรียบร้อยแล้ว`;
   
-  // 🌟 บันทึกรูปแบบลายเซ็นที่เลือกลงไปในข้อมูลการประเมิน 🌟
   const feedback = `[CHECK:${checksString}][SIG:${finalSigMode}]${feedbackText}`;
 
   const btn = document.getElementById('btnApprove');
@@ -1358,7 +1392,6 @@ async function submitApproval() {
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> บันทึก...';
 
   try {
-    // ถ้ารูปแบบลายเซ็นเป็นแบบ Custom (วาด/อัปโหลด) ให้เซฟรูปลง system_settings เฉพาะของแผนนี้
     if (customSigData) {
         await saveSystemSetting('plan_sig_' + _currentPlanId, customSigData);
     }
@@ -1453,7 +1486,7 @@ async function openEsigSettings() {
 
   const img = document.getElementById('sigImagePreview');
   img.src = ""; img.classList.add('hidden');
-  document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปภาพลายเซ็น (ภาพพื้นใสดีที่สุด)";
+  document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปภาพหลักจากเครื่อง";
   document.getElementById('sigImageInput').value = '';
 
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
@@ -1522,8 +1555,103 @@ async function saveEsigSettings() {
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+//  GENERATE PDF FORM (แบบฟอร์มเอกสารใบประเมิน)
+// ══════════════════════════════════════════════════════════════
+async function downloadEvaluationPDF() {
+    if (!_currentPlanData) return;
+
+    Swal.fire({title: 'กำลังสร้างเอกสาร PDF...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading(), background: '#1a2540', color: '#e2e8f0'});
+
+    const plan = _currentPlanData;
+    const teacherName = plan.users?.name || 'ไม่ระบุ';
+    const subjectName = plan.subject_name || 'ไม่ระบุ';
+    const weekNum = plan.week_number || '-';
+    
+    // ถอดรหัสข้อมูลประเมิน
+    let feedbackText = plan.director_feedback || '';
+    let checks = [false, false, false, false];
+    let savedSigMode = 'esign'; 
+
+    if (feedbackText.startsWith('[CHECK:')) {
+      const match = feedbackText.match(/^\[CHECK:([01],[01],[01],[01])\](?:\[SIG:([^\]]+)\])?(.*)/s);
+      if (match) {
+        checks = match[1].split(',').map(v => v === '1');
+        savedSigMode = match[2] || 'esign'; 
+        feedbackText = match[3];
+      }
+    }
+
+    // กำหนดค่าลงใน HTML Template ที่ซ่อนอยู่
+    document.getElementById('pdf-teacher-name').textContent = teacherName;
+    document.getElementById('pdf-subject-name').textContent = subjectName;
+    document.getElementById('pdf-week-num').textContent = weekNum;
+
+    // สร้าง Checklist
+    const criteria = [
+      "จุดประสงค์การเรียนรู้ (K-P-A) ครบถ้วนและเขียนไว้วัดผลได้จริง",
+      "มีการจัดกิจกรรมการเรียนรู้เชิงรุก (Active Learning) ที่เน้นผู้เรียน",
+      "การเลือกใช้สื่อ/นวัตกรรม เทคโนโลยีการสอนมีความเหมาะสม",
+      "มีเกณฑ์การวัดและประเมินผลการเรียนรู้สอดคล้องกับเนื้อหาบทเรียน"
+    ];
+    let checkHtml = '';
+    criteria.forEach((text, i) => {
+        const icon = checks[i] ? '✔' : '&nbsp;&nbsp;';
+        checkHtml += `<div class="pdf-checkbox-item"><div class="pdf-box">${icon}</div> <span>${text}</span></div>`;
+    });
+    document.getElementById('pdf-checklist-container').innerHTML = checkHtml;
+
+    // ข้อความประเมิน
+    document.getElementById('pdf-feedback-text').textContent = feedbackText || 'ไม่มีข้อเสนอแนะเพิ่มเติม';
+
+    // จัดการรูปลายเซ็น
+    const sigImg = document.getElementById('pdf-signature-img');
+    sigImg.style.display = 'none';
+    if (savedSigMode === 'esign' && _cachedEsig) {
+        sigImg.src = _cachedEsig;
+        sigImg.style.display = 'block';
+    } else if (savedSigMode === 'custom') {
+        const customSig = await getSystemSetting('plan_sig_' + plan.id);
+        if (customSig) {
+            sigImg.src = customSig;
+            sigImg.style.display = 'block';
+        }
+    }
+
+    // ดึงชื่อผู้อำนวยการ
+    const directorName = document.getElementById('directorName').textContent;
+    document.getElementById('pdf-sign-name').textContent = directorName !== 'กำลังโหลด...' ? directorName : '...................................................';
+
+    // เรียกใช้ html2pdf
+    const element = document.getElementById('pdf-content');
+    
+    // ตั้งค่า Options
+    const opt = {
+      margin:       10,
+      filename:     `ใบประเมินแผน_${subjectName}_สัปดาห์ที่${weekNum}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // จำลองแสดงผลเพื่อวาดภาพ แล้วซ่อนกลับ
+    document.getElementById('pdf-export-container').style.left = '0';
+    document.getElementById('pdf-export-container').style.zIndex = '-100';
+
+    html2pdf().from(element).set(opt).save().then(() => {
+        document.getElementById('pdf-export-container').style.left = '-9999px';
+        Swal.close();
+    }).catch(err => {
+        document.getElementById('pdf-export-container').style.left = '-9999px';
+        Swal.fire({ icon: 'error', title: 'สร้าง PDF ไม่สำเร็จ', text: err.message, background: '#1a2540', color: '#e2e8f0' });
+    });
+}
+
+// ── Auth ──
+function logout() { window.location.href = 'index.html'; }
+
 // Init
-showPage('dashboard');
+loadDashboard();
 
 </script>
 </body>
