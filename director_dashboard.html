@@ -76,7 +76,7 @@
     box-shadow: 0 32px 80px rgba(0,0,0,.6);
   }
 
-  .sig-section { background: #1a2540; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px; }
+  .sig-section { background: #1a2540; border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 20px; transition: opacity 0.3s; }
   .sig-radio { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px 0; }
   .sig-display { background: #0d1526; border: 1px dashed rgba(255,255,255,.15); border-radius: 10px; min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #475569; font-size: 13px; overflow: hidden; padding: 10px; }
   .sig-display img { max-height: 90px; object-fit: contain; background: white; padding: 4px; border-radius: 6px; }
@@ -88,7 +88,9 @@
   .btn-approve:disabled { opacity: .4; cursor: not-allowed; }
 
   .dark-textarea { background: #0d1526; border: 1px solid rgba(255,255,255,.1); color: #e2e8f0; border-radius: 10px; padding: 12px; font-family: 'Sarabun', sans-serif; font-size: 14px; width: 100%; resize: vertical; outline: none; transition: border .2s; }
-  .dark-textarea:focus { border-color: rgba(99,102,241,.5); }
+  .dark-textarea:focus:not(:disabled) { border-color: rgba(99,102,241,.5); }
+  .dark-textarea:disabled { opacity: 0.6; cursor: not-allowed; }
+  
   .btn-pdf { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); color: #cbd5e1; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px; text-decoration: none; }
   .btn-pdf:hover { background: rgba(255,255,255,.12); color: white; }
   
@@ -221,7 +223,6 @@
 
       <!-- Graph & Subject Group Breakdown Split Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-        <!-- กราฟ Chart.js ด้านซ้าย -->
         <div class="dark-card p-5 lg:col-span-7 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-chart-line text-indigo-400 mr-2"></i>แผนภูมิเปรียบเทียบการส่งแผนแยกตามกลุ่มสาระฯ</h2>
@@ -232,7 +233,6 @@
           </div>
         </div>
 
-        <!-- ตารางรายละเอียดด้านขวา -->
         <div class="dark-card p-5 lg:col-span-5 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-table-list text-emerald-400 mr-2"></i>สรุปสถานะรายกลุ่มสาระฯ</h2>
@@ -256,7 +256,6 @@
         </div>
       </div>
 
-      <!-- ส่วนงานด่วน -->
       <div class="dark-card p-5">
         <h2 class="kn font-semibold text-white text-base mb-3"><i class="fa-solid fa-bell-concierge text-amber-400 mr-2"></i>งานด่วนค้างพิจารณา / ติดตามความคืบหน้า</h2>
         <div class="overflow-x-auto">
@@ -290,7 +289,6 @@
         </button>
       </div>
 
-      <!-- แท็บปุ่มสถานะสำหรับหน้าตรวจสอบแผน -->
       <div class="flex gap-2 mb-4">
         <button onclick="showPage('review', 'Pending')" id="filter-rev-pending" class="tab-btn active border border-indigo-500/30">
           <i class="fa-solid fa-hourglass-half mr-1 text-yellow-400"></i> รอตรวจ
@@ -339,7 +337,7 @@
               <th class="text-left">ครูผู้สอน</th>
               <th class="text-left">วิชา/สัปดาห์</th>
               <th class="text-left">วันที่อนุมัติ</th>
-              <th class="text-left">ไฟล์เอกสาร</th>
+              <th class="text-left">เอกสารและคำสั่ง</th>
             </tr>
           </thead>
           <tbody id="approvedTableBody">
@@ -395,26 +393,28 @@
         </div>
       </div>
 
-      <!-- Signature Section (ยังคงมีการเซ็นด้วยมือตอนตรวจ) -->
-      <div class="sig-section">
+      <!-- Signature Section -->
+      <div class="sig-section" id="modalSigSection">
         <p class="text-sm font-semibold text-white mb-3"><i class="fa-solid fa-signature text-violet-400 mr-1"></i>รูปแบบการลงนามประทับตราอนุมัติ</p>
-        <div class="flex flex-col gap-1 mb-3">
+        
+        <!-- Radio Group (ถูกซ่อนถ้าอยู่ในโหมด View-Only) -->
+        <div id="sigRadioGroup" class="flex flex-col gap-1 mb-3">
           <label class="sig-radio">
-            <input type="radio" name="sigMode" value="esign" checked onchange="switchSigMode('esign')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
+            <input type="radio" name="sigMode" value="esign" onchange="switchSigMode('esign')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
             <span class="text-sm text-slate-300">ใช้ลายเซ็นหลัก <span class="text-slate-500 text-xs">(ที่ตั้งค่าไว้ในระบบ)</span></span>
           </label>
           <label class="sig-radio">
             <input type="radio" name="sigMode" value="upload" onchange="switchSigMode('upload')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
-            <span class="text-sm text-slate-300">อัปโหลดแนบรูปภาพใหม่ <span class="text-slate-500 text-xs">(เฉพาะครั้งนี้)</span></span>
+            <span class="text-sm text-slate-300">อัปโหลดแนบรูปภาพใหม่ <span class="text-slate-500 text-xs">(เฉพาะแผนนี้)</span></span>
           </label>
           <label class="sig-radio">
             <input type="radio" name="sigMode" value="draw" onchange="switchSigMode('draw')" class="w-4 h-4 text-indigo-500 bg-slate-800 border-slate-600">
-            <span class="text-sm text-slate-300">วาดลงลายมือชื่อสดๆ <span class="text-slate-500 text-xs">(เฉพาะครั้งนี้)</span></span>
+            <span class="text-sm text-slate-300">วาดลงลายมือชื่อสดๆ <span class="text-slate-500 text-xs">(เฉพาะแผนนี้)</span></span>
           </label>
         </div>
 
-        <!-- 1. แสดงผลลายเซ็นที่เซฟไว้ -->
-        <div id="sign-esign" class="sig-display">
+        <!-- 1. แสดงผลลายเซ็นอิเล็กทรอนิกส์หลัก -->
+        <div id="sign-esign" class="sig-display" style="display:none;">
           <img id="esigImg" src="" alt="E-Signature" style="display:none">
           <div id="esigPlaceholder" class="flex flex-col items-center gap-2 py-2">
             <i class="fa-solid fa-signature text-slate-600 text-2xl"></i>
@@ -427,7 +427,7 @@
           <div class="border-2 border-dashed border-slate-500 rounded-xl p-5 text-center cursor-pointer hover:border-indigo-500 transition-colors bg-[#0d1526]" onclick="document.getElementById('modalSigUpload').click()">
             <input type="file" id="modalSigUpload" accept="image/png, image/jpeg" class="hidden" onchange="handleModalSigUpload(event)">
             <i class="fa-solid fa-cloud-arrow-up text-2xl text-indigo-400 mb-1"></i>
-            <p id="modalSigUploadText" class="text-xs text-slate-300 font-medium">คลิกเพื่อเลือกไฟล์รูปลายเซ็นผอ.</p>
+            <p id="modalSigUploadText" class="text-xs text-slate-300 font-medium">คลิกเพื่อเลือกไฟล์รูปลายเซ็น</p>
             <img id="modalSigUploadPreview" class="hidden mx-auto mt-2 max-h-20 rounded bg-white p-1 border">
           </div>
         </div>
@@ -443,16 +443,18 @@
           </div>
         </div>
 
+        <!-- 4. แสดงลายเซ็นที่เคยบันทึกไว้สำหรับแผนนี้ (Read-only) -->
+        <div id="sign-saved" class="sig-display" style="display:none; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">
+            <p class="text-xs font-semibold text-emerald-400 mb-1">ลายเซ็นที่ลงนามไว้</p>
+            <img id="savedSigImg" src="" alt="Saved Signature" style="display:none; max-height: 80px; background: white; padding: 4px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+            <p id="savedSigStatus" class="text-slate-400 text-xs mt-1 text-center"></p>
+        </div>
+
       </div>
 
       <!-- Action Footer -->
-      <div class="flex justify-end gap-3 pt-2">
-        <button onclick="submitRevisionFromModal()" class="btn-revision">
-          <i class="fa-solid fa-rotate-left mr-1"></i> ตีกลับให้แก้ไข
-        </button>
-        <button onclick="submitApproval()" id="btnApprove" class="btn-approve">
-          <i class="fa-solid fa-check mr-1"></i> อนุมัติลงนามเสร็จสิ้น
-        </button>
+      <div class="flex justify-end gap-3 pt-2" id="modalFooterActions">
+        <!-- จะถูกเปลี่ยนอัตโนมัติด้วย JavaScript ตามสถานะ -->
       </div>
     </div>
   </div>
@@ -470,7 +472,6 @@
     </div>
     
     <div class="p-6 space-y-4">
-      
       <!-- ส่วนแสดงผลลายเซ็นปัจจุบัน -->
       <div class="mb-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50 flex flex-col items-center">
         <p class="text-xs text-slate-400 mb-3">ลายเซ็นหลักปัจจุบันในระบบ</p>
@@ -513,7 +514,7 @@ let _uploadedModalSig = null;
 let _uploadedSettingsSig = null;
 let _cachedEsig = null;       
 let _chartInstance = null;
-let _sigCanvasData = null; // สำหรับวาดเซ็นสดใน Review
+let _sigCanvasData = null; 
 
 // ─── Profile & Avatar & Logo Init ───────────────────────────────
 (function initProfile() {
@@ -539,7 +540,6 @@ async function loadSchoolLogo() {
   } catch(e) {}
 }
 
-// 🌟 ระบบอัปโหลดและปรับแต่งรูปโปรไฟล์แบบลากอิสระ (Drag to Pan) 🌟
 async function openAvatarSettings() {
   const { value: file } = await Swal.fire({
     title: '<span class="font-display">อัปโหลดรูปโปรไฟล์</span>',
@@ -735,7 +735,7 @@ function showPage(name, filter = null) {
 
     loadReviewPlans(targetFilter);
 
-  } else if (name === 'approved') {
+  } else if (name === 'archive') {
     const navBtn = document.getElementById('nav-approved');
     navBtn.classList.add('active'); navBtn.classList.remove('text-slate-300');
     loadApprovedPlans();
@@ -760,7 +760,6 @@ async function forceRefreshData() {
     await refreshGlobalData();
     Swal.close();
     
-    // เช็คว่าตอนนี้อยู่หน้าไหน ให้รีเฟรชหน้านั้น
     if (!document.getElementById('page-dashboard').classList.contains('section-hidden')) {
         loadDashboard();
     } else if (!document.getElementById('page-review').classList.contains('section-hidden')) {
@@ -968,7 +967,7 @@ function filterReviewTable(status) {
 
 
 // ══════════════════════════════════════════════════════════════
-//  APPROVED ARCHIVE GROUPED BY SUBJECT GROUP (10x FASTER)
+//  APPROVED ARCHIVE GROUPED BY SUBJECT GROUP
 // ══════════════════════════════════════════════════════════════
 async function loadApprovedPlans() {
   const tbody = document.getElementById('approvedTableBody');
@@ -985,7 +984,6 @@ async function loadApprovedPlans() {
     return;
   }
 
-  // จัดกลุ่มตามหมวดสาระ
   const grouped = {};
   approvedPlans.forEach(p => {
     const gName = p.users?.subject_group || 'ไม่ระบุหมวดสาระ';
@@ -1005,13 +1003,16 @@ async function loadApprovedPlans() {
     html += plans.map(p => {
       const date = p.updated_at ? new Date(p.updated_at).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}) : '—';
       const fileLink = p.file_url
-        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold"><i class="fa-solid fa-file-pdf"></i>เปิดดูไฟล์บนไดรฟ์</a>`
-        : `<span class="text-slate-600 text-xs">ไม่พบไฟล์เอกสาร</span>`;
+        ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold bg-indigo-500/10 w-fit px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors mr-2"><i class="fa-solid fa-file-pdf"></i>เปิดดูไฟล์บนไดรฟ์</a>`
+        : `<span class="text-slate-600 text-xs mr-2">ไม่พบไฟล์เอกสาร</span>`;
       return `<tr>
         <td class="pl-8"><span class="font-medium text-white">${p.users?.name || '—'}</span></td>
         <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
         <td class="text-slate-400">${date}</td>
-        <td>${fileLink}</td>
+        <td class="flex items-center gap-2">
+            ${fileLink}
+            <button onclick="openReviewModal('${p.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-slate-600 flex items-center gap-1"><i class="fa-solid fa-eye"></i> เรียกดู / แก้ไข</button>
+        </td>
       </tr>`;
     }).join('');
   }
@@ -1020,7 +1021,7 @@ async function loadApprovedPlans() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  WORK WORKSPACE: ควบคุมการเปิดปิดกล่องอนุมัติแผน
+//  WORK WORKSPACE: ควบคุมการเปิดปิดกล่องอนุมัติแผน (Read-only + Edit)
 // ══════════════════════════════════════════════════════════════
 async function openReviewModal(planId) {
   const plan = globalPlans.find(p => p.id === planId);
@@ -1028,29 +1029,107 @@ async function openReviewModal(planId) {
 
   _currentPlanId   = plan.id;
   _currentPlanData = plan;
-  _sigMode = 'esign';
-  _uploadedModalSig = null;
-  _sigCanvasData = null; // ล้างข้อมูลการวาด
-
-  document.querySelector('input[name="sigMode"][value="esign"]').checked = true;
-  document.getElementById('sign-esign').style.display  = 'flex';
-  document.getElementById('sign-upload').style.display = 'none';
-  document.getElementById('sign-draw').style.display   = 'none';
   
   let feedbackText = plan.director_feedback || '';
   let checks = [false, false, false, false];
+  let savedSigMode = 'esign'; // Default
 
+  // ถอดรหัส Checklist และ SigMode ออกจาก feedbackText
   if (feedbackText.startsWith('[CHECK:')) {
-    const match = feedbackText.match(/^\[CHECK:([01],[01],[01],[01])\](.*)/s);
+    const match = feedbackText.match(/^\[CHECK:([01],[01],[01],[01])\](?:\[SIG:([^\]]+)\])?(.*)/s);
     if (match) {
       checks = match[1].split(',').map(v => v === '1');
-      feedbackText = match[2];
+      savedSigMode = match[2] || 'esign'; // ดึงประเภทลายเซ็นที่เคยบันทึกไว้
+      feedbackText = match[3];
     }
   }
 
-  document.getElementById('manualNotes').value = feedbackText;
+  const isLocked = (plan.status !== 'Pending');
+
+  // จัดการกล่องข้อความและตัวเลือก Checkbox (ล็อคถ้าไม่ใช่ Pending)
+  const notesEl = document.getElementById('manualNotes');
+  notesEl.value = feedbackText;
+  notesEl.disabled = isLocked;
+
   const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
-  checkboxes.forEach((cb, i) => { if(cb) cb.checked = checks[i]; });
+  checkboxes.forEach((cb, i) => { 
+      if(cb) {
+          cb.checked = checks[i]; 
+          cb.disabled = isLocked;
+      }
+  });
+
+  const sigSection = document.getElementById('modalSigSection');
+  const sigRadioGroup = document.getElementById('sigRadioGroup');
+  const signSavedBox = document.getElementById('sign-saved');
+  const savedImg = document.getElementById('savedSigImg');
+  const savedStatus = document.getElementById('savedSigStatus');
+
+  if (isLocked) {
+      // 🌟 โหมดอ่านอย่างเดียว: ซ่อนกล่องเลือกการเซ็น และโชว์เฉพาะลายเซ็นที่เคยใช้ 🌟
+      sigSection.style.opacity = '1';
+      sigRadioGroup.style.display = 'none';
+      document.getElementById('sign-esign').style.display = 'none';
+      document.getElementById('sign-upload').style.display = 'none';
+      document.getElementById('sign-draw').style.display = 'none';
+      signSavedBox.style.display = 'flex';
+      
+      if (savedSigMode === 'esign') {
+          if (_cachedEsig) {
+              savedImg.src = _cachedEsig;
+              savedImg.style.display = 'block';
+              savedStatus.textContent = '(ใช้ลายเซ็นอิเล็กทรอนิกส์หลัก)';
+          } else {
+              savedImg.style.display = 'none';
+              savedStatus.textContent = 'ไม่มีข้อมูลลายเซ็น (อนุมัติโดยไม่แนบลายเซ็น)';
+          }
+      } else if (savedSigMode === 'custom') {
+          savedStatus.textContent = 'กำลังโหลดลายเซ็น...';
+          savedImg.style.display = 'none';
+          // ดึงลายเซ็นเฉพาะแผนนี้ที่อัปโหลดไว้
+          getSystemSetting('plan_sig_' + plan.id).then(res => {
+              if (res) {
+                  savedImg.src = res;
+                  savedImg.style.display = 'block';
+                  savedStatus.textContent = '(วาดสด/อัปโหลดภาพเฉพาะแผนนี้)';
+              } else {
+                  savedStatus.textContent = 'ไม่พบลายเซ็นที่แนบไว้สำหรับแผนนี้';
+              }
+          });
+      }
+  } else {
+      // 🌟 โหมดพร้อมประเมิน (Pending): โหลดความชอบส่วนตัวของ ผอ. 🌟
+      sigSection.style.opacity = '1';
+      sigRadioGroup.style.display = 'flex';
+      signSavedBox.style.display = 'none';
+      
+      _sigMode = localStorage.getItem('preferredDirectorSigMode') || 'esign';
+      _uploadedModalSig = null;
+      _sigCanvasData = null; 
+
+      const sigRadio = document.querySelector(`input[name="sigMode"][value="${_sigMode}"]`);
+      if (sigRadio) sigRadio.checked = true;
+      switchSigMode(_sigMode);
+  }
+
+  // เปลี่ยนแปลงปุ่มด้านล่างตามโหมด
+  const footerActions = document.getElementById('modalFooterActions');
+  if (isLocked) {
+      footerActions.innerHTML = `
+        <button onclick="unlockReviewModal()" class="btn-approve" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+          <i class="fa-solid fa-lock-open mr-1"></i> ปลดล็อกแก้ไขการประเมิน
+        </button>
+      `;
+  } else {
+      footerActions.innerHTML = `
+        <button onclick="submitRevisionFromModal()" class="btn-revision">
+          <i class="fa-solid fa-rotate-left mr-1"></i> ตีกลับให้แก้ไข
+        </button>
+        <button onclick="submitApproval()" id="btnApprove" class="btn-approve">
+          <i class="fa-solid fa-check mr-1"></i> อนุมัติลงนามเสร็จสิ้น
+        </button>
+      `;
+  }
 
   const name = plan.users?.name || 'ไม่ทราบชื่อ';
   document.getElementById('modalTeacherName').textContent = name;
@@ -1069,7 +1148,41 @@ async function openReviewModal(planId) {
   }
 
   await loadESignatureDisplay();
+  
+  // กรณีที่มีลายเซ็นหลักอยู่แล้วและเป็น Read-only ให้แสดงผลเลยถ้าใช้ esign
+  if (isLocked && savedSigMode === 'esign' && _cachedEsig) {
+      savedImg.src = _cachedEsig;
+      savedImg.style.display = 'block';
+  }
+
   document.getElementById('reviewModal').classList.remove('hidden');
+}
+
+// 🌟 ฟังก์ชันปลดล็อกกล่องประเมิน เมื่อกด "แก้ไขการประเมิน" 🌟
+function unlockReviewModal() {
+    const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.disabled = false);
+    
+    document.getElementById('manualNotes').disabled = false;
+    
+    // คืนค่ากล่องเลือกลายเซ็นกลับมา
+    document.getElementById('sigRadioGroup').style.display = 'flex';
+    document.getElementById('sign-saved').style.display = 'none';
+
+    _sigMode = localStorage.getItem('preferredDirectorSigMode') || 'esign';
+    const sigRadio = document.querySelector(`input[name="sigMode"][value="${_sigMode}"]`);
+    if (sigRadio) sigRadio.checked = true;
+    switchSigMode(_sigMode);
+
+    const footerActions = document.getElementById('modalFooterActions');
+    footerActions.innerHTML = `
+      <button onclick="submitRevisionFromModal()" class="btn-revision">
+        <i class="fa-solid fa-rotate-left mr-1"></i> ตีกลับให้แก้ไข
+      </button>
+      <button onclick="submitApproval()" id="btnApprove" class="btn-approve">
+        <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกการเปลี่ยนแปลง (อนุมัติ)
+      </button>
+    `;
 }
 
 function closeReviewModal() {
@@ -1079,6 +1192,9 @@ function closeReviewModal() {
 
 function switchSigMode(mode) {
   _sigMode = mode;
+  // จำตัวเลือกล่าสุดที่ ผอ. เลือกว่าถนัดใช้แบบไหน
+  localStorage.setItem('preferredDirectorSigMode', mode);
+
   document.getElementById('sign-esign').style.display  = mode === 'esign' ? 'flex' : 'none';
   document.getElementById('sign-upload').style.display = mode === 'upload' ? 'block' : 'none';
   document.getElementById('sign-draw').style.display   = mode === 'draw' ? 'block' : 'none';
@@ -1183,16 +1299,23 @@ async function loadESignatureDisplay() {
 async function submitApproval() {
   if (!_currentPlanId) return;
 
+  let finalSigMode = 'esign';
+  let customSigData = null;
+
   if (_sigMode === 'upload') {
     if (!_uploadedModalSig) {
       Swal.fire({ icon: 'warning', title: 'ไม่พบไฟล์ภาพ', text: 'กรุณาอัปโหลดแนบไฟล์รูปภาพลายเซ็นก่อนทำการอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
       return;
     }
+    finalSigMode = 'custom';
+    customSigData = _uploadedModalSig;
   } else if (_sigMode === 'draw') {
     if (!_sigCanvasData) {
       Swal.fire({ icon: 'warning', title: 'ยังไม่ได้เซ็นชื่อ', text: 'กรุณาวาดลายมือชื่อลงในช่องสี่เหลี่ยมก่อนอนุมัติ', background: '#1a2540', color: '#e2e8f0' });
       return;
     }
+    finalSigMode = 'custom';
+    customSigData = _sigCanvasData;
   } else {
     if (!_cachedEsig) {
       const { isConfirmed } = await Swal.fire({
@@ -1203,33 +1326,44 @@ async function submitApproval() {
       });
       if (!isConfirmed) return;
     }
+    finalSigMode = 'esign';
   }
 
   const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
   const checksString = Array.from(checkboxes).map(cb => cb.checked ? '1' : '0').join(',');
   const notes = document.getElementById('manualNotes').value.trim();
   const feedbackText = notes || `ผ่านการพิจารณาตรวจสอบและอนุมัติจากผู้อำนวยการเรียบร้อยแล้ว`;
-  const feedback = `[CHECK:${checksString}]${feedbackText}`;
+  
+  // 🌟 บันทึกรูปแบบลายเซ็นที่เลือกลงไปในข้อมูลการประเมิน 🌟
+  const feedback = `[CHECK:${checksString}][SIG:${finalSigMode}]${feedbackText}`;
 
   const btn = document.getElementById('btnApprove');
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> บันทึก...';
 
   try {
+    // ถ้ารูปแบบลายเซ็นเป็นแบบ Custom (วาด/อัปโหลด) ให้เซฟรูปลง system_settings เฉพาะของแผนนี้
+    if (customSigData) {
+        await saveSystemSetting('plan_sig_' + _currentPlanId, customSigData);
+    }
+
     await updatePlanStatus(_currentPlanId, 'Approved', feedback);
     closeReviewModal();
-    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'ลงนามแผนการสอนสำเร็จ', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
+    Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'ลงนามอนุมัติสำเร็จ', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
     
-    // รีเฟรชข้อมูล Global Memory ให้เป็นปัจจุบัน
     await refreshGlobalData();
 
-    const currentTab = document.querySelector('.tab-btn.active.bg-indigo-600\\/25');
-    let targetFilter = 'Pending';
-    if(currentTab) {
-       if (currentTab.id === 'filter-rev-approved') targetFilter = 'Approved';
-       if (currentTab.id === 'filter-rev-revision') targetFilter = 'Revision Needed';
+    if (!document.getElementById('page-approved').classList.contains('section-hidden')) {
+       loadApprovedPlans();
+    } else {
+       const currentTab = document.querySelector('.tab-btn.active.bg-indigo-600\\/25');
+       let targetFilter = 'Pending';
+       if(currentTab) {
+          if (currentTab.id === 'filter-rev-approved') targetFilter = 'Approved';
+          if (currentTab.id === 'filter-rev-revision') targetFilter = 'Revision Needed';
+       }
+       loadReviewPlans(targetFilter);
     }
-    loadReviewPlans(targetFilter);
     loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'เกิดปัญหา', text: err.message, background: '#1a2540', color: '#e2e8f0' });
@@ -1251,24 +1385,43 @@ async function submitRevisionFromModal() {
   });
   if (!isConfirmed) return;
 
+  let finalSigMode = 'esign';
+  let customSigData = null;
+
+  if (_sigMode === 'upload' && _uploadedModalSig) {
+    finalSigMode = 'custom';
+    customSigData = _uploadedModalSig;
+  } else if (_sigMode === 'draw' && _sigCanvasData) {
+    finalSigMode = 'custom';
+    customSigData = _sigCanvasData;
+  }
+
   const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
   const checksString = Array.from(checkboxes).map(cb => cb.checked ? '1' : '0').join(',');
-  const feedback = `[CHECK:${checksString}]${feedbackInput}`;
+  const feedback = `[CHECK:${checksString}][SIG:${finalSigMode}]${feedbackInput}`;
 
   try {
+    if (customSigData) {
+        await saveSystemSetting('plan_sig_' + _currentPlanId, customSigData);
+    }
+
     await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback);
     closeReviewModal();
     Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ตีกลับแผนการสอนเรียบร้อย', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
     
     await refreshGlobalData();
 
-    const currentTab = document.querySelector('.tab-btn.active.bg-indigo-600\\/25');
-    let targetFilter = 'Pending';
-    if(currentTab) {
-       if (currentTab.id === 'filter-rev-approved') targetFilter = 'Approved';
-       if (currentTab.id === 'filter-rev-revision') targetFilter = 'Revision Needed';
+    if (!document.getElementById('page-approved').classList.contains('section-hidden')) {
+       loadApprovedPlans();
+    } else {
+       const currentTab = document.querySelector('.tab-btn.active.bg-indigo-600\\/25');
+       let targetFilter = 'Pending';
+       if(currentTab) {
+          if (currentTab.id === 'filter-rev-approved') targetFilter = 'Approved';
+          if (currentTab.id === 'filter-rev-revision') targetFilter = 'Revision Needed';
+       }
+       loadReviewPlans(targetFilter);
     }
-    loadReviewPlans(targetFilter);
     loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message, background: '#1a2540', color: '#e2e8f0' });
@@ -1352,9 +1505,6 @@ async function saveEsigSettings() {
     btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูลลายเซ็นลงฐาน';
   }
 }
-
-// ── Auth ──
-function logout() { window.location.href = 'index.html'; }
 
 // Init
 showPage('dashboard');
