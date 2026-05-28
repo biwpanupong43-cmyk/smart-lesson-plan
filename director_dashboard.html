@@ -20,6 +20,12 @@
   .nav-item:hover { background: rgba(255,255,255,.08); }
   .nav-item.active { background: rgba(99,102,241,.25); border: 1px solid rgba(99,102,241,.4); }
 
+  /* Dropdown Sub-menu */
+  .sub-menu { transition: max-height 0.3s ease-in-out, opacity 0.3s; overflow: hidden; }
+  .sub-nav-item { transition: all .2s ease; border-radius: 10px; }
+  .sub-nav-item:hover { background: rgba(255,255,255,.08); }
+  .sub-nav-item.active { background: rgba(99,102,241,.15); color: #818cf8 !important; font-weight: 600; }
+
   /* ── Cards ── */
   .dark-card { background: #1a2540; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; }
   .stat-card { border-radius: 14px; transition: transform 0.2s; }
@@ -88,6 +94,9 @@
   
   .tab-btn { padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; border: 1px solid transparent; color: #94a3b8; background: transparent; width: 100%; text-align: center; }
   .tab-btn.active { background: rgba(99,102,241,.25); border-color: rgba(99,102,241,.5); color: #a5b4fc; }
+  
+  /* ตัวแต่งป๊อปอัพ Slider */
+  input[type=range] { accent-color: #818cf8; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -95,10 +104,12 @@
 
   <!-- ══ SIDEBAR ══ -->
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 text-white overflow-y-auto">
+    <!-- School Logo Dynamic Update -->
     <div class="mb-7 mt-1">
       <div class="flex items-center gap-3 mb-1">
-        <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-          <i class="fa-solid fa-school text-white text-sm"></i>
+        <div id="logoContainer" class="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border border-white/10" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+          <img id="sidebarSchoolLogo" src="" class="hidden w-full h-full object-contain p-1" />
+          <i id="sidebarSchoolIcon" class="fa-solid fa-school text-white text-sm"></i>
         </div>
         <div>
           <p class="kn font-bold text-sm leading-tight">Smart Lesson Plan</p>
@@ -107,21 +118,21 @@
       </div>
     </div>
 
-    <!-- User profile with Image Upload Feature -->
-    <div class="dark-card p-3 mb-6 flex items-center gap-3">
-      <!-- Clickable Avatar -->
-      <div class="relative group cursor-pointer" onclick="openAvatarSettings()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden relative border border-indigo-400/30">
+    <!-- User profile with Image Upload Feature (Enlarged) -->
+    <div class="dark-card p-4 mb-6 flex items-center gap-4">
+      <!-- Clickable Avatar (Larger: w-14 h-14) -->
+      <div class="relative group cursor-pointer flex-shrink-0" onclick="openAvatarSettings()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl bg-gradient-to-br from-indigo-500 to-purple-600 overflow-hidden relative border-2 border-indigo-400/30 shadow-md">
           <span id="avatarText">--</span>
           <img id="avatarImg" class="hidden absolute inset-0 w-full h-full object-cover" />
         </div>
         <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <i class="fa-solid fa-camera text-xs text-white"></i>
+          <i class="fa-solid fa-camera text-lg text-white"></i>
         </div>
       </div>
       <div class="flex-1 min-w-0">
-        <p id="directorName" class="font-semibold text-sm truncate text-white">กำลังโหลด...</p>
-        <span class="text-xs text-slate-400">ผู้อำนวยการ</span>
+        <p id="directorName" class="font-semibold text-base truncate text-white">กำลังโหลด...</p>
+        <span class="text-xs text-slate-400">ผู้อำนวยการสถานศึกษา</span>
       </div>
     </div>
 
@@ -130,11 +141,31 @@
         <i class="fa-solid fa-chart-line w-5 text-center text-indigo-400"></i>
         <span>Dashboard ระบบ</span>
       </button>
-      <button onclick="showPage('review')" id="nav-review" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
-        <i class="fa-solid fa-clipboard-check w-5 text-center text-yellow-400"></i>
-        <span>ตรวจสอบแผน</span>
-      </button>
-      <button onclick="showPage('approved')" id="nav-approved" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm">
+
+      <!-- 🌟 เมนูย่อย ตรวจสอบแผน (Accordion) กลับมาแล้ว 🌟 -->
+      <div>
+        <button onclick="toggleSubmenu('submenu-review', 'icon-review')" id="nav-review-main" class="nav-item w-full flex items-center justify-between px-4 py-3 text-left text-sm text-slate-300 hover:bg-white/5 transition-colors">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-clipboard-check w-5 text-center text-yellow-400"></i>
+            <span>ตรวจสอบแผน</span>
+          </div>
+          <i id="icon-review" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+        </button>
+        
+        <div id="submenu-review" class="sub-menu max-h-0 pl-4 pr-1 space-y-1 mt-1">
+          <button onclick="showPage('review', 'Pending')" id="nav-rev-pending" class="sub-nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-400 hover:text-slate-200">
+            <i class="fa-solid fa-hourglass-half w-4 text-center text-yellow-400/70"></i> รอตรวจ
+          </button>
+          <button onclick="showPage('review', 'Approved')" id="nav-rev-approved" class="sub-nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-400 hover:text-slate-200">
+            <i class="fa-solid fa-check-double w-4 text-center text-emerald-400/70"></i> อนุมัติแล้ว
+          </button>
+          <button onclick="showPage('review', 'Revision Needed')" id="nav-rev-revision" class="sub-nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-400 hover:text-slate-200">
+            <i class="fa-solid fa-rotate-left w-4 text-center text-red-400/70"></i> แก้ไขแผน
+          </button>
+        </div>
+      </div>
+
+      <button onclick="showPage('approved')" id="nav-approved" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-slate-300">
         <i class="fa-solid fa-folder-open w-5 text-center text-emerald-400"></i>
         <span>คลังแผนการสอน</span>
       </button>
@@ -191,7 +222,7 @@
 
       <!-- Graph & Subject Group Breakdown Split Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
-        <!-- กราฟ Chart.js ด้านซ้าย (เปลี่ยนเป็นกราฟเส้น) -->
+        <!-- กราฟ Chart.js ด้านซ้าย -->
         <div class="dark-card p-5 lg:col-span-7 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-chart-line text-indigo-400 mr-2"></i>แผนภูมิเปรียบเทียบการส่งแผนแยกตามกลุ่มสาระฯ</h2>
@@ -255,21 +286,21 @@
           <h1 class="kn text-2xl font-bold text-white">ตรวจสอบแผนการสอน</h1>
           <p class="text-slate-400 text-sm mt-1">พิจารณาอนุมัติ หรือเรียกดูประวัติแผนการสอนของคุณครู</p>
         </div>
-        <button onclick="loadReviewPlans()" class="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+        <button onclick="loadReviewPlans(document.querySelector('.tab-btn.active')?.id.replace('filter-rev-','') || 'Pending')" class="text-sm text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
           <i class="fa-solid fa-rotate-right"></i> รีเฟรช
         </button>
       </div>
 
       <!-- แท็บปุ่มสถานะสำหรับหน้าตรวจสอบแผน -->
       <div class="flex gap-2 mb-4">
-        <button onclick="filterReviewTable('Pending')" id="filter-rev-pending" class="filter-rev-btn px-4 py-2 text-sm rounded-lg bg-indigo-600 text-white font-medium">
-          <i class="fa-solid fa-hourglass-half mr-1"></i> รอตรวจ
+        <button onclick="showPage('review', 'Pending')" id="filter-rev-pending" class="tab-btn active border border-indigo-500/30">
+          <i class="fa-solid fa-hourglass-half mr-1 text-yellow-400"></i> รอตรวจ
         </button>
-        <button onclick="filterReviewTable('Approved')" id="filter-rev-approved" class="filter-rev-btn px-4 py-2 text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">
-          <i class="fa-solid fa-check-double mr-1"></i> อนุมัติแล้ว
+        <button onclick="showPage('review', 'Approved')" id="filter-rev-approved" class="tab-btn border border-slate-700">
+          <i class="fa-solid fa-check-double mr-1 text-emerald-400"></i> อนุมัติแล้ว
         </button>
-        <button onclick="filterReviewTable('Revision Needed')" id="filter-rev-revision" class="filter-rev-btn px-4 py-2 text-sm rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium">
-          <i class="fa-solid fa-rotate-left mr-1"></i> แก้ไขแผน
+        <button onclick="showPage('review', 'Revision Needed')" id="filter-rev-revision" class="tab-btn border border-slate-700">
+          <i class="fa-solid fa-rotate-left mr-1 text-red-400"></i> แก้ไขแผน
         </button>
       </div>
 
@@ -435,7 +466,6 @@
     
     <div class="p-6 space-y-4">
       
-      <!-- 🌟 ส่วนแสดงผลลายเซ็นปัจจุบัน 🌟 -->
       <div class="mb-2 p-3 bg-slate-900/50 rounded-xl border border-slate-700/50 flex flex-col items-center">
         <p class="text-xs text-slate-400 mb-2">ลายเซ็นหลักปัจจุบันในระบบ</p>
         <img id="currentEsigDisplay" src="" class="hidden max-h-16 bg-white px-2 py-1 rounded">
@@ -490,7 +520,7 @@ let _settingsSigType = 'upload';
 let _chartInstance = null;
 let allReviewPlans = []; 
 
-// ─── Profile & Avatar Init ────────────────────────────────────
+// ─── Profile & Avatar & Logo Init ───────────────────────────────
 (function initProfile() {
   const p = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (p.name) {
@@ -499,9 +529,22 @@ let allReviewPlans = [];
     document.getElementById('avatarText').textContent = init || '--';
     loadAvatar(); 
   }
+  loadSchoolLogo();
 })();
 
-// อัปโหลดและแสดงรูปโปรไฟล์
+async function loadSchoolLogo() {
+  try {
+    const logo = await getSystemSetting('school_logo');
+    if (logo) {
+      document.getElementById('sidebarSchoolLogo').src = logo;
+      document.getElementById('sidebarSchoolLogo').classList.remove('hidden');
+      document.getElementById('sidebarSchoolIcon').classList.add('hidden');
+      document.getElementById('logoContainer').style.background = '#ffffff'; 
+    }
+  } catch(e) {}
+}
+
+// 🌟 ระบบอัปโหลดและปรับแต่งรูปโปรไฟล์แบบลากอิสระ (Drag to Pan) 🌟
 async function openAvatarSettings() {
   const { value: file } = await Swal.fire({
     title: '<span class="font-display">อัปโหลดรูปโปรไฟล์</span>',
@@ -513,20 +556,111 @@ async function openAvatarSettings() {
   if (file) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const base64 = e.target.result;
-      const { value: pos } = await Swal.fire({
-        title: '<span class="font-display">เลือกการจัดตำแหน่งรูปภาพ</span>',
-        input: 'select',
-        inputOptions: { 'center': 'ตรงกลาง (Center)', 'top': 'ชิดด้านบน (Top)', 'bottom': 'ชิดด้านล่าง (Bottom)' },
-        inputValue: 'center',
-        background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1'
-      });
-      const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-      if (profile.id) {
-        localStorage.setItem('avatar_' + profile.id, JSON.stringify({ img: base64, pos: pos || 'center' }));
-        loadAvatar();
-        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ', showConfirmButton: false, timer: 2000, background: '#1a2540', color: '#e2e8f0' });
-      }
+      // บีบอัดรูปภาพด้วย Canvas
+      const imgObj = new Image();
+      imgObj.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 400; 
+        let w = imgObj.width;
+        let h = imgObj.height;
+        if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } 
+        else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgObj, 0, 0, w, h);
+        const base64Compressed = canvas.toDataURL('image/jpeg', 0.8); 
+
+        let currentZoom = 1;
+        let currentX = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        await Swal.fire({
+          title: '<span class="font-display">ปรับตำแหน่งรูปโปรไฟล์</span>',
+          html: `
+            <div class="flex flex-col items-center select-none touch-none">
+              <p class="text-xs text-slate-400 mb-4">คลิกค้างที่รูปแล้วลากเพื่อจัดตำแหน่ง หรือใช้แถบเลื่อนเพื่อซูม</p>
+              <div id="cropContainer" class="w-40 h-40 rounded-full overflow-hidden border-4 border-indigo-500/50 shadow-inner relative bg-slate-900 cursor-move">
+                <img id="swalAvatarPreview" src="${base64Compressed}" style="width:100%; height:100%; object-fit:cover; transform: translate(0px, 0px) scale(1); transform-origin: center; pointer-events: none;" draggable="false" />
+              </div>
+              <div class="w-full text-left mt-6 px-4">
+                <label class="text-xs text-slate-400 flex justify-between"><span>ซูมขยาย</span><span id="zoomLabel" class="text-indigo-400">1.0x</span></label>
+                <input type="range" id="zoomAvatar" min="1" max="3" step="0.05" value="1" class="w-full accent-indigo-500">
+              </div>
+            </div>
+          `,
+          didOpen: () => {
+            const container = document.getElementById('cropContainer');
+            const img = document.getElementById('swalAvatarPreview');
+            const zoomSlider = document.getElementById('zoomAvatar');
+            const zoomLabel = document.getElementById('zoomLabel');
+
+            const updateTransform = () => {
+              img.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentZoom})`;
+            };
+
+            zoomSlider.addEventListener('input', (ev) => {
+              currentZoom = parseFloat(ev.target.value);
+              zoomLabel.textContent = currentZoom.toFixed(1) + 'x';
+              updateTransform();
+            });
+
+            // Logic สำหรับเมาส์และทัชสกรีน
+            const onPointerDown = (ev) => {
+              isDragging = true;
+              startX = (ev.clientX || (ev.touches && ev.touches[0].clientX)) - currentX;
+              startY = (ev.clientY || (ev.touches && ev.touches[0].clientY)) - currentY;
+            };
+
+            const onPointerMove = (ev) => {
+              if (!isDragging) return;
+              ev.preventDefault(); // ป้องกันจอมือถือเลื่อนตาม
+              const clientX = ev.clientX || (ev.touches && ev.touches[0].clientX);
+              const clientY = ev.clientY || (ev.touches && ev.touches[0].clientY);
+              currentX = clientX - startX;
+              currentY = clientY - startY;
+              updateTransform();
+            };
+
+            const onPointerUp = () => { isDragging = false; };
+
+            container.addEventListener('mousedown', onPointerDown);
+            window.addEventListener('mousemove', onPointerMove, {passive: false});
+            window.addEventListener('mouseup', onPointerUp);
+            
+            container.addEventListener('touchstart', onPointerDown, {passive: false});
+            window.addEventListener('touchmove', onPointerMove, {passive: false});
+            window.addEventListener('touchend', onPointerUp);
+
+            Swal.getPopup().addEventListener('remove', () => {
+               window.removeEventListener('mousemove', onPointerMove);
+               window.removeEventListener('mouseup', onPointerUp);
+               window.removeEventListener('touchmove', onPointerMove);
+               window.removeEventListener('touchend', onPointerUp);
+            });
+          },
+          showCancelButton: true, confirmButtonText: 'บันทึกรูปโปรไฟล์', cancelButtonText: 'ยกเลิก',
+          background: '#1a2540', color: '#e2e8f0', confirmButtonColor: '#6366f1'
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            Swal.fire({title: 'กำลังบันทึก...', showConfirmButton: false, didOpen: () => Swal.showLoading(), background: '#1a2540', color: '#e2e8f0'});
+            const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+            if (profile.id) {
+              const avatarData = JSON.stringify({ img: base64Compressed, x: currentX, y: currentY, zoom: currentZoom });
+              try {
+                await saveSystemSetting('avatar_' + profile.id, avatarData);
+                localStorage.setItem('avatar_' + profile.id, avatarData);
+                loadAvatar();
+                Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ', showConfirmButton: false, timer: 2000, background: '#1a2540', color: '#e2e8f0' });
+              } catch(e) {
+                 Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: e.message, background: '#1a2540', color: '#e2e8f0' });
+              }
+            }
+          }
+        });
+      };
+      imgObj.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -538,22 +672,87 @@ function loadAvatar() {
   const saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
   const imgEl = document.getElementById('avatarImg');
   const txtEl = document.getElementById('avatarText');
+  
   if (saved && saved.img) {
     imgEl.src = saved.img;
-    imgEl.style.objectPosition = saved.pos;
+    // อ่านค่า Translate X,Y ถ้ามี
+    if (saved.x !== undefined) {
+       imgEl.style.transform = `translate(${saved.x}px, ${saved.y}px) scale(${saved.zoom || 1})`;
+       imgEl.style.objectPosition = 'center'; 
+    } else {
+       imgEl.style.objectPosition = saved.pos || 'center';
+       imgEl.style.transform = 'none';
+    }
     imgEl.classList.remove('hidden');
     txtEl.classList.add('hidden');
   }
 }
 
-function showPage(name) {
+// ── Sidebar Menu Sub-menu Toggle ──
+function toggleSubmenu(menuId, iconId) {
+  const menu = document.getElementById(menuId);
+  const icon = document.getElementById(iconId);
+  if (menu.style.maxHeight === '0px' || menu.style.maxHeight === '') {
+    menu.style.maxHeight = '250px';
+    icon.classList.add('rotate-180');
+  } else {
+    menu.style.maxHeight = '0px';
+    icon.classList.remove('rotate-180');
+  }
+}
+
+// ── Navigation ──
+function showPage(name, filter = null) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
-  document.querySelectorAll('button[id^="nav-"]').forEach(b => b.classList.remove('active'));
+  
+  // ล้างสถานะ active
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.remove('active');
+    b.classList.add('text-slate-300');
+  });
+  document.querySelectorAll('.sub-nav-item').forEach(b => {
+    b.classList.remove('active', 'text-indigo-400');
+    b.classList.add('text-slate-400');
+  });
+
   document.getElementById('page-' + name).classList.remove('section-hidden');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'dashboard') loadDashboard();
-  if (name === 'review')    loadReviewPlans();
-  if (name === 'approved')  loadApprovedPlans();
+  
+  if (name === 'dashboard') {
+    const navBtn = document.getElementById('nav-dashboard');
+    navBtn.classList.add('active'); navBtn.classList.remove('text-slate-300');
+    loadDashboard();
+  } else if (name === 'review') {
+    const navMain = document.getElementById('nav-review-main');
+    navMain.classList.add('active'); navMain.classList.remove('text-slate-300');
+    
+    // เปิด Sub-menu เสมอ
+    const menu = document.getElementById('submenu-review');
+    const icon = document.getElementById('icon-review');
+    if(menu) menu.style.maxHeight = '250px';
+    if(icon) icon.classList.add('rotate-180');
+
+    const targetFilter = filter || 'Pending';
+    const filterMap = {
+      'Pending': 'nav-rev-pending',
+      'Approved': 'nav-rev-approved',
+      'Revision Needed': 'nav-rev-revision'
+    };
+    const activeSub = document.getElementById(filterMap[targetFilter]);
+    if(activeSub) {
+      activeSub.classList.add('active', 'text-indigo-400');
+      activeSub.classList.remove('text-slate-400');
+    }
+
+    if (allReviewPlans.length === 0) {
+       loadReviewPlans(targetFilter);
+    } else {
+       filterReviewTable(targetFilter);
+    }
+  } else if (name === 'approved') {
+    const navBtn = document.getElementById('nav-approved');
+    navBtn.classList.add('active'); navBtn.classList.remove('text-slate-300');
+    loadApprovedPlans();
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -621,7 +820,7 @@ async function loadDashboard() {
             <td class="text-slate-400">${group}</td>
             <td class="text-slate-300">${p.subject_name} (สัปดาห์ ${p.week_number})</td>
             <td>${stBadge}</td>
-            <td><button onclick="showPage('review')" class="text-indigo-400 hover:underline">ไปที่งานตรวจ</button></td>
+            <td><button onclick="showPage('review', 'Pending')" class="text-indigo-400 hover:underline">ไปที่งานตรวจ</button></td>
           </tr>`;
       }).join('');
     }
@@ -679,29 +878,30 @@ function renderDirectorChart(summaryData) {
 // ══════════════════════════════════════════════════════════════
 //  REVIEW SECTION WITH STATUS TABS
 // ══════════════════════════════════════════════════════════════
-async function loadReviewPlans() {
+async function loadReviewPlans(defaultFilter = 'Pending') {
   const tbody = document.getElementById('reviewTableBody');
   tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังดึงข้อมูลแผนจากระบบ...</td></tr>`;
   try {
     const { data, error } = await db.from('lesson_plans').select('*, users(name, subject_group)').order('created_at', { ascending: false });
     if (error) throw error;
     allReviewPlans = data || [];
-    filterReviewTable('Pending'); 
+    filterReviewTable(defaultFilter); 
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
   }
 }
 
 function filterReviewTable(status) {
-  document.querySelectorAll('.filter-rev-btn').forEach(b => {
-    b.classList.remove('bg-indigo-600', 'text-white');
-    b.classList.add('bg-slate-800', 'text-slate-300');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active', 'bg-indigo-600/25', 'border-indigo-500/50', 'text-indigo-400');
+    b.classList.add('border-transparent');
   });
+  
   const btnMap = { 'Pending': 'pending', 'Approved': 'approved', 'Revision Needed': 'revision' };
   const activeBtn = document.getElementById(`filter-rev-${btnMap[status]}`);
   if (activeBtn) {
-    activeBtn.classList.add('bg-indigo-600', 'text-white');
-    activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+    activeBtn.classList.add('active', 'bg-indigo-600/25', 'border-indigo-500/50', 'text-indigo-400');
+    activeBtn.classList.remove('border-transparent');
   }
 
   const filtered = allReviewPlans.filter(p => p.status === status);
@@ -721,7 +921,6 @@ function filterReviewTable(status) {
     else if (p.status === 'Approved') badge = '<span class="badge-approved">อนุมัติแล้ว</span>';
     else badge = '<span class="badge-revision">ต้องแก้ไข</span>';
     
-    // 🌟 แก้ปัญหาปุ่มค้าง ส่ง ID ไปแทน Object 🌟
     let actionBtn = '';
     if (p.status === 'Pending') {
         actionBtn = `<button onclick="openReviewModal('${p.id}')" class="btn-review bg-indigo-600 hover:bg-indigo-500"><i class="fa-solid fa-magnifying-glass mr-1"></i>ตรวจประเมิน</button>`;
@@ -863,7 +1062,6 @@ function clearSettingsCanvas() {
 //  WORK WORKSPACE: ควบคุมการเปิดปิดกล่องอนุมัติแผน
 // ══════════════════════════════════════════════════════════════
 async function openReviewModal(planId) {
-  // หาแผนจาก allReviewPlans
   const plan = allReviewPlans.find(p => p.id === planId);
   if (!plan) return;
 
@@ -877,7 +1075,6 @@ async function openReviewModal(planId) {
   document.getElementById('uploadSection').style.display = 'none';
   document.getElementById('esigDisplay').style.display  = 'flex';
   
-  // 🌟 ดึงข้อมูลประเมินและข้อความจาก feedback 🌟
   let feedbackText = plan.director_feedback || '';
   let checks = [false, false, false, false];
 
@@ -988,7 +1185,6 @@ async function submitApproval() {
     }
   }
 
-  // 🌟 บีบอัดข้อมูลการติ๊ก Checklist รวมกับข้อเสนอแนะเพื่อบันทึก 🌟
   const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
   const checksString = Array.from(checkboxes).map(cb => cb.checked ? '1' : '0').join(',');
   const notes = document.getElementById('manualNotes').value.trim();
@@ -1003,13 +1199,20 @@ async function submitApproval() {
     await updatePlanStatus(_currentPlanId, 'Approved', feedback);
     closeReviewModal();
     Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'ลงนามแผนการสอนสำเร็จ', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
-    loadReviewPlans();
+    
+    const currentTab = document.querySelector('.tab-btn.active.bg-indigo-600\\/25');
+    let targetFilter = 'Pending';
+    if(currentTab) {
+       if (currentTab.id === 'filter-rev-approved') targetFilter = 'Approved';
+       if (currentTab.id === 'filter-rev-revision') targetFilter = 'Revision Needed';
+    }
+    loadReviewPlans(targetFilter);
     loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'เกิดปัญหา', text: err.message, background: '#1a2540', color: '#e2e8f0' });
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> อนุมัติและลงนาม';
+    btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> อนุมัติลงนามเสร็จสิ้น';
   }
 }
 
@@ -1025,7 +1228,6 @@ async function submitRevisionFromModal() {
   });
   if (!isConfirmed) return;
 
-  // บีบอัดข้อมูลการติ๊ก Checklist สำหรับการตีกลับ
   const checkboxes = document.querySelectorAll('#reviewModal input[type="checkbox"]');
   const checksString = Array.from(checkboxes).map(cb => cb.checked ? '1' : '0').join(',');
   const feedback = `[CHECK:${checksString}]${feedbackInput}`;
@@ -1034,7 +1236,14 @@ async function submitRevisionFromModal() {
     await updatePlanStatus(_currentPlanId, 'Revision Needed', feedback);
     closeReviewModal();
     Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ตีกลับแผนการสอนเรียบร้อย', showConfirmButton: false, timer: 2200, background: '#1a2540', color: '#e2e8f0' });
-    loadReviewPlans();
+    
+    const currentTab = document.querySelector('.tab-btn.active.bg-indigo-600\\/25');
+    let targetFilter = 'Pending';
+    if(currentTab) {
+       if (currentTab.id === 'filter-rev-approved') targetFilter = 'Approved';
+       if (currentTab.id === 'filter-rev-revision') targetFilter = 'Revision Needed';
+    }
+    loadReviewPlans(targetFilter);
     loadDashboard();
   } catch (err) {
     Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message, background: '#1a2540', color: '#e2e8f0' });
@@ -1048,7 +1257,6 @@ async function openEsigSettings() {
   document.getElementById('esigSettingsModal').classList.remove('hidden');
   switchEsigTab('upload'); 
 
-  // 🌟 แสดงรูปภาพลายเซ็นปัจจุบัน 🌟
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
   
@@ -1081,7 +1289,6 @@ function switchEsigTab(tab) {
   document.getElementById('esigTabUpload').classList.toggle('hidden', tab !== 'upload');
   document.getElementById('esigTabDraw').classList.toggle('hidden', tab !== 'draw');
 
-  // Reset file selector view
   const img = document.getElementById('sigImagePreview');
   img.src = ""; img.classList.add('hidden');
   document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปล่าสุด (JPG, PNG)";
@@ -1099,7 +1306,7 @@ function handleSigImage(e) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (ev) => {
-    _settingsCanvasData = ev.target.result; // ได้ Base64 string ข้อมูลภาพดิบ
+    _settingsCanvasData = ev.target.result; 
     const img = document.getElementById('sigImagePreview');
     img.src = _settingsCanvasData;
     img.classList.remove('hidden');
@@ -1137,8 +1344,6 @@ async function saveEsigSettings() {
   }
 }
 
-// Initial Call
-loadDashboard();
 </script>
 </body>
 </html>
