@@ -223,6 +223,7 @@
 
       <!-- Graph & Subject Group Breakdown Split Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mb-6">
+        <!-- กราฟ Chart.js ด้านซ้าย -->
         <div class="dark-card p-5 lg:col-span-7 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-chart-line text-indigo-400 mr-2"></i>แผนภูมิเปรียบเทียบการส่งแผนแยกตามกลุ่มสาระฯ</h2>
@@ -233,6 +234,7 @@
           </div>
         </div>
 
+        <!-- ตารางรายละเอียดด้านขวา -->
         <div class="dark-card p-5 lg:col-span-5 flex flex-col justify-between">
           <div>
             <h2 class="kn font-semibold text-white text-base"><i class="fa-solid fa-table-list text-emerald-400 mr-2"></i>สรุปสถานะรายกลุ่มสาระฯ</h2>
@@ -256,6 +258,7 @@
         </div>
       </div>
 
+      <!-- ส่วนงานด่วน -->
       <div class="dark-card p-5">
         <h2 class="kn font-semibold text-white text-base mb-3"><i class="fa-solid fa-bell-concierge text-amber-400 mr-2"></i>งานด่วนค้างพิจารณา / ติดตามความคืบหน้า</h2>
         <div class="overflow-x-auto">
@@ -289,6 +292,7 @@
         </button>
       </div>
 
+      <!-- แท็บปุ่มสถานะสำหรับหน้าตรวจสอบแผน -->
       <div class="flex gap-2 mb-4">
         <button onclick="showPage('review', 'Pending')" id="filter-rev-pending" class="tab-btn active border border-indigo-500/30">
           <i class="fa-solid fa-hourglass-half mr-1 text-yellow-400"></i> รอตรวจ
@@ -460,7 +464,7 @@
   </div>
 </div>
 
-<!-- ══ E-SIGNATURE SETTINGS MODAL (เฉพาะอัปโหลดรูป) ══ -->
+<!-- ══ E-SIGNATURE SETTINGS MODAL (หน้าต่างตั้งค่าลายเซ็นหลัก มีแค่อัปโหลด/วาดถูกเอาออกแล้วตามรีเควสก่อนหน้า) ══ -->
 <div id="esigSettingsModal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width:520px">
     <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
@@ -472,6 +476,7 @@
     </div>
     
     <div class="p-6 space-y-4">
+      
       <!-- ส่วนแสดงผลลายเซ็นปัจจุบัน -->
       <div class="mb-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50 flex flex-col items-center">
         <p class="text-xs text-slate-400 mb-3">ลายเซ็นหลักปัจจุบันในระบบ</p>
@@ -540,6 +545,7 @@ async function loadSchoolLogo() {
   } catch(e) {}
 }
 
+// 🌟 ระบบอัปโหลดและปรับแต่งรูปโปรไฟล์แบบลากอิสระ (Drag to Pan) 🌟
 async function openAvatarSettings() {
   const { value: file } = await Swal.fire({
     title: '<span class="font-display">อัปโหลดรูปโปรไฟล์</span>',
@@ -735,7 +741,7 @@ function showPage(name, filter = null) {
 
     loadReviewPlans(targetFilter);
 
-  } else if (name === 'archive') {
+  } else if (name === 'approved') {
     const navBtn = document.getElementById('nav-approved');
     navBtn.classList.add('active'); navBtn.classList.remove('text-slate-300');
     loadApprovedPlans();
@@ -984,6 +990,7 @@ async function loadApprovedPlans() {
     return;
   }
 
+  // 🌟 จัดกลุ่มตามหมวดสาระ 🌟
   const grouped = {};
   approvedPlans.forEach(p => {
     const gName = p.users?.subject_group || 'ไม่ระบุหมวดสาระ';
@@ -996,7 +1003,7 @@ async function loadApprovedPlans() {
     html += `
       <tr class="bg-slate-800/80 border-b border-slate-700/50">
         <td colspan="4" class="py-2.5 px-4 font-semibold text-indigo-300 text-sm">
-          <i class="fa-solid fa-layer-group mr-2"></i> หมวดสาระการเรียนรู้: ${gName}
+          <i class="fa-solid fa-layer-group mr-2"></i> หมวดสาระการเรียนรู้: ${gName} <span class="text-slate-500 text-xs font-normal ml-2">(${plans.length} แผน)</span>
         </td>
       </tr>`;
     
@@ -1005,13 +1012,13 @@ async function loadApprovedPlans() {
       const fileLink = p.file_url
         ? `<a href="${p.file_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 text-xs flex items-center gap-1 font-semibold bg-indigo-500/10 w-fit px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-colors mr-2"><i class="fa-solid fa-file-pdf"></i>เปิดดูไฟล์บนไดรฟ์</a>`
         : `<span class="text-slate-600 text-xs mr-2">ไม่พบไฟล์เอกสาร</span>`;
-      return `<tr>
+      return `<tr class="border-b border-slate-700/50 hover:bg-slate-800/40 transition-colors">
         <td class="pl-8"><span class="font-medium text-white">${p.users?.name || '—'}</span></td>
         <td class="text-slate-300">${p.subject_name} <span class="text-slate-500">(สัปดาห์ ${p.week_number})</span></td>
         <td class="text-slate-400">${date}</td>
         <td class="flex items-center gap-2">
             ${fileLink}
-            <button onclick="openReviewModal('${p.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-slate-600 flex items-center gap-1"><i class="fa-solid fa-eye"></i> เรียกดู / แก้ไข</button>
+            <button onclick="openReviewModal('${p.id}')" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-slate-600 flex items-center gap-1"><i class="fa-solid fa-eye"></i> เรียกดูข้อมูล</button>
         </td>
       </tr>`;
     }).join('');
@@ -1029,6 +1036,15 @@ async function openReviewModal(planId) {
 
   _currentPlanId   = plan.id;
   _currentPlanData = plan;
+  
+  // 🌟 โหลดค่าการเลือกลายเซ็นที่ ผอ. เคยเลือกไว้ (ถ้าไม่มีให้ค่าเริ่มต้นเป็น esign) 🌟
+  _sigMode = localStorage.getItem('preferredDirectorSigMode') || 'esign';
+  _uploadedModalSig = null;
+  _sigCanvasData = null; 
+
+  const sigRadio = document.querySelector(`input[name="sigMode"][value="${_sigMode}"]`);
+  if (sigRadio) sigRadio.checked = true;
+  switchSigMode(_sigMode);
   
   let feedbackText = plan.director_feedback || '';
   let checks = [false, false, false, false];
@@ -1437,7 +1453,7 @@ async function openEsigSettings() {
 
   const img = document.getElementById('sigImagePreview');
   img.src = ""; img.classList.add('hidden');
-  document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปภาพหลักจากเครื่อง";
+  document.getElementById('sigImageText').textContent = "คลิกเพื่อเลือกไฟล์รูปภาพลายเซ็น (ภาพพื้นใสดีที่สุด)";
   document.getElementById('sigImageInput').value = '';
 
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
