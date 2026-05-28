@@ -355,10 +355,11 @@ form.addEventListener('submit', async (e) => {
   try {
     const profile = await login(username, password);
 
-    await modernPopup.fire({
+    // แสดง toast สั้นๆ แล้ว redirect ทันที (ไม่รอ timer)
+    modernPopup.fire({
       toast:true, position:'bottom-end', icon:'success',
       title:`ยินดีต้อนรับ, ${profile.name} 👋`,
-      showConfirmButton:false, timer:1500, timerProgressBar:true,
+      showConfirmButton:false, timer:1200, timerProgressBar:true,
     });
 
     const route = ROLE_ROUTES[profile.role];
