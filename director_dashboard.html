@@ -788,12 +788,15 @@ function showPage(name, filter = null) {
       activeSub.classList.remove('text-slate-400');
     }
 
-    if (allReviewPlans.length === 0) {
+    // 🌟 แก้ไข: เปลี่ยนมาใช้ globalPlans ตามระบบ Memory ใหม่ 🌟
+    if (globalPlans.length === 0) {
        loadReviewPlans(targetFilter);
     } else {
        filterReviewTable(targetFilter);
     }
-  } else if (name === 'archive') {
+
+  // 🌟 แก้ไข: เปลี่ยนชื่อรับหน้าเว็บให้ตรงกันเป็น 'approved' 🌟
+  } else if (name === 'approved') {
     const navBtn = document.getElementById('nav-approved');
     navBtn.classList.add('active'); navBtn.classList.remove('text-slate-300');
     loadApprovedPlans();
