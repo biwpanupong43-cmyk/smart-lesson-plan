@@ -418,8 +418,8 @@ async function submitPlan() {
 
   const fullSubjectName = `${subj} ${grade}`;
   
-  // 🔴 🔴 เปลี่ยน URL ตรงนี้เป็น URL จาก Google Apps Script ของคุณครูที่ Deploy ใหม่อีกครั้ง 🔴 🔴
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwcWc1zN65oK6N-2hP5kXoDk-c3_6kQ6Yp-pP29K6B8n6D5Hw_L9r2Z5C2hD7eM/exec'; // <--- เปลี่ยนตรงนี้!
+  // 🌟 ลิงก์ GAS URL ตัวจริงของคุณครู (คืนค่าเดิมให้แล้วครับ) 🌟
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyi3mrOYV5o-47ITAQosbXNDklhgMu43bwNakoT7bH1QT4P-ThwxXRQp9PkbY5xPl_N/exec';
 
   try {
     saveMemory(group, subj, grade);
@@ -430,7 +430,11 @@ async function submitPlan() {
     
     await loadStats(); showPage('history', 'Pending');
   } catch (error) {
-    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: error.message, confirmButtonColor: '#3b82f6' });
+    let errorMsg = error.message;
+    if (errorMsg.includes('Failed to fetch')) {
+      errorMsg = 'เชื่อมต่อขัดข้อง (Failed to fetch)<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือตั้งค่า Deploy Google Apps Script ให้เป็น "Who has access: Anyone"';
+    }
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', html: errorMsg, confirmButtonColor: '#3b82f6' });
   }
 }
 
@@ -451,8 +455,8 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
     const base64 = await _fileToBase64(file);
     const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
     
-    // 🔴 🔴 เปลี่ยน URL ตรงนี้เป็น URL จาก Google Apps Script ของคุณครูที่ Deploy ใหม่อีกครั้ง 🔴 🔴
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6dLqqHcA7yffz_NzIx8afmMIRuolLePV_HipwkDV9u1LAd5WqeOibqIfYGP8oiqQT/exec'; // <--- เปลี่ยนตรงนี้ด้วย!
+    // 🌟 ลิงก์ GAS URL ตัวจริงของคุณครู (คืนค่าเดิมให้แล้วครับ) 🌟
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx6dLqqHcA7yffz_NzIx8afmMIRuolLePV_HipwkDV9u1LAd5WqeOibqIfYGP8oiqQT/exec';
 
     const payload = { fileName: file.name, base64: base64, mimeType: file.type, subject: subjectName, week: weekNumber, teacherId: profile.id, teacherName: profile.name };
     const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
@@ -460,7 +464,6 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
     if (!response.ok) throw new Error(`การเชื่อมต่อขัดข้อง (Status ${response.status})`);
     const result = await response.json();
     
-    // 🌟 รองรับค่าแบบใหม่และเก่า
     if (!result.success && result.status !== 'success') {
       throw new Error(result.message || result.error || 'Google Drive ขัดข้อง ส่งไฟล์ไม่สำเร็จ');
     }
@@ -474,7 +477,11 @@ async function resubmitPlan(planId, subjectName, weekNumber) {
     await loadStats(); loadHistory().then(() => { filterTable('Pending'); });
 
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'ส่งไฟล์ล้มเหลว', text: err.message, confirmButtonColor: '#3b82f6' });
+    let errorMsg = err.message;
+    if (errorMsg.includes('Failed to fetch')) {
+      errorMsg = 'เชื่อมต่อขัดข้อง (Failed to fetch)<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือตั้งค่า Deploy Google Apps Script ให้เป็น "Who has access: Anyone"';
+    }
+    Swal.fire({ icon: 'error', title: 'ส่งไฟล์ล้มเหลว', html: errorMsg, confirmButtonColor: '#3b82f6' });
   }
 }
 </script>
