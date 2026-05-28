@@ -137,7 +137,7 @@ async function updatePlanStatus(planId, status, feedback = '') {
   const { error } = await window.db.from('lesson_plans').update({ 
     status: status, 
     director_feedback: feedback, 
-    reviewed_by: profile.id, 
+    // ลบ reviewed_by ออกแล้ว เพื่อให้ตรงกับฐานข้อมูลของคุณครู
     updated_at: new Date().toISOString() 
   }).eq('id', planId);
   
