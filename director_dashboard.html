@@ -318,7 +318,7 @@
         <!-- Info Section -->
         <div class="flex items-center justify-between gap-4 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 mb-6">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl"><i class="fa-solid fa-user-chalkboard"></i></div>
+            <div id="modalAvatar" class="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl font-bold"><i class="fa-solid fa-user-chalkboard"></i></div>
             <div>
               <p id="modalTeacherName" class="font-semibold text-white text-lg">ชื่อครู</p>
               <p id="modalSubjectInfo" class="text-sm text-slate-400">วิชา - สัปดาห์</p>
@@ -441,6 +441,8 @@ const Toast = Swal.mixin({
 let allReviewPlans = [];
 let _chartInstance = null;
 let currentReviewId = null;
+let _currentPlanId = null;
+let _currentPlanData = null;
 let _sigMode = 'esign';
 let _sigCanvasData = null; 
 let _cachedEsig = null;    
@@ -892,11 +894,17 @@ async function openReviewModal(plan) {
   document.getElementById('sign-esign').classList.remove('hidden');
   
   document.getElementById('dirFeedback').value = plan.director_feedback || '';
-  document.querySelectorAll('#reviewModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('#customReviewModal input[type="checkbox"]').forEach(cb => cb.checked = false);
 
   const name = plan.users?.name || 'ไม่ทราบชื่อ';
   document.getElementById('modalTeacherName').textContent = name;
-  document.getElementById('modalAvatar').textContent = name.slice(0, 2);
+  const avatarEl = document.getElementById('modalAvatar');
+  if (avatarEl) {
+    const initials = name.trim().split(' ').map(w => w[0]).slice(0,2).join('') || 'ครู';
+    avatarEl.innerHTML = `<span class="text-sm">${initials}</span>`;
+    avatarEl.style.background = 'rgba(99,102,241,0.3)';
+    avatarEl.style.color = '#a5b4fc';
+  }
   document.getElementById('modalSubjectInfo').textContent = `${plan.subject_name || plan.subject} — สัปดาห์ที่ ${plan.week_number || plan.week}`;
   
   const pdfLink = document.getElementById('modalPdfLink');
