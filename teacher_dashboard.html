@@ -7,73 +7,60 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- 🌟 เพิ่มไลบรารี html2pdf สำหรับสร้างไฟล์ PDF ใบประเมิน 🌟 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { font-family: 'Sarabun', sans-serif; }
   h1,h2,.font-display { font-family: 'Kanit', sans-serif; }
-  :root {
-    --blue-primary: #1d4ed8;
-    --blue-light:   #eff6ff;
-    --blue-mid:     #3b82f6;
-    --blue-dark:    #1e3a8a;
-    --glass-bg:     rgba(255,255,255,0.7);
-    --glass-border: rgba(255,255,255,0.9);
-  }
-  body { background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 40%, #e0f2fe 100%); min-height: 100vh; }
+  :root { --blue-primary: #1d4ed8; --glass-bg: rgba(255,255,255,0.7); --glass-border: rgba(255,255,255,0.9); }
+  body { background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 40%, #e0f2fe 100%); min-height: 100vh; overflow-x: hidden; }
   .sidebar { background: linear-gradient(180deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%); }
-  
-  /* Navigation */
   .nav-item { transition: all .2s ease; border-radius: 12px; }
   .nav-item:hover { background: rgba(255,255,255,.15); transform: translateX(4px); }
   .nav-item.active { background: rgba(255,255,255,.2); box-shadow: 0 4px 15px rgba(0,0,0,.2); }
-  
-  /* Dropdown Sub-menu */
   .sub-menu { transition: max-height 0.3s ease-in-out, opacity 0.3s; overflow: hidden; }
   .sub-nav-item { transition: all .2s ease; border-radius: 10px; }
   .sub-nav-item:hover { background: rgba(255,255,255,.1); }
   .sub-nav-item.active { background: rgba(255,255,255,.2); font-weight: 600; }
-
-  /* Cards */
-  .glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(31,38,135,.1);
-  }
-  .drop-zone {
-    border: 2.5px dashed #93c5fd;
-    background: linear-gradient(135deg, rgba(239,246,255,.8), rgba(219,234,254,.6));
-    border-radius: 16px;
-    transition: all .25s ease;
-    cursor: pointer;
-  }
-  .drop-zone:hover, .drop-zone.drag-over {
-    border-color: #3b82f6;
-    background: linear-gradient(135deg, rgba(219,234,254,.9), rgba(191,219,254,.7));
-    transform: scale(1.01);
-    box-shadow: 0 0 0 4px rgba(59,130,246,.15);
-  }
-
+  .glass-card { background: var(--glass-bg); backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 8px 32px rgba(31,38,135,.1); }
+  .drop-zone { border: 2.5px dashed #93c5fd; background: linear-gradient(135deg, rgba(239,246,255,.8), rgba(219,234,254,.6)); border-radius: 16px; transition: all .25s ease; cursor: pointer; }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: #3b82f6; background: linear-gradient(135deg, rgba(219,234,254,.9), rgba(191,219,254,.7)); transform: scale(1.01); box-shadow: 0 0 0 4px rgba(59,130,246,.15); }
   .badge-approved  { background:#dcfce7; color:#166534; }
   .badge-pending   { background:#fef9c3; color:#854d0e; }
   .badge-revision  { background:#fee2e2; color:#991b1b; }
   @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
   .page { animation: fadeIn .35s ease; }
   .section-hidden { display:none!important; }
-  
-  /* Custom Datalist Arrow */
-  input[list] {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-  }
+  input[list] { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
   input[list]::-webkit-calendar-picker-indicator { opacity: 0; }
   ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#bfdbfe; border-radius:3px; }
-  
-  /* Custom Range Slider for Avatar Adjuster */
   input[type=range] { accent-color: #3b82f6; cursor: pointer; }
+
+  /* 🌟 รูปแบบเอกสาร PDF สำหรับการพิมพ์ 🌟 */
+  #pdf-export-container {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+  }
+  .pdf-a4 {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 25mm 20mm;
+      background-color: white;
+      color: black;
+      font-family: 'Sarabun', sans-serif;
+      box-sizing: border-box;
+  }
+  .pdf-title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 25px; }
+  .pdf-info { margin-bottom: 20px; font-size: 16px; line-height: 1.6; }
+  .pdf-section-title { font-size: 18px; font-weight: 700; margin-top: 20px; margin-bottom: 10px; }
+  .pdf-checkbox-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 16px; }
+  .pdf-box { width: 18px; height: 18px; border: 1px solid #000; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+  .pdf-comment-box { width: 100%; min-height: 100px; border: 1px solid #000; padding: 15px; font-size: 16px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 40px; border-radius: 4px; }
+  .pdf-signature-area { width: 100%; display: flex; flex-direction: column; align-items: flex-end; margin-top: 50px; padding-right: 20px; }
+  .pdf-signature-img { max-height: 70px; max-width: 150px; object-fit: contain; margin-bottom: 5px; }
 </style>
 </head>
 <body>
@@ -94,10 +81,9 @@
       <p class="text-xs text-blue-300 mt-1 ml-1">ระบบตรวจแผนการสอน</p>
     </div>
 
-    <!-- User info (Clickable for Photo Upload) -->
+    <!-- User info -->
     <div class="glass-card bg-white/10 border-white/20 p-3 mb-6 flex items-center gap-3">
       <div class="relative group cursor-pointer" onclick="openAvatarSettings()" title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์">
-        <!-- Overflow hidden สำหรับวงกลมด้านนอกสุด -->
         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center font-bold text-sm overflow-hidden relative border border-blue-200/50">
           <span id="avatarInitials">--</span>
           <img id="avatarImg" class="hidden absolute inset-0 w-full h-full object-cover" />
@@ -112,20 +98,15 @@
       </div>
     </div>
 
-    <!-- Navigation with Advanced Sub-menu -->
+    <!-- Navigation -->
     <nav class="space-y-2 flex-1">
-      
-      <!-- ปุ่มหน้าส่งแผน (Main Menu) -->
       <button onclick="showPage('upload')" id="nav-upload" class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-medium">
         <i class="fa-solid fa-cloud-arrow-up w-5 text-center"></i> ส่งแผนการสอนใหม่
       </button>
 
-      <!-- เมนูติดตามสถานะ (มี Sub-menu ย่อย) -->
       <div>
         <button onclick="toggleSubmenu('submenu-history', 'icon-history')" id="nav-history-main" class="nav-item w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium hover:bg-white/10 rounded-xl transition-colors">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-folder-open w-5 text-center text-blue-100"></i> ติดตามสถานะงาน
-          </div>
+          <div class="flex items-center gap-3"><i class="fa-solid fa-folder-open w-5 text-center text-blue-100"></i> ติดตามสถานะงาน</div>
           <i id="icon-history" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
         </button>
         
@@ -144,7 +125,6 @@
           </button>
         </div>
       </div>
-      
     </nav>
 
     <div class="mt-auto pt-4 border-t border-white/20">
@@ -170,91 +150,38 @@
         <p class="text-gray-500 text-sm mt-1">กรอกข้อมูลและอัปโหลดไฟล์ PDF แผนการสอนประจำสัปดาห์</p>
       </div>
 
-      <!-- Stats row -->
       <div class="grid grid-cols-3 gap-4 mb-6">
-        <div class="glass-card p-4 text-center">
-          <p id="statTotal" class="text-3xl font-display font-bold text-blue-700">—</p>
-          <p class="text-xs text-gray-500 mt-1">ส่งแล้วทั้งหมด</p>
-        </div>
-        <div class="glass-card p-4 text-center">
-          <p id="statApproved" class="text-3xl font-display font-bold text-green-600">—</p>
-          <p class="text-xs text-gray-500 mt-1">อนุมัติแล้ว</p>
-        </div>
-        <div class="glass-card p-4 text-center">
-          <p id="statPending" class="text-3xl font-display font-bold text-yellow-600">—</p>
-          <p class="text-xs text-gray-500 mt-1">รอการตรวจ</p>
-        </div>
+        <div class="glass-card p-4 text-center"><p id="statTotal" class="text-3xl font-display font-bold text-blue-700">—</p><p class="text-xs text-gray-500 mt-1">ส่งแล้วทั้งหมด</p></div>
+        <div class="glass-card p-4 text-center"><p id="statApproved" class="text-3xl font-display font-bold text-green-600">—</p><p class="text-xs text-gray-500 mt-1">อนุมัติแล้ว</p></div>
+        <div class="glass-card p-4 text-center"><p id="statPending" class="text-3xl font-display font-bold text-yellow-600">—</p><p class="text-xs text-gray-500 mt-1">รอการตรวจ</p></div>
       </div>
 
-      <!-- Upload Form -->
       <div class="glass-card p-6">
-        <h2 class="font-display font-semibold text-lg text-blue-900 mb-5">
-          <i class="fa-solid fa-file-circle-plus text-blue-500 mr-2"></i>รายละเอียดรายวิชา
-        </h2>
+        <h2 class="font-display font-semibold text-lg text-blue-900 mb-5"><i class="fa-solid fa-file-circle-plus text-blue-500 mr-2"></i>รายละเอียดรายวิชา</h2>
 
-        <!-- ระบบ Datalist พิมพ์แล้วจำ + มีตัวเลือกอัตโนมัติ (ระบบสะกดอัจฉริยะ) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">หมวดสาระการเรียนรู้ <span class="text-red-500">*</span></label>
+          <div><label class="block text-sm font-medium text-gray-700 mb-2">หมวดสาระการเรียนรู้ <span class="text-red-500">*</span></label>
             <input type="text" id="inpGroup" list="groupList" required placeholder="พิมพ์เพื่อค้นหา (เช่น วิทยาศาสตร์)" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <datalist id="groupList">
-              <option value="วิทยาศาสตร์และเทคโนโลยี"></option>
-              <option value="คณิตศาสตร์"></option>
-              <option value="ภาษาไทย"></option>
-              <option value="ภาษาต่างประเทศ"></option>
-              <option value="สังคมศึกษา ศาสนาและวัฒนธรรม"></option>
-              <option value="สุขศึกษาและพลศึกษา"></option>
-              <option value="ศิลปะ"></option>
-              <option value="การงานอาชีพ"></option>
-            </datalist>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อรายวิชา <span class="text-red-500">*</span></label>
+            <datalist id="groupList"><option value="วิทยาศาสตร์และเทคโนโลยี"></option><option value="คณิตศาสตร์"></option><option value="ภาษาไทย"></option><option value="ภาษาต่างประเทศ"></option><option value="สังคมศึกษา ศาสนาและวัฒนธรรม"></option><option value="สุขศึกษาและพลศึกษา"></option><option value="ศิลปะ"></option><option value="การงานอาชีพ"></option></datalist></div>
+          <div><label class="block text-sm font-medium text-gray-700 mb-2">ชื่อรายวิชา <span class="text-red-500">*</span></label>
             <input type="text" id="inpSubject" list="subjectList" required placeholder="พิมพ์เพื่อค้นหา (เช่น วิทยาศาสตร์พื้นฐาน)" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <datalist id="subjectList">
-              <option value="วิทยาศาสตร์พื้นฐาน"></option>
-              <option value="วิทยาศาสตร์เพิ่มเติม"></option>
-              <option value="คณิตศาสตร์พื้นฐาน"></option>
-              <option value="คณิตศาสตร์เพิ่มเติม"></option>
-              <option value="ภาษาไทย"></option>
-              <option value="ภาษาอังกฤษพื้นฐาน"></option>
-              <option value="ภาษาอังกฤษเพื่อการสื่อสาร"></option>
-              <option value="สังคมศึกษา"></option>
-              <option value="ประวัติศาสตร์"></option>
-              <option value="สุขศึกษาและพลศึกษา"></option>
-              <option value="ศิลปะและดนตรี"></option>
-              <option value="วิทยาการคำนวณ"></option>
-              <option value="การออกแบบและเทคโนโลยี"></option>
-            </datalist>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">ระดับชั้น <span class="text-red-500">*</span></label>
+            <datalist id="subjectList"><option value="วิทยาศาสตร์พื้นฐาน"></option><option value="คณิตศาสตร์พื้นฐาน"></option><option value="ภาษาไทย"></option><option value="ภาษาอังกฤษพื้นฐาน"></option><option value="สังคมศึกษา"></option><option value="ประวัติศาสตร์"></option><option value="สุขศึกษาและพลศึกษา"></option><option value="ศิลปะและดนตรี"></option><option value="วิทยาการคำนวณ"></option></datalist></div>
+          <div><label class="block text-sm font-medium text-gray-700 mb-2">ระดับชั้น <span class="text-red-500">*</span></label>
             <input type="text" id="inpGrade" list="gradeList" required placeholder="เช่น ม.1/2" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <datalist id="gradeList"></datalist>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">สัปดาห์ที่ (ตัวเลข) <span class="text-red-500">*</span></label>
-            <input type="number" id="inpWeek" min="1" max="40" required placeholder="เช่น 1" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-          </div>
+            <datalist id="gradeList"></datalist></div>
+          <div><label class="block text-sm font-medium text-gray-700 mb-2">สัปดาห์ที่ (ตัวเลข) <span class="text-red-500">*</span></label>
+            <input type="number" id="inpWeek" min="1" max="40" required placeholder="เช่น 1" class="w-full px-4 py-2.5 bg-white border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"></div>
         </div>
-        <p class="text-xs text-blue-500 mb-6 italic"><i class="fa-solid fa-circle-info mr-1"></i>ระบบช่วยสะกดอัตโนมัติจะทำงานเมื่อคุณเริ่มพิมพ์ และระบบจะจดจำคำตอบใหม่ๆ ของคุณไว้เสมอ</p>
 
-        <!-- Drag & Drop zone -->
-        <div id="dropZone" class="drop-zone p-10 text-center mb-5"
-             onclick="document.getElementById('fileInput').click()"
-             ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div id="dropZone" class="drop-zone p-10 text-center mb-5" onclick="document.getElementById('fileInput').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
           <input type="file" id="fileInput" accept=".pdf" class="hidden" onchange="handleFileSelect(event)"/>
           <div id="dropContent">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fa-solid fa-file-pdf text-blue-400 text-3xl"></i>
-            </div>
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-file-pdf text-blue-400 text-3xl"></i></div>
             <p class="font-semibold text-blue-800 mb-1">ลากไฟล์มาวาง หรือคลิกเพื่อเลือก</p>
             <p class="text-sm text-gray-500">รองรับเฉพาะไฟล์ PDF ขนาดไม่เกิน 10 MB</p>
           </div>
           <div id="fileSelected" class="hidden">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <i class="fa-solid fa-circle-check text-green-500 text-3xl"></i>
-            </div>
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-circle-check text-green-500 text-3xl"></i></div>
             <p id="fileName" class="font-semibold text-green-700 mb-1"></p>
             <p id="fileSize" class="text-sm text-gray-500"></p>
             <button onclick="clearFile(event)" class="mt-2 text-xs text-red-400 hover:text-red-600"><i class="fa-solid fa-xmark mr-1"></i>ลบไฟล์</button>
@@ -277,10 +204,10 @@
       <div class="glass-card p-6">
         <div class="flex items-center justify-between mb-4">
           <div class="flex gap-2">
-            <button onclick="filterTable('all')"              id="filter-all"      class="filter-btn px-4 py-2 text-sm rounded-lg bg-blue-600 text-white font-medium">ทั้งหมด</button>
-            <button onclick="filterTable('Pending')"          id="filter-pending"  class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">รอตรวจ</button>
-            <button onclick="filterTable('Approved')"         id="filter-approved" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">อนุมัติ</button>
-            <button onclick="filterTable('Revision Needed')"  id="filter-revision" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">ต้องแก้ไข</button>
+            <button onclick="filterTable('all')" id="filter-all" class="filter-btn px-4 py-2 text-sm rounded-lg bg-blue-600 text-white font-medium">ทั้งหมด</button>
+            <button onclick="filterTable('Pending')" id="filter-pending" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">รอตรวจ</button>
+            <button onclick="filterTable('Approved')" id="filter-approved" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">อนุมัติ</button>
+            <button onclick="filterTable('Revision Needed')" id="filter-revision" class="filter-btn px-4 py-2 text-sm rounded-lg bg-white/80 text-gray-600 hover:bg-blue-50 font-medium">ต้องแก้ไข</button>
           </div>
           <button onclick="loadHistory()" class="text-xs text-blue-500 hover:text-blue-700"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรชข้อมูล</button>
         </div>
@@ -291,7 +218,7 @@
               <tr class="border-b border-blue-100">
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">สัปดาห์</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">รายวิชา</th>
-                <th class="text-left py-3 px-2 text-gray-500 font-medium">วันที่อัปเดตล่าสุด</th>
+                <th class="text-left py-3 px-2 text-gray-500 font-medium">วันที่ส่ง/แก้ไข</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">สถานะ</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">ข้อเสนอแนะ ผอ.</th>
                 <th class="text-left py-3 px-2 text-gray-500 font-medium">เอกสารและคำสั่ง</th>
@@ -307,6 +234,37 @@
   </main>
 </div>
 
+<!-- 🌟 HTML TEMPLATE ซ่อนไว้สำหรับ Generate PDF ใบประเมิน (สำหรับครูโหลด) 🌟 -->
+<div id="pdf-export-container">
+  <div id="pdf-content" class="pdf-a4">
+    <div class="pdf-title">ความเห็นของผู้บริหารสถานศึกษา / ผู้ที่ได้รับมอบหมาย</div>
+    
+    <div class="pdf-info" id="pdf-header-info">
+      <strong>ผู้สอน:</strong> <span id="pdf-teacher-name"></span><br>
+      <strong>วิชา:</strong> <span id="pdf-subject-name"></span><br>
+      <strong>สัปดาห์ที่:</strong> <span id="pdf-week-num"></span>
+    </div>
+
+    <div class="pdf-section-title">ผลการประเมินแผนการจัดการเรียนรู้</div>
+    <div style="margin-bottom: 25px;" id="pdf-checklist-container">
+      <!-- จะถูกเติมด้วย Javascript -->
+    </div>
+
+    <div class="pdf-section-title">ข้อเสนอแนะเพิ่มเติม</div>
+    <div class="pdf-comment-box" id="pdf-feedback-text">
+      <!-- ข้อความจาก ผอ. -->
+    </div>
+
+    <div class="pdf-signature-area">
+      <img id="pdf-signature-img" class="pdf-signature-img" src="" style="display: none;">
+      <div style="text-align: center;">
+        <p style="margin: 0; font-size: 16px;">( <span id="pdf-sign-name">...................................................</span> )</p>
+        <p style="margin: 5px 0 0 0; font-size: 16px;" id="pdf-sign-role">ผู้อำนวยการสถานศึกษา</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ================= เชื่อม Backend ================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase_integration.js"></script>
@@ -314,7 +272,6 @@
 <script>
 'use strict';
 
-// ── โหลด Profile และ Settings ────────────────────────────────
 let allPlans = [];
 let selectedFile = null;
 
@@ -329,103 +286,53 @@ let selectedFile = null;
   }
 
   try {
-    const term       = await getSystemSetting('current_term');
-    const uploadOpen = await getSystemSetting('upload_open');
+    const term = await getSystemSetting('current_term'), uploadOpen = await getSystemSetting('upload_open');
     if (term) document.getElementById('currentTerm').textContent = `ภาคเรียนที่ ${term}`;
     if (uploadOpen === 'false') {
-      document.getElementById('uploadStatusBadge').innerHTML =
-        `<div class="w-2 h-2 bg-red-400 rounded-full"></div><p class="text-xs text-red-300">ปิดรับการส่งแผนชั่วคราว</p>`;
-      document.getElementById('btnSubmit').disabled = true;
-      document.getElementById('btnSubmit').classList.add('opacity-50', 'cursor-not-allowed');
+      document.getElementById('uploadStatusBadge').innerHTML = `<div class="w-2 h-2 bg-red-400 rounded-full"></div><p class="text-xs text-red-300">ปิดรับการส่งแผนชั่วคราว</p>`;
+      document.getElementById('btnSubmit').disabled = true; document.getElementById('btnSubmit').classList.add('opacity-50', 'cursor-not-allowed');
     }
   } catch (_) {}
 
-  loadMemory();
-  await loadStats();
+  loadMemory(); await loadStats();
 })();
 
-// ── Avatar Setup (Custom Position & Zoom) ────────────────────────
+// ── Avatar Setup ─────────────────────────────────────────────
 async function openAvatarSettings() {
-  // 1. กดเลือกไฟล์จากเครื่อง
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = 'image/png, image/jpeg';
-  fileInput.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  const { value: file } = await Swal.fire({ title: '<span class="font-display">อัปโหลดรูปโปรไฟล์ส่วนตัว</span>', input: 'file', inputAttributes: { accept: 'image/png, image/jpeg', 'aria-label': 'อัปโหลดรูปโปรไฟล์' }, confirmButtonColor: '#3b82f6' });
+  if (file) {
     const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const base64 = ev.target.result;
-
-      // 2. เด้งหน้าต่างปรับแต่งรูป (Zoom, X, Y)
+    reader.onload = async (e) => {
+      const base64 = e.target.result;
       await Swal.fire({
-        title: '<span class="font-display">ปรับแต่งรูปโปรไฟล์</span>',
+        title: '<span class="font-display">เลือกการจัดตำแหน่งรูปภาพ</span>',
         html: `
           <div class="flex flex-col items-center">
-            <!-- กรอบแสดงผลการปรับแต่งแบบวงกลม -->
             <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-200 shadow-inner mb-5 relative" style="background:#f3f4f6;">
               <img id="swalAvatarPreview" src="${base64}" style="width:100%; height:100%; object-fit:cover; object-position:50% 50%; transform:scale(1); transform-origin:center;" />
             </div>
-            
             <div class="w-full text-left space-y-4 px-2">
-              <div>
-                <label class="text-xs text-gray-500 font-semibold flex justify-between"><span>ซูมขยาย (Zoom)</span> <span id="valZ" class="text-blue-600">1x</span></label>
-                <input type="range" id="zoomAvatar" min="1" max="3" step="0.05" value="1" class="w-full">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนซ้าย-ขวา (X)</span> <span id="valX" class="text-blue-600">50%</span></label>
-                <input type="range" id="posXAvatar" min="0" max="100" value="50" class="w-full">
-              </div>
-              <div>
-                <label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนบน-ล่าง (Y)</span> <span id="valY" class="text-blue-600">50%</span></label>
-                <input type="range" id="posYAvatar" min="0" max="100" value="50" class="w-full">
-              </div>
+              <div><label class="text-xs text-gray-500 font-semibold flex justify-between"><span>ซูมขยาย</span> <span id="valZ" class="text-blue-600">1x</span></label><input type="range" id="zoomAvatar" min="1" max="3" step="0.05" value="1" class="w-full"></div>
+              <div><label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนซ้าย-ขวา</span> <span id="valX" class="text-blue-600">50%</span></label><input type="range" id="posXAvatar" min="0" max="100" value="50" class="w-full"></div>
+              <div><label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนบน-ล่าง</span> <span id="valY" class="text-blue-600">50%</span></label><input type="range" id="posYAvatar" min="0" max="100" value="50" class="w-full"></div>
             </div>
           </div>
         `,
         didOpen: () => {
-          // ผูก Event ให้สไลเดอร์อัปเดตภาพแบบ Real-time
-          const img = document.getElementById('swalAvatarPreview');
-          const z = document.getElementById('zoomAvatar');
-          const x = document.getElementById('posXAvatar');
-          const y = document.getElementById('posYAvatar');
-
-          const vz = document.getElementById('valZ');
-          const vx = document.getElementById('valX');
-          const vy = document.getElementById('valY');
-
-          const updateImg = () => {
-            img.style.transform = `scale(${z.value})`;
-            img.style.objectPosition = `${x.value}% ${y.value}%`;
-            vz.textContent = z.value + 'x';
-            vx.textContent = x.value + '%';
-            vy.textContent = y.value + '%';
-          };
-
-          z.oninput = updateImg;
-          x.oninput = updateImg;
-          y.oninput = updateImg;
+          const img = document.getElementById('swalAvatarPreview'), z = document.getElementById('zoomAvatar'), x = document.getElementById('posXAvatar'), y = document.getElementById('posYAvatar');
+          const vz = document.getElementById('valZ'), vx = document.getElementById('valX'), vy = document.getElementById('valY');
+          const updateImg = () => { img.style.transform = `scale(${z.value})`; img.style.objectPosition = `${x.value}% ${y.value}%`; vz.textContent = z.value + 'x'; vx.textContent = x.value + '%'; vy.textContent = y.value + '%'; };
+          z.oninput = updateImg; x.oninput = updateImg; y.oninput = updateImg;
         },
-        showCancelButton: true,
-        confirmButtonText: '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกรูปภาพ',
-        cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#3b82f6'
+        showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกรูปภาพ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#3b82f6'
       }).then((result) => {
         if (result.isConfirmed) {
-          // เมื่อกดบันทึก ดึงค่าพิกัดทั้งหมดเก็บลง LocalStorage
-          const z = document.getElementById('zoomAvatar').value;
-          const x = document.getElementById('posXAvatar').value;
-          const y = document.getElementById('posYAvatar').value;
-
+          const z = document.getElementById('zoomAvatar').value, x = document.getElementById('posXAvatar').value, y = document.getElementById('posYAvatar').value;
           const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
           if (profile.id) {
-            localStorage.setItem('avatar_' + profile.id, JSON.stringify({
-              img: base64,
-              zoom: z,
-              posX: x,
-              posY: y
-            }));
+            const avatarData = JSON.stringify({ img: base64, zoom: z, posX: x, posY: y });
+            localStorage.setItem('avatar_' + profile.id, avatarData);
+            saveSystemSetting('avatar_' + profile.id, avatarData).catch(()=>{}); // Save to DB in background
             loadAvatar();
             Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ', showConfirmButton: false, timer: 2000 });
           }
@@ -433,362 +340,318 @@ async function openAvatarSettings() {
       });
     };
     reader.readAsDataURL(file);
-  };
-  fileInput.click();
+  }
 }
 
 function loadAvatar() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
-  const saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
-  const imgEl = document.getElementById('avatarImg');
-  const txtEl = document.getElementById('avatarInitials');
-  
-  if (saved && saved.img) {
-    imgEl.src = saved.img;
-    imgEl.style.objectPosition = `${saved.posX || 50}% ${saved.posY || 50}%`;
-    imgEl.style.transform = `scale(${saved.zoom || 1})`;
-    imgEl.classList.remove('hidden');
-    txtEl.classList.add('hidden');
-  }
+  let saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
+  if (!saved) {
+    getSystemSetting('avatar_' + profile.id).then(dbData => {
+      if(dbData) { saved = JSON.parse(dbData); localStorage.setItem('avatar_' + profile.id, dbData); applyAvatar(saved); }
+    });
+  } else { applyAvatar(saved); }
 }
 
-// ── Sidebar Menu Toggle (เชื่อมการกดเมนูย่อยให้เปิดหน้าและกรองตาราง) ──────
+function applyAvatar(saved) {
+  const imgEl = document.getElementById('avatarImg'), txtEl = document.getElementById('avatarInitials');
+  imgEl.src = saved.img; imgEl.style.objectPosition = `${saved.posX || 50}% ${saved.posY || 50}%`; imgEl.style.transform = `scale(${saved.zoom || 1})`;
+  imgEl.classList.remove('hidden'); txtEl.classList.add('hidden');
+}
+
 function toggleSubmenu(menuId, iconId) {
-  const menu = document.getElementById(menuId);
-  const icon = document.getElementById(iconId);
-  if (menu.style.maxHeight === '0px' || menu.style.maxHeight === '') {
-    menu.style.maxHeight = '250px';
-    icon.classList.add('rotate-180');
-  } else {
-    menu.style.maxHeight = '0px';
-    icon.classList.remove('rotate-180');
-  }
+  const menu = document.getElementById(menuId), icon = document.getElementById(iconId);
+  if (menu.style.maxHeight === '0px' || menu.style.maxHeight === '') { menu.style.maxHeight = '250px'; icon.classList.add('rotate-180'); } 
+  else { menu.style.maxHeight = '0px'; icon.classList.remove('rotate-180'); }
 }
 
-// ── Tab navigation ────────────────────────────────────────────
 function showPage(name, filter = 'all') {
-  // ซ่อนทุกหน้า
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
-  
-  // ลบ Active ออกจากทุกปุ่มเมนูหลัก/ย่อย
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.sub-nav-item').forEach(b => b.classList.remove('active'));
-
-  // เปิดหน้าที่เลือก
   document.getElementById('page-' + name).classList.remove('section-hidden');
 
-  if (name === 'upload') {
-    document.getElementById('nav-upload').classList.add('active');
-  } else if (name === 'history') {
+  if (name === 'upload') { document.getElementById('nav-upload').classList.add('active'); } 
+  else if (name === 'history') {
     document.getElementById('nav-history-main').classList.add('active');
-    
-    // ไฮไลต์ปุ่มเมนูย่อยตามฟิลเตอร์
-    const filterMap = {
-      'all': 'nav-history-all',
-      'Pending': 'nav-history-pending',
-      'Approved': 'nav-history-approved',
-      'Revision Needed': 'nav-history-revision'
-    };
-    const activeSub = document.getElementById(filterMap[filter]);
-    if(activeSub) activeSub.classList.add('active');
-
-    // ให้มั่นใจว่ากล่องเมนูย่อยกางอยู่เสมอ
-    const menu = document.getElementById('submenu-history');
-    const icon = document.getElementById('icon-history');
-    menu.style.maxHeight = '250px';
-    icon.classList.add('rotate-180');
-
-    // กรองตารางตามที่คลิกมาจากเมนู
+    const filterMap = { 'all': 'nav-history-all', 'Pending': 'nav-history-pending', 'Approved': 'nav-history-approved', 'Revision Needed': 'nav-history-revision' };
+    const activeSub = document.getElementById(filterMap[filter]); if(activeSub) activeSub.classList.add('active');
+    const menu = document.getElementById('submenu-history'), icon = document.getElementById('icon-history');
+    menu.style.maxHeight = '250px'; icon.classList.add('rotate-180');
     loadHistory().then(() => { filterTable(filter); });
   }
 }
 
-// ── Memory System (จดจำสิ่งที่เคยพิมพ์ + ข้อมูลพื้นฐาน) ──────────
 function loadMemory() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
   const mem = JSON.parse(localStorage.getItem('teacher_mem_' + profile.id) || '{"groups":[], "subjects":[], "grades":[]}');
-
-  const groupList = document.getElementById('groupList');
-  mem.groups.forEach(g => { if(!groupList.querySelector(`option[value="${g}"]`)) groupList.innerHTML += `<option value="${g}"></option>`; });
-  
-  const subjectList = document.getElementById('subjectList');
-  mem.subjects.forEach(s => { if(!subjectList.querySelector(`option[value="${s}"]`)) subjectList.innerHTML += `<option value="${s}"></option>`; });
-
-  const gradeList = document.getElementById('gradeList');
-  mem.grades.forEach(g => { if(!gradeList.querySelector(`option[value="${g}"]`)) gradeList.innerHTML += `<option value="${g}"></option>`; });
-
-  if (document.getElementById('inpGroup').value === '' && profile.subject_group) {
-    document.getElementById('inpGroup').value = profile.subject_group;
-  }
+  const groupList = document.getElementById('groupList'); mem.groups.forEach(g => { if(!groupList.querySelector(`option[value="${g}"]`)) groupList.innerHTML += `<option value="${g}"></option>`; });
+  const subjectList = document.getElementById('subjectList'); mem.subjects.forEach(s => { if(!subjectList.querySelector(`option[value="${s}"]`)) subjectList.innerHTML += `<option value="${s}"></option>`; });
+  const gradeList = document.getElementById('gradeList'); mem.grades.forEach(g => { if(!gradeList.querySelector(`option[value="${g}"]`)) gradeList.innerHTML += `<option value="${g}"></option>`; });
+  if (document.getElementById('inpGroup').value === '' && profile.subject_group) { document.getElementById('inpGroup').value = profile.subject_group; }
 }
 
 function saveMemory(g, s, gr) {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
   let mem = JSON.parse(localStorage.getItem('teacher_mem_' + profile.id) || '{"groups":[], "subjects":[], "grades":[]}');
-
   if (g && !mem.groups.includes(g)) mem.groups.push(g);
   if (s && !mem.subjects.includes(s)) mem.subjects.push(s);
   if (gr && !mem.grades.includes(gr)) mem.grades.push(gr);
-
-  localStorage.setItem('teacher_mem_' + profile.id, JSON.stringify(mem));
-  loadMemory();
+  localStorage.setItem('teacher_mem_' + profile.id, JSON.stringify(mem)); loadMemory();
 }
 
-
-// ── Stats ─────────────────────────────────────────────────────
 async function loadStats() {
   try {
-    const plans = await getMyPlans();
-    allPlans = plans;
+    const plans = await getMyPlans(); allPlans = plans;
     document.getElementById('statTotal').textContent    = plans.length;
     document.getElementById('statApproved').textContent = plans.filter(p => p.status === 'Approved').length;
     document.getElementById('statPending').textContent  = plans.filter(p => p.status === 'Pending').length;
-  } catch (err) {
-    console.error('loadStats error:', err);
-  }
+  } catch (err) {}
 }
 
-// ── History & Tables ──────────────────────────────────────────
 async function loadHistory() {
   const tbody = document.getElementById('historyTable');
   tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>`;
-  try {
-    allPlans = await getMyPlans();
-    renderTable(allPlans);
-  } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
-  }
+  try { allPlans = await getMyPlans(); renderTable(allPlans); } 
+  catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-red-400">${err.message}</td></tr>`; }
 }
 
 function renderTable(data) {
   const tbody = document.getElementById('historyTable');
-  if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ยังไม่มีประวัติแผนในหมวดหมู่นี้</td></tr>`;
-    return;
-  }
+  if (!data.length) { tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-gray-400">ยังไม่มีประวัติแผนในหมวดหมู่นี้</td></tr>`; return; }
   tbody.innerHTML = data.map(p => {
-    const date = p.updated_at || p.created_at
-      ? new Date(p.updated_at || p.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' })
-      : '—';
-      
-    const fileLink = p.file_url
-      ? `<a href="${p.file_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs font-semibold mr-2 border border-blue-200 bg-white px-2 py-1 rounded shadow-sm"><i class="fa-solid fa-file-pdf mr-1"></i>ดูไฟล์เก่า</a>`
-      : `<span class="text-gray-400 text-xs mr-2">—</span>`;
-      
+    const date = p.updated_at || p.created_at ? new Date(p.updated_at || p.created_at).toLocaleDateString('th-TH', { year:'numeric', month:'short', day:'numeric' }) : '—';
+    const fileLink = p.file_url ? `<a href="${p.file_url}" target="_blank" class="text-blue-500 hover:text-blue-700 text-xs font-semibold mr-2 border border-blue-200 bg-white px-2 py-1 rounded shadow-sm whitespace-nowrap"><i class="fa-solid fa-file-pdf mr-1"></i> ดูไฟล์แผน</a>` : `<span class="text-gray-400 text-xs mr-2">—</span>`;
+    
     let extraAction = '';
-    if (p.status === 'Revision Needed') {
-      extraAction = `<button onclick="resubmitPlan('${p.id}', '${p.subject_name}', '${p.week_number}')" class="text-white hover:bg-red-600 text-xs font-semibold bg-red-500 px-3 py-1.5 rounded-lg shadow-md transition-colors whitespace-nowrap"><i class="fa-solid fa-upload mr-1"></i>ส่งไฟล์แก้ไข</button>`;
+    if (p.status === 'Revision Needed') { 
+        extraAction = `<button onclick="resubmitPlan('${p.id}', '${p.subject_name}', '${p.week_number}')" class="text-white hover:bg-red-600 text-xs font-semibold bg-red-500 px-3 py-1.5 rounded-lg shadow-md transition-colors whitespace-nowrap"><i class="fa-solid fa-upload mr-1"></i> ส่งแก้ไข</button>`; 
+    } else if (p.status === 'Approved') {
+        extraAction = `<button onclick="downloadEvaluationPDF('${p.id}')" class="text-white hover:bg-green-600 text-xs font-semibold bg-green-500 px-3 py-1.5 rounded-lg shadow-md transition-colors whitespace-nowrap"><i class="fa-solid fa-download mr-1"></i> ใบประเมิน</button>`;
+    }
+
+    // 🌟 ซ่อนข้อความ Tags ที่ติดมาจากการประเมิน 🌟
+    let rawFeedback = p.director_feedback || '';
+    let cleanFeedback = rawFeedback;
+    if (rawFeedback.startsWith('[CHECK:')) {
+        const match = rawFeedback.match(/^\[CHECK:([01],[01],[01],[01])\](?:\[SIG:([^\]]+)\])?(.*)/s);
+        if(match) cleanFeedback = match[3] || 'ไม่มีข้อเสนอแนะเพิ่มเติม';
     }
 
     return `<tr class="border-b border-blue-50 hover:bg-blue-50/40 transition-colors">
       <td class="py-4 px-2 font-semibold text-blue-900 text-center">${p.week_number}</td>
-      <td class="py-4 px-2 text-gray-800 font-medium">${p.subject_name}</td>
+      <td class="py-4 px-2 text-gray-800 font-medium">${p.subject_name || p.subject}</td>
       <td class="py-4 px-2 text-gray-500 text-xs">${date}</td>
       <td class="py-4 px-2">${badgeHTML(p.status)}</td>
-      <td class="py-4 px-2 text-gray-600 max-w-xs truncate">${p.director_feedback || '<span class="text-gray-300 italic">ไม่มีข้อเสนอแนะ</span>'}</td>
+      <td class="py-4 px-2 text-gray-600 max-w-xs truncate" title="${cleanFeedback}">${cleanFeedback || '<span class="text-gray-300 italic">ไม่มีข้อเสนอแนะ</span>'}</td>
       <td class="py-4 px-2 flex items-center gap-2">${fileLink} ${extraAction}</td>
     </tr>`;
   }).join('');
 }
 
 function badgeHTML(status) {
-  const map = {
-    'Approved':        ['badge-approved', 'fa-circle-check', 'อนุมัติแล้ว'],
-    'Pending':         ['badge-pending',  'fa-clock',        'รอตรวจ'],
-    'Revision Needed': ['badge-revision', 'fa-rotate-left',  'ต้องแก้ไข'],
-  };
+  const map = { 'Approved': ['badge-approved', 'fa-circle-check', 'อนุมัติแล้ว'], 'Pending': ['badge-pending',  'fa-clock', 'รอตรวจ'], 'Revision Needed': ['badge-revision', 'fa-rotate-left', 'ต้องแก้ไข'] };
   const [cls, icon, label] = map[status] || ['badge-pending', 'fa-question', 'ไม่ทราบ'];
   return `<span class="${cls} px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1 whitespace-nowrap"><i class="fa-solid ${icon}"></i>${label}</span>`;
 }
 
 function filterTable(key) {
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.remove('bg-blue-600','text-white');
-    b.classList.add('bg-white/80','text-gray-600');
-  });
+  document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('bg-blue-600','text-white'); b.classList.add('bg-white/80','text-gray-600'); });
   const btnId = key === 'all' ? 'filter-all' : `filter-${key.replace(' Needed','').toLowerCase()}`;
   const active = document.getElementById(btnId);
   if (active) { active.classList.add('bg-blue-600','text-white'); active.classList.remove('bg-white/80','text-gray-600'); }
   renderTable(key === 'all' ? allPlans : allPlans.filter(p => p.status === key));
 }
 
-// ── File handling ─────────────────────────────────────────────
+// ── File handling ──
 function handleDragOver(e)  { e.preventDefault(); document.getElementById('dropZone').classList.add('drag-over'); }
 function handleDragLeave(e) { document.getElementById('dropZone').classList.remove('drag-over'); }
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('dropZone').classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f) setFile(f);
-}
+function handleDrop(e) { e.preventDefault(); document.getElementById('dropZone').classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
 function handleFileSelect(e) { const f = e.target.files[0]; if (f) setFile(f); }
-
 function setFile(f) {
-  if (f.type !== 'application/pdf') {
-    Swal.fire({ icon:'error', title:'ไฟล์ไม่ถูกต้อง', text:'กรุณาเลือกไฟล์ PDF เท่านั้น', confirmButtonColor:'#3b82f6' });
-    return;
-  }
-  if (f.size > 10 * 1024 * 1024) {
-    Swal.fire({ icon:'error', title:'ไฟล์ใหญ่เกินไป', text:'ขนาดไฟล์ต้องไม่เกิน 10 MB', confirmButtonColor:'#3b82f6' });
-    return;
-  }
-  selectedFile = f;
-  document.getElementById('dropContent').classList.add('hidden');
-  document.getElementById('fileSelected').classList.remove('hidden');
-  document.getElementById('fileName').textContent = f.name;
-  document.getElementById('fileSize').textContent  = (f.size / 1024).toFixed(1) + ' KB';
+  if (f.type !== 'application/pdf') { Swal.fire({ icon:'error', title:'ไฟล์ไม่ถูกต้อง', text:'กรุณาเลือกไฟล์ PDF เท่านั้น', confirmButtonColor:'#3b82f6' }); return; }
+  if (f.size > 10 * 1024 * 1024) { Swal.fire({ icon:'error', title:'ไฟล์ใหญ่เกินไป', text:'ขนาดไฟล์ต้องไม่เกิน 10 MB', confirmButtonColor:'#3b82f6' }); return; }
+  selectedFile = f; document.getElementById('dropContent').classList.add('hidden'); document.getElementById('fileSelected').classList.remove('hidden'); document.getElementById('fileName').textContent = f.name; document.getElementById('fileSize').textContent  = (f.size / 1024).toFixed(1) + ' KB';
 }
+function clearFile(e) { if (e && e.stopPropagation) e.stopPropagation(); selectedFile = null; document.getElementById('fileInput').value = ''; document.getElementById('dropContent').classList.remove('hidden'); document.getElementById('fileSelected').classList.add('hidden'); }
 
-function clearFile(e) {
-  if (e && e.stopPropagation) e.stopPropagation();
-  selectedFile = null;
-  document.getElementById('fileInput').value = '';
-  document.getElementById('dropContent').classList.remove('hidden');
-  document.getElementById('fileSelected').classList.add('hidden');
-}
-
-// ── Submit New Plan ─────────────────────────────
+// ── Submit New Plan ──
 async function submitPlan() {
-  const group = document.getElementById('inpGroup').value.trim();
-  const subj  = document.getElementById('inpSubject').value.trim();
-  const grade = document.getElementById('inpGrade').value.trim();
-  const weekNum = document.getElementById('inpWeek').value.trim();
+  const group = document.getElementById('inpGroup').value.trim(), subj = document.getElementById('inpSubject').value.trim(), grade = document.getElementById('inpGrade').value.trim(), weekNum = document.getElementById('inpWeek').value.trim();
+  if (!group || !subj || !grade || !weekNum) return Swal.fire({ icon:'warning', title:'กรุณากรอกข้อมูลให้ครบ', text:'ระบุสาระฯ, วิชา, ชั้น และสัปดาห์', confirmButtonColor:'#3b82f6' });
+  if (!selectedFile) return Swal.fire({ icon:'warning', title:'ยังไม่ได้เลือกไฟล์', text:'กรุณาอัปโหลดไฟล์ PDF ก่อนส่ง', confirmButtonColor:'#3b82f6' });
 
-  if (!group || !subj || !grade || !weekNum) {
-    Swal.fire({ icon:'warning', title:'กรุณากรอกข้อมูลให้ครบ', text:'ระบุสาระฯ, วิชา, ชั้น และสัปดาห์', confirmButtonColor:'#3b82f6' });
-    return;
-  }
-  if (!selectedFile) {
-    Swal.fire({ icon:'warning', title:'ยังไม่ได้เลือกไฟล์', text:'กรุณาอัปโหลดไฟล์ PDF ก่อนส่ง', confirmButtonColor:'#3b82f6' });
-    return;
-  }
-
-  Swal.fire({
-    title: '<span style="font-family:Kanit">กำลังอัปโหลดแผนการสอน...</span>',
-    html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่ ห้ามปิดหน้าต่างนี้</p>',
-    allowOutsideClick: false,
-    showConfirmButton: false,
-    didOpen: () => Swal.showLoading()
-  });
+  Swal.fire({ title: '<span style="font-family:Kanit">กำลังอัปโหลดแผนการสอน...</span>', html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่ ห้ามปิดหน้าต่างนี้</p>', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
 
   const fullSubjectName = `${subj} ${grade}`;
   
-  // 🌟 ดึงลิงก์อัตโนมัติจากที่แอดมินตั้งค่าไว้ 🌟
-  const gasUrl = await getSystemSetting('gas_url');
-  if (!gasUrl) {
+  const GAS_URL = await getSystemSetting('gas_url');
+  if (!GAS_URL) {
     return Swal.fire({ icon:'error', title:'ระบบยังไม่เชื่อมต่อ', text:'กรุณาแจ้งผู้ดูแลระบบให้ตั้งค่า API URL', confirmButtonColor:'#3b82f6' });
   }
 
   try {
     saveMemory(group, subj, grade);
-    await uploadPlanViaGAS(fullSubjectName, weekNum, selectedFile, gasUrl);
+    await uploadPlanViaGAS(fullSubjectName, weekNum, selectedFile, GAS_URL);
 
-    await Swal.fire({
-      icon: 'success',
-      title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>',
-      html: '<p style="font-family:Sarabun;font-size:14px">แผนของคุณเข้าสู่ระบบและรอผู้อำนวยการตรวจสอบแล้ว</p>',
-      confirmButtonColor: '#3b82f6',
-      confirmButtonText: 'ดูประวัติการส่ง',
-    });
-
-    clearFile(null);
-    document.getElementById('inpSubject').value = '';
-    document.getElementById('inpGrade').value   = '';
-    document.getElementById('inpWeek').value    = '';
+    await Swal.fire({ icon: 'success', title: '<span style="font-family:Kanit">ส่งแผนการสอนสำเร็จ!</span>', html: '<p style="font-family:Sarabun;font-size:14px">แผนของคุณเข้าสู่ระบบเรียบร้อยแล้ว</p>', confirmButtonColor: '#3b82f6', confirmButtonText: 'รับทราบ' });
+    clearFile(null); document.getElementById('inpSubject').value = ''; document.getElementById('inpGrade').value = ''; document.getElementById('inpWeek').value = '';
     
-    await loadStats();
-    showPage('history', 'Pending'); // นำไปสู่หน้ารอตรวจอัตโนมัติ
-
+    await loadStats(); showPage('history', 'Pending');
   } catch (error) {
-    Swal.fire({
-      icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: error.message,
-      confirmButtonColor: '#3b82f6',
-    });
+    let errorMsg = error.message;
+    if (errorMsg.includes('Failed to fetch')) {
+      errorMsg = 'เชื่อมต่อขัดข้อง (Failed to fetch)<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือตั้งค่า Deploy Google Apps Script ให้เป็น "Who has access: Anyone"';
+    }
+    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', html: errorMsg, confirmButtonColor: '#3b82f6' });
   }
 }
 
-// ── Submit Revision Plan (อัปโหลดทับอันที่ตีกลับ) ────────────────
+// ── Submit Revision Plan ──
 async function resubmitPlan(planId, subjectName, weekNumber) {
   const { value: file } = await Swal.fire({
-    title: '<span style="font-family:Kanit">ส่งแผนการสอนฉบับแก้ไข</span>',
-    html: `<p style="font-family:Sarabun;font-size:14px;color:#4b5563;margin-bottom:12px;">อัปโหลดไฟล์แก้ไขสำหรับ <strong>${subjectName}</strong> (สัปดาห์ที่ ${weekNumber})</p>`,
-    input: 'file',
-    inputAttributes: {
-      'accept': 'application/pdf',
-      'aria-label': 'อัปโหลดไฟล์ PDF ฉบับแก้ไข'
-    },
-    showCancelButton: true,
-    confirmButtonText: '<i class="fa-solid fa-cloud-arrow-up mr-1"></i>อัปโหลดแก้ไข',
-    cancelButtonText: 'ยกเลิก',
-    confirmButtonColor: '#3b82f6',
-    cancelButtonColor: '#94a3b8'
+    title: '<span style="font-family:Kanit">ส่งแผนฉบับแก้ไข</span>', html: `<p style="font-family:Sarabun;font-size:14px;color:#4b5563;margin-bottom:12px;">อัปโหลดไฟล์แก้ไขสำหรับ <strong>${subjectName}</strong> (สัปดาห์ที่ ${weekNumber})</p>`, input: 'file', inputAttributes: { 'accept': 'application/pdf', 'aria-label': 'อัปโหลดไฟล์ PDF ฉบับแก้ไข' },
+    showCancelButton: true, confirmButtonText: '<i class="fa-solid fa-cloud-arrow-up mr-1"></i>อัปโหลดแก้ไข', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#3b82f6', cancelButtonColor: '#94a3b8'
   });
 
   if (!file) return; 
-  if (file.type !== 'application/pdf') {
-     return Swal.fire({ icon:'error', title:'ไฟล์ไม่ถูกต้อง', text:'กรุณาอัปโหลดไฟล์ PDF เท่านั้น', confirmButtonColor:'#3b82f6'});
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    return Swal.fire({ icon:'error', title:'ไฟล์ใหญ่เกินไป', text:'ขนาดไฟล์ต้องไม่เกิน 10 MB', confirmButtonColor:'#3b82f6'});
-  }
+  if (file.type !== 'application/pdf') return Swal.fire({ icon:'error', title:'ไฟล์ไม่ถูกต้อง', text:'กรุณาอัปโหลดไฟล์ PDF เท่านั้น', confirmButtonColor:'#3b82f6'});
+  if (file.size > 10 * 1024 * 1024) return Swal.fire({ icon:'error', title:'ไฟล์ใหญ่เกินไป', text:'ขนาดไฟล์ต้องไม่เกิน 10 MB', confirmButtonColor:'#3b82f6'});
 
-  Swal.fire({
-    title: '<span style="font-family:Kanit">กำลังอัปโหลดฉบับแก้ไข...</span>',
-    html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่ ระบบกำลังอัปเดตไฟล์ไปยังฐานข้อมูล</p>',
-    allowOutsideClick: false,
-    showConfirmButton: false,
-    didOpen: () => Swal.showLoading()
-  });
+  Swal.fire({ title: '<span style="font-family:Kanit">กำลังอัปโหลดฉบับแก้ไข...</span>', html: '<p style="font-family:Sarabun;font-size:14px;color:#6b7280">กรุณารอสักครู่ ระบบกำลังอัปเดตไฟล์ไปยังฐานข้อมูล</p>', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading() });
 
   try {
     const base64 = await _fileToBase64(file);
     const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
     
-    // 🌟 ดึงลิงก์อัตโนมัติจากที่แอดมินตั้งค่าไว้ 🌟
-    const gasUrl = await getSystemSetting('gas_url');
-    if (!gasUrl) {
+    const GAS_URL = await getSystemSetting('gas_url');
+    if (!GAS_URL) {
       return Swal.fire({ icon:'error', title:'ระบบยังไม่เชื่อมต่อ', text:'กรุณาแจ้งผู้ดูแลระบบให้ตั้งค่า API URL', confirmButtonColor:'#3b82f6' });
     }
 
-    const payload = {
-      fileName:    file.name,
-      base64:      base64,
-      mimeType:    file.type,
-      subject:     subjectName,
-      week:        weekNumber,
-      teacherId:   profile.id,
-      teacherName: profile.name,
-    };
-
-    const response = await fetch(gasUrl, { method: 'POST', body: JSON.stringify(payload) });
+    const payload = { fileName: file.name, base64: base64, mimeType: file.type, subject: subjectName, week: weekNumber, teacherId: profile.id, teacherName: profile.name };
+    const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+    
     if (!response.ok) throw new Error(`การเชื่อมต่อขัดข้อง (Status ${response.status})`);
     const result = await response.json();
-    if (!result.success) throw new Error(result.message);
+    
+    if (!result.success && result.status !== 'success') {
+      throw new Error(result.message || result.error || 'Google Drive ขัดข้อง ส่งไฟล์ไม่สำเร็จ');
+    }
 
-    const { error } = await db.from('lesson_plans').update({
-      file_url: result.fileUrl,
-      status: 'Pending',
-      director_feedback: null, 
-      updated_at: new Date().toISOString()
-    }).eq('id', planId);
-
+    const finalFileUrl = result.fileUrl || result.url;
+    const { error } = await db.from('lesson_plans').update({ file_url: finalFileUrl, status: 'Pending', director_feedback: null, updated_at: new Date().toISOString() }).eq('id', planId);
     if (error) throw error;
 
-    Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', text: 'ส่งแผนการสอนฉบับแก้ไขเรียบร้อยแล้ว', confirmButtonColor: '#3b82f6' });
+    Swal.fire({ icon: 'success', title: 'อัปเดตสำเร็จ', text: 'ส่งแผนฉบับแก้ไขเรียบร้อยแล้ว', confirmButtonColor: '#3b82f6' });
     
-    await loadStats();
-    loadHistory().then(() => { filterTable('Pending'); }); // พาไปหน้ารอตรวจเพื่อดูว่าเปลี่ยนสถานะแล้ว
+    await loadStats(); loadHistory().then(() => { filterTable('Pending'); });
 
   } catch (err) {
-    Swal.fire({ icon: 'error', title: 'การส่งไฟล์ล้มเหลว', text: err.message, confirmButtonColor: '#3b82f6' });
+    let errorMsg = err.message;
+    if (errorMsg.includes('Failed to fetch')) {
+      errorMsg = 'เชื่อมต่อขัดข้อง (Failed to fetch)<br>กรุณาตรวจสอบอินเทอร์เน็ต หรือตั้งค่า Deploy Google Apps Script ให้เป็น "Who has access: Anyone"';
+    }
+    Swal.fire({ icon: 'error', title: 'ส่งไฟล์ล้มเหลว', html: errorMsg, confirmButtonColor: '#3b82f6' });
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+//  GENERATE PDF FORM (แบบฟอร์มเอกสารใบประเมินสำหรับครู)
+// ══════════════════════════════════════════════════════════════
+async function downloadEvaluationPDF(planId) {
+    const plan = allPlans.find(p => p.id === planId);
+    if (!plan) return;
+
+    Swal.fire({title: 'กำลังดึงข้อมูลใบประเมิน...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => Swal.showLoading()});
+
+    const teacherName = plan.users?.name || 'ไม่ระบุ';
+    const subjectName = plan.subject_name || plan.subject || 'ไม่ระบุ';
+    const weekNum = plan.week_number || '-';
+    
+    let feedbackText = plan.director_feedback || '';
+    let checks = [false, false, false, false];
+    let savedSigMode = 'esign'; 
+
+    if (feedbackText.startsWith('[CHECK:')) {
+      const match = feedbackText.match(/^\[CHECK:([01],[01],[01],[01])\](?:\[SIG:([^\]]+)\])?(.*)/s);
+      if (match) {
+        checks = match[1].split(',').map(v => v === '1');
+        savedSigMode = match[2] || 'esign'; 
+        feedbackText = match[3];
+      }
+    }
+
+    // กำหนดค่าลงใน HTML Template ที่ซ่อนอยู่
+    document.getElementById('pdf-teacher-name').textContent = teacherName;
+    document.getElementById('pdf-subject-name').textContent = subjectName;
+    document.getElementById('pdf-week-num').textContent = weekNum;
+
+    // สร้าง Checklist
+    const criteria = [
+      "จุดประสงค์การเรียนรู้ (K-P-A) ครบถ้วนและเขียนไว้วัดผลได้จริง",
+      "มีการจัดกิจกรรมการเรียนรู้เชิงรุก (Active Learning) ที่เน้นผู้เรียน",
+      "การเลือกใช้สื่อ/นวัตกรรม เทคโนโลยีการสอนมีความเหมาะสม",
+      "มีเกณฑ์การวัดและประเมินผลการเรียนรู้สอดคล้องกับเนื้อหาบทเรียน"
+    ];
+    let checkHtml = '';
+    criteria.forEach((text, i) => {
+        const icon = checks[i] ? '✔' : '&nbsp;&nbsp;';
+        checkHtml += `<div class="pdf-checkbox-item"><div class="pdf-box">${icon}</div> <span>${text}</span></div>`;
+    });
+    document.getElementById('pdf-checklist-container').innerHTML = checkHtml;
+
+    // ข้อความประเมิน
+    document.getElementById('pdf-feedback-text').textContent = feedbackText || 'ไม่มีข้อเสนอแนะเพิ่มเติม';
+
+    // จัดการรูปลายเซ็น (ดึงข้อมูลผู้อำนวยการอัตโนมัติ)
+    const sigImg = document.getElementById('pdf-signature-img');
+    sigImg.style.display = 'none';
+    
+    // ดึงบัญชีที่เป็นผู้อำนวยการจากฐานข้อมูลมาแสดงชื่อและลายเซ็น
+    const { data: director } = await db.from('users').select('id, name').eq('role', 'director').limit(1).single();
+    document.getElementById('pdf-sign-name').textContent = director ? director.name : '...................................................';
+
+    if (savedSigMode === 'esign' && director) {
+        const esig = await getSystemSetting('esig_' + director.id);
+        if (esig) {
+            sigImg.src = esig;
+            sigImg.style.display = 'block';
+        }
+    } else if (savedSigMode === 'custom') {
+        const customSig = await getSystemSetting('plan_sig_' + plan.id);
+        if (customSig) {
+            sigImg.src = customSig;
+            sigImg.style.display = 'block';
+        }
+    }
+
+    // เรียกใช้ html2pdf
+    const element = document.getElementById('pdf-content');
+    
+    const opt = {
+      margin:       10,
+      filename:     `ใบประเมินผล_${subjectName}_สัปดาห์ที่${weekNum}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    // จำลองแสดงผลเพื่อวาดภาพ แล้วซ่อนกลับ
+    document.getElementById('pdf-export-container').style.left = '0';
+    document.getElementById('pdf-export-container').style.zIndex = '-100';
+
+    html2pdf().from(element).set(opt).save().then(() => {
+        document.getElementById('pdf-export-container').style.left = '-9999px';
+        Swal.close();
+    }).catch(err => {
+        document.getElementById('pdf-export-container').style.left = '-9999px';
+        Swal.fire({ icon: 'error', title: 'สร้าง PDF ไม่สำเร็จ', text: err.message, confirmButtonColor: '#3b82f6' });
+    });
+}
 </script>
 </body>
 </html>
