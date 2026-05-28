@@ -10,20 +10,20 @@
 const SUPABASE_URL      = 'https://aamnvfnhtvmxwypgiorq.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFhbW52Zm5odHZteHd5cGdpb3JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MTYwNDAsImV4cCI6MjA5NTE5MjA0MH0.dkvN9FVrz_ekrmvOUFOgGZxewG0S_tQyTJTp_kZeTVI';
 
-// ปรับให้ตรงกับชื่อไฟล์ที่คุณครูใช้งานจริง
+// 🌟 แก้ไขจุดที่ทำให้เกิด Error 404: ปรับชื่อไฟล์ให้ตรงกับบน GitHub ของคุณครูเป๊ะๆ 🌟
 const ROLE_ROUTES = { 
-  teacher: 'teacher.html', 
-  director: 'director.html', 
-  admin: 'admin.html' 
+  teacher: 'teacher_dashboard.html', 
+  director: 'director_dashboard.html', 
+  admin: 'admin_dashboard.html' 
 };
 
-// 🌟 แก้บัค db is not defined: บังคับให้เป็น Global Variable 🌟
+// บังคับให้เป็น Global Variable ป้องกันบัค db is not defined
 const db = (typeof window._supabaseClient !== 'undefined') ? window._supabaseClient : (() => {
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   window._supabaseClient = client; 
   return client;
 })();
-window.db = db; // <- บรรทัดนี้สำคัญมาก ทำให้หน้าอื่นมองเห็น db ได้เสมอ
+window.db = db; 
 
 // ตรวจสอบสิทธิ์การเข้าหน้าเว็บ (Session Check)
 (async () => {
