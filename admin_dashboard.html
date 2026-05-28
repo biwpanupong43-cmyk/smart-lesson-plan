@@ -846,9 +846,10 @@ async function loadOverviewStats() {
     logBody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>`;
 
     // 🌟 โหลดข้อมูลทั้งหมดแบบคู่ขนาน (Concurrent Fetch) ให้หน้าเว็บโชว์เร็วปรี๊ด! 🌟
+    // แก้ไข: เอาคำว่า subject ออกจาก select query ให้ตรงกับฐานข้อมูล
     const [users, { data: plans }, gasUrl] = await Promise.all([
         getAllUsers(),
-        db.from('lesson_plans').select('id, status, created_at, updated_at, subject_name, subject, week_number, users(name)'),
+        db.from('lesson_plans').select('id, status, created_at, updated_at, subject_name, week_number, users(name)'),
         getSystemSetting('gas_url')
     ]);
 
@@ -875,51 +876,41 @@ async function loadOverviewStats() {
         });
     });
 
-    // 2. เพิ่ม Log ฝั่งแผนการสอน (แยก 2 บรรทัดต่อ 1 แผน)
+    // 2. เพิ่ม Log ฝั่งแผนการสอน (อัปเดตให้รองรับทุกสถานะและชื่อวิชาเป๊ะๆ)
     if (plans) {
         plans.forEach(p => {
-            const subjectInfo = p.subject_name || p.subject || 'แผนการสอน';
+            let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
+            let logTime;
+            
+            // 🌟 ดักจับปัญหา Date NaN ที่ทำให้เรียงลำดับพัง 🌟
+            try {
+                // ถ้าตรวจแล้วให้ใช้วันที่ตรวจ (updated_at) ถ้ายังไม่ตรวจใช้วันที่ส่ง (created_at)
+                const dateStr = (p.status !== 'Pending' && p.updated_at) ? p.updated_at : p.created_at;
+                logTime = dateStr ? new Date(dateStr) : new Date();
+                if (isNaN(logTime.getTime())) logTime = new Date();
+            } catch(e) {
+                logTime = new Date();
+            }
+
+            const subjectInfo = p.subject_name || 'แผนการสอน';
             const teacherName = p.users?.name || 'ไม่ทราบชื่อ';
             const weekInfo = p.week_number ? ` (สัปดาห์ที่ ${p.week_number})` : '';
 
-            // --- เหตุการณ์ที่ 1: การส่งแผน (ดึงจาก created_at เสมอ) ---
-            let submitTime;
-            try {
-                submitTime = p.created_at ? new Date(p.created_at) : new Date();
-                if (isNaN(submitTime.getTime())) submitTime = new Date();
-            } catch(e) { submitTime = new Date(); }
-            
-            logs.push({ 
-                time: submitTime, 
-                typeText: 'SUBMIT', 
-                color: 'text-blue-500', 
-                msg: `คุณครู ${teacherName} ส่งวิชา ${subjectInfo}${weekInfo} เข้าสู่ระบบ` 
-            });
-
-            // --- เหตุการณ์ที่ 2: การตรวจแผน (ถ้าไม่ใช่ Pending ให้สร้างเพิ่ม 1 บรรทัด) ---
-            if (p.status !== 'Pending' && p.updated_at) {
-                let updateTime;
-                try {
-                    updateTime = new Date(p.updated_at);
-                    if (isNaN(updateTime.getTime())) updateTime = new Date();
-                } catch(e) { updateTime = new Date(); }
-
-                if (p.status === 'Approved') {
-                    logs.push({ 
-                        time: updateTime, 
-                        typeText: 'APPROVE', 
-                        color: 'text-emerald-500', 
-                        msg: `ผู้อำนวยการ อนุมัติวิชา ${subjectInfo}${weekInfo} ของ ${teacherName}` 
-                    });
-                } else if (p.status === 'Revision Needed') {
-                    logs.push({ 
-                        time: updateTime, 
-                        typeText: 'REVISION', 
-                        color: 'text-red-500', 
-                        msg: `ผู้อำนวยการ ตีกลับวิชา ${subjectInfo}${weekInfo} ของ ${teacherName} ให้ปรับปรุง` 
-                    });
-                }
+            if (p.status === 'Pending') {
+                msg = `คุณครู ${teacherName} ส่งวิชา ${subjectInfo}${weekInfo} เข้าสู่ระบบ`;
+                color = 'text-blue-500'; typeText = 'SUBMIT';
+            } else if (p.status === 'Approved') {
+                msg = `ผู้อำนวยการ อนุมัติวิชา ${subjectInfo}${weekInfo} ของ ${teacherName}`;
+                color = 'text-emerald-500'; typeText = 'APPROVE';
+            } else if (p.status === 'Revision Needed') {
+                msg = `ผู้อำนวยการ ตีกลับวิชา ${subjectInfo}${weekInfo} ของ ${teacherName} ให้ปรับปรุง`;
+                color = 'text-red-500'; typeText = 'REVISION';
+            } else {
+                msg = `อัปเดตสถานะ ${subjectInfo} ของ ${teacherName}`;
+                color = 'text-gray-500'; typeText = 'UPDATE';
             }
+            
+            logs.push({ time: logTime, typeText: typeText, color: color, msg: msg });
         });
     }
 
