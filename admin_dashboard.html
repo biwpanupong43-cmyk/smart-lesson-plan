@@ -167,7 +167,7 @@
                 <p class="text-gray-400 text-xs mt-2">รวมทุกสถานะ</p>
               </div>
               <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center border border-amber-100">
-                <!-- 🌟 เปลี่ยนไอคอนเป็นรูป PDF ของจริง 🌟 -->
+                <!-- 🌟 ไอคอน PDF -->
                 <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" alt="PDF Icon" class="w-6 h-6 object-contain">
               </div>
             </div>
@@ -180,16 +180,16 @@
                 <p id="driveStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p id="driveSubtext" class="text-gray-400 text-[10px] mt-1 break-all font-mono leading-tight">กำลังตรวจสอบ...</p>
                 
-                <!-- 🌟 แถบความจำ Drive หนาขึ้นและมองเห็นชัดเจน 🌟 -->
+                <!-- แถบความจำ Drive หนาขึ้นและมองเห็นชัดเจน -->
                 <div id="driveStorageWrapper" class="hidden border-t border-gray-100 pt-3 mt-3">
-                  <p id="driveStorageText" class="text-gray-600 text-[11px] mb-1.5">ตรวจสอบความจุจริง...</p>
-                  <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden shadow-inner">
-                    <div id="driveBarFill" class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000" style="width:0%"></div>
+                  <p id="driveStorageText" class="text-gray-600 text-[11px] mb-1.5">ใช้ไป -- GB จาก -- GB</p>
+                  <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
+                    <div id="driveBarFill" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-1000" style="width:0%"></div>
                   </div>
                 </div>
               </div>
               <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100">
-                <!-- 🌟 เปลี่ยนไอคอนเป็นโลโก้ Google Drive ของจริง 🌟 -->
+                <!-- 🌟 โลโก้ Google Drive -->
                 <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Google Drive" class="w-6 h-6 object-contain">
               </div>
             </div>
@@ -200,7 +200,7 @@
           <div class="flex justify-between items-center mb-4">
             <h2 class="kn font-semibold text-gray-800 text-base">บันทึกกิจกรรมล่าสุด (Real-time Logs)</h2>
             <button onclick="loadOverviewStats()" class="text-xs text-gray-500 hover:text-indigo-600 transition-colors">
-              <i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรช
+              <i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรชข้อมูล
             </button>
           </div>
           <div class="overflow-x-auto">
@@ -258,7 +258,7 @@
           <div class="card integ-drive p-6 col-span-2 md:col-span-1 border-blue-200 shadow-sm">
             <div class="flex items-center gap-3 mb-4">
               <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100">
-                <!-- 🌟 เปลี่ยนไอคอน Google Drive ให้สมจริง 🌟 -->
+                <!-- โลโก้ Google Drive -->
                 <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Google Drive" class="w-7 h-7 object-contain">
               </div>
               <div>
@@ -530,7 +530,7 @@ function showPage(name) {
 
 // ── Users (อัปเดตแสดงรูปภาพโปรไฟล์ของคุณครูทุกคน) ─────────
 let allUsers = [];
-let globalAvatars = {}; // 🌟 หน่วยความจำเก็บรูปโปรไฟล์คุณครู
+let globalAvatars = {};
 
 async function loadUserTable() {
   const tbody = document.getElementById('userTableBody');
@@ -538,7 +538,6 @@ async function loadUserTable() {
   try {
     allUsers = await getAllUsers();
     
-    // 🌟 ดึงข้อมูลรูปโปรไฟล์ทั้งหมดจากฐานข้อมูลมาไว้ใน Memory 🌟
     const { data: settings } = await db.from('system_settings').select('key, value').like('key', 'avatar_%');
     globalAvatars = {};
     if (settings) {
@@ -568,7 +567,6 @@ function renderUserTable(users) {
     const initials   = (u.name || 'User').trim().split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
     const idLabel    = u.username ? `ID: ${u.username}` : '';
 
-    // 🌟 ตรวจสอบและแสดงรูปโปรไฟล์ 🌟
     const av = globalAvatars[u.id];
     let avatarHtml = initials;
     if (av && av.img) {
@@ -606,7 +604,6 @@ function renderUserTable(users) {
   }).join('');
 }
 
-// 🌟 ฟังก์ชันแสดงรูปโปรไฟล์แบบขยายเต็มจอ 🌟
 function viewAvatar(imgSrc) {
     Swal.fire({
         imageUrl: imgSrc,
@@ -690,7 +687,6 @@ function resetUserPassword(userId, userName) {
       const newPwd = document.getElementById('new-pwd').value.trim();
       if (!newPwd) { Swal.showValidationMessage('กรุณากรอกรหัสผ่านใหม่'); return false; }
       try {
-        // อัปเดตรหัสผ่านลงใน temp_password ของตาราง users เพื่อเป็นหลักฐานให้แอดมินดูได้
         const { error } = await db.from('users').update({ temp_password: newPwd }).eq('id', userId);
         if (error) throw error;
       } catch (err) {
@@ -782,7 +778,8 @@ async function loadOverviewStats() {
     const users = await getAllUsers();
     document.getElementById('totalUsers').textContent = users.length;
 
-    const { data: plans } = await db.from('lesson_plans').select('id, status, created_at, updated_at, users(name)');
+    // ดึงข้อมูลแผนการสอนทั้งหมดเพื่อคำนวณและทำ Log
+    const { data: plans } = await db.from('lesson_plans').select('id, status, created_at, updated_at, subject_name, subject, week_number, users(name)');
     document.getElementById('totalPlans').textContent = plans ? plans.length : "0";
 
     const gasUrl = await getSystemSetting('gas_url');
@@ -792,7 +789,6 @@ async function loadOverviewStats() {
     const driveBarFill = document.getElementById('driveBarFill');
     const driveStorageText = document.getElementById('driveStorageText');
 
-    // 🌟 ดึงข้อมูลพื้นที่ใช้งานจริงจาก Google Apps Script 🌟
     if (gasUrl) {
         driveStatus.innerHTML = `<span class="text-blue-600">เชื่อมต่อแล้ว</span>`;
         driveSub.textContent  = `API: เชื่อมต่อสำเร็จ`;
@@ -841,16 +837,18 @@ async function loadOverviewStats() {
         plans.forEach(p => {
             let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
             let logTime = new Date(p.created_at || Date.now());
+            // ดึงชื่อวิชามาประกอบข้อความ Log ตามฐานข้อมูลจริง
+            const subjectInfo = p.subject_name || p.subject || 'แผนการสอน';
 
             if (p.status === 'Pending') {
-                msg = `คุณครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งแผนการสอนเข้าสู่ระบบ`;
+                msg = `คุณครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งวิชา${subjectInfo} เข้าสู่ระบบ`;
                 color = 'text-blue-500'; typeText = 'SUBMIT';
             } else if (p.status === 'Approved') {
-                msg = `ผู้อำนวยการ อนุมัติแผนการสอนของ ${p.users?.name || 'ไม่ทราบชื่อ'} แล้ว`;
+                msg = `ผู้อำนวยการ อนุมัติวิชา${subjectInfo} ของ ${p.users?.name || 'ไม่ทราบชื่อ'} แล้ว`;
                 color = 'text-emerald-500'; typeText = 'APPROVE';
                 if(p.updated_at) logTime = new Date(p.updated_at);
             } else if (p.status === 'Revision Needed') {
-                msg = `ผู้อำนวยการ ตีกลับแผนของ ${p.users?.name || 'ไม่ทราบชื่อ'} ให้แก้ไขใหม่`;
+                msg = `ผู้อำนวยการ ตีกลับวิชา${subjectInfo} ของ ${p.users?.name || 'ไม่ทราบชื่อ'} ให้แก้ไข`;
                 color = 'text-red-500'; typeText = 'REVISION';
                 if(p.updated_at) logTime = new Date(p.updated_at);
             }
@@ -859,8 +857,9 @@ async function loadOverviewStats() {
         });
     }
 
+    // จัดเรียงบันทึกกิจกรรมล่าสุดและแสดงผล 8 รายการ
     logs.sort((a,b) => b.time - a.time);
-    const topLogs = logs.slice(0, 6);
+    const topLogs = logs.slice(0, 8);
     const logBody = document.getElementById('logTableBody');
 
     if (topLogs.length > 0) {
