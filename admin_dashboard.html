@@ -12,56 +12,44 @@
   * { font-family:'Sarabun',sans-serif; }
   h1,h2,.kn { font-family:'Kanit',sans-serif; }
 
-  /* ── Layout (Light Theme) ── */
   body { background:#f3f4f6; color:#1f2937; min-height:100vh; }
 
-  /* ── Sidebar ── */
   .sidebar { background: linear-gradient(180deg, #1e1b4b 0%, #1a1748 60%, #111130 100%); width: 240px; flex-shrink: 0; }
   .sidebar-label { color:#8b8db8; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding: 0 16px; margin-bottom:6px; }
 
-  /* Nav items */
   .nav-item { transition:all .2s; border-radius:10px; }
   .nav-item:hover { background:rgba(255,255,255,.07); }
   .nav-item.active { background: linear-gradient(135deg, #7c3aed, #6d28d9); color:#fff !important; }
   .nav-item.active i { color:#fff !important; }
 
-  /* ── Cards ── */
   .card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; }
   .stat-card { background:#fff; border-radius:14px; border:1px solid #e5e7eb; overflow:hidden; }
   .stat-card .top-bar { height:4px; }
 
-  /* ── Role badges ── */
   .badge-admin    { background:#ede9fe; color:#7c3aed; border:1px solid #c4b5fd; }
   .badge-director { background:#fce7f3; color:#be185d; border:1px solid #fbcfe8; }
   .badge-teacher  { background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; }
 
-  /* ── Status chip ── */
   .chip-online { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
 
-  /* ── Table ── */
   table thead th { color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #f3f4f6; }
   table tbody tr { border-bottom:1px solid #f9fafb; transition:background .15s; }
   table tbody tr:hover { background:#f9fafb; }
 
-  /* ── Inputs ── */
   input, select, textarea { background:#f9fafb !important; color:#1f2937 !important; border-color:#e5e7eb !important; outline:none !important; }
   input:focus, select:focus, textarea:focus { border-color:#7c3aed !important; box-shadow:0 0 0 3px rgba(124,58,237,.1) !important; background:#fff !important; }
 
-  /* ── Animation ── */
   @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
   .page { animation:fadeIn .25s ease; }
   .section-hidden { display:none !important; }
 
-  /* ── Scrollbar ── */
   ::-webkit-scrollbar { width:4px; }
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:2px; }
 
-  /* ── Logout button ── */
   .btn-logout { background:#0f0e2e; color:#e5e7eb; border-radius:10px; transition:background .2s; }
   .btn-logout:hover { background:#1e1b4b; }
 
-  /* ── Avatar (รองรับรูปภาพ) ── */
   .avatar-circle {
     width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#7c3aed,#4f46e5);
     display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px;
@@ -69,13 +57,10 @@
   }
   .avatar-circle:hover::after { content: '\f030'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
   
-  /* ตัวแต่งป๊อปอัพ Slider ซูมรูปภาพ */
   input[type=range] { accent-color: #7c3aed; cursor: pointer; }
 
-  /* ── Danger zone ── */
   .danger-card { background:#fff5f5; border:1px solid #fecaca; border-radius:14px; }
 
-  /* ── Toggle ── */
   .toggle-track { width:48px; height:26px; border-radius:13px; position:relative; cursor:pointer; transition:background .2s; }
   .toggle-thumb { position:absolute; top:3px; left:3px; width:20px; height:20px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .2s; }
 </style>
@@ -155,7 +140,7 @@
                 <p id="totalUsers" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p class="text-green-600 text-xs mt-2 flex items-center gap-1">ดึงข้อมูลจริงจากระบบ</p>
               </div>
-              <div class="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center border border-violet-100"><i class="fa-solid fa-users text-violet-500 text-lg"></i></div>
+              <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center border border-violet-100"><i class="fa-solid fa-users text-violet-500 text-lg"></i></div>
             </div>
           </div>
           <div class="stat-card p-5">
@@ -166,8 +151,7 @@
                 <p id="totalPlans" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p class="text-gray-400 text-xs mt-2">รวมทุกสถานะ</p>
               </div>
-              <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center border border-amber-100">
-                <!-- 🌟 เปลี่ยนไอคอนเป็นรูป PDF ของจริง 🌟 -->
+              <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center border border-amber-100">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" alt="PDF Icon" class="w-6 h-6 object-contain">
               </div>
             </div>
@@ -180,16 +164,14 @@
                 <p id="driveStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
                 <p id="driveSubtext" class="text-gray-400 text-[10px] mt-1 break-all font-mono leading-tight">กำลังตรวจสอบ...</p>
                 
-                <!-- 🌟 แถบความจำ Drive หนาขึ้นและมองเห็นชัดเจน 🌟 -->
                 <div id="driveStorageWrapper" class="hidden border-t border-gray-100 pt-3 mt-3">
-                  <p id="driveStorageText" class="text-gray-600 text-[11px] mb-1.5">ใช้ไป -- GB จาก -- GB</p>
-                  <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden shadow-inner">
-                    <div id="driveBarFill" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-1000" style="width:0%"></div>
+                  <p id="driveStorageText" class="text-gray-600 text-[11px] mb-1.5 font-medium">รอการตรวจสอบความจุจริง...</p>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden shadow-inner">
+                    <div id="driveBarFill" class="bg-blue-500 h-1.5 rounded-full transition-all duration-1000" style="width:0%"></div>
                   </div>
                 </div>
               </div>
               <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100">
-                <!-- 🌟 เปลี่ยนไอคอนเป็นโลโก้ Google Drive ของจริง 🌟 -->
                 <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Google Drive" class="w-6 h-6 object-contain">
               </div>
             </div>
@@ -199,8 +181,8 @@
         <div class="card p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="kn font-semibold text-gray-800 text-base">บันทึกกิจกรรมล่าสุด (Real-time Logs)</h2>
-            <button onclick="loadOverviewStats()" class="text-xs text-gray-500 hover:text-indigo-600 transition-colors">
-              <i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรช
+            <button onclick="forceRefreshData()" class="text-xs text-gray-500 hover:text-indigo-600 transition-colors">
+              <i class="fa-solid fa-rotate-right mr-1"></i> อัปเดตข้อมูลจริง
             </button>
           </div>
           <div class="overflow-x-auto">
@@ -258,7 +240,6 @@
           <div class="card integ-drive p-6 col-span-2 md:col-span-1 border-blue-200 shadow-sm">
             <div class="flex items-center gap-3 mb-4">
               <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100">
-                <!-- 🌟 เปลี่ยนไอคอน Google Drive ให้สมจริง 🌟 -->
                 <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg" alt="Google Drive" class="w-7 h-7 object-contain">
               </div>
               <div>
@@ -398,6 +379,12 @@ const Toast = Swal.mixin({
     customClass: { popup: 'rounded-2xl shadow-xl border border-gray-100 bg-white text-gray-800' }
 });
 
+// ── GLOBAL STATE (เพื่อความรวดเร็วในการโหลดหน้าเว็บ) ──
+let globalUsers = [];
+let globalPlans = [];
+let globalAvatars = {};
+let gasUrlGlobal = '';
+
 // ── Load Profile ──────────────────────────────────────────────
 (function initProfile() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
@@ -409,7 +396,7 @@ const Toast = Swal.mixin({
   }
 })();
 
-// ── อัปโหลดรูปโปรไฟล์ ──────────────────────────────
+// ── อัปโหลดรูปโปรไฟล์ + เลื่อนพิกัด X/Y ──────────────────────────────
 async function openAvatarSettings() {
   const { value: file } = await modernPopup.fire({
     title: 'อัปโหลดรูปโปรไฟล์ส่วนตัว',
@@ -420,46 +407,108 @@ async function openAvatarSettings() {
   if (file) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const base64 = e.target.result;
-      await modernPopup.fire({
-        title: 'ปรับแต่งรูปโปรไฟล์',
-        html: `
-          <div class="flex flex-col items-center">
-            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-violet-100 shadow-inner mb-5 relative bg-gray-50">
-              <img id="swalAvatarPreview" src="${base64}" style="width:100%; height:100%; object-fit:cover; object-position:50% 50%; transform:scale(1); transform-origin:center;" />
+      const imgObj = new Image();
+      imgObj.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 400; 
+        let w = imgObj.width;
+        let h = imgObj.height;
+        if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } } 
+        else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgObj, 0, 0, w, h);
+        const base64Compressed = canvas.toDataURL('image/jpeg', 0.8); 
+
+        let currentZoom = 1;
+        let currentX = 0;
+        let currentY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        await modernPopup.fire({
+          title: 'ปรับแต่งรูปโปรไฟล์',
+          html: `
+            <div class="flex flex-col items-center select-none touch-none">
+              <p class="text-xs text-gray-500 mb-4">คลิกค้างที่รูปแล้วลากเพื่อจัดตำแหน่ง หรือใช้แถบเลื่อนเพื่อซูม</p>
+              <div id="cropContainer" class="w-40 h-40 rounded-full overflow-hidden border-4 border-violet-100 shadow-inner mb-5 relative bg-gray-50 cursor-move">
+                <img id="swalAvatarPreview" src="${base64Compressed}" style="width:100%; height:100%; object-fit:cover; transform: translate(0px, 0px) scale(1); transform-origin: center; pointer-events: none;" draggable="false" />
+              </div>
+              <div class="w-full text-left mt-2 px-4">
+                <label class="text-xs text-gray-500 flex justify-between"><span>ซูมขยาย</span><span id="zoomLabel" class="text-violet-600">1.0x</span></label>
+                <input type="range" id="zoomAvatar" min="1" max="3" step="0.05" value="1" class="w-full accent-violet-600">
+              </div>
             </div>
-            <div class="w-full text-left space-y-4 px-2">
-              <div><label class="text-xs text-gray-500 font-semibold flex justify-between"><span>ซูมขยาย (Zoom)</span> <span id="valZ" class="text-violet-600">1x</span></label><input type="range" id="zoomAvatar" min="1" max="3" step="0.05" value="1" class="w-full"></div>
-              <div><label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนซ้าย-ขวา (X)</span> <span id="valX" class="text-violet-600">50%</span></label><input type="range" id="posXAvatar" min="0" max="100" value="50" class="w-full"></div>
-              <div><label class="text-xs text-gray-500 font-semibold flex justify-between"><span>เลื่อนบน-ล่าง (Y)</span> <span id="valY" class="text-violet-600">50%</span></label><input type="range" id="posYAvatar" min="0" max="100" value="50" class="w-full"></div>
-            </div>
-          </div>
-        `,
-        didOpen: () => {
-          const img = document.getElementById('swalAvatarPreview'), z = document.getElementById('zoomAvatar'), x = document.getElementById('posXAvatar'), y = document.getElementById('posYAvatar');
-          const vz = document.getElementById('valZ'), vx = document.getElementById('valX'), vy = document.getElementById('valY');
-          const updateImg = () => { img.style.transform = `scale(${z.value})`; img.style.objectPosition = `${x.value}% ${y.value}%`; vz.textContent = z.value + 'x'; vx.textContent = x.value + '%'; vy.textContent = y.value + '%'; };
-          z.oninput = updateImg; x.oninput = updateImg; y.oninput = updateImg;
-        },
-        showCancelButton: true, confirmButtonText: 'บันทึกรูปลงระบบ', cancelButtonText: 'ยกเลิก'
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          modernPopup.fire({title: 'กำลังบันทึกข้อมูล...', showConfirmButton: false, didOpen: () => Swal.showLoading()});
-          const z = document.getElementById('zoomAvatar').value, x = document.getElementById('posXAvatar').value, y = document.getElementById('posYAvatar').value;
-          const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
-          if (profile.id) {
-            const avatarData = JSON.stringify({ img: base64, zoom: z, posX: x, posY: y });
-            try {
-              await saveSystemSetting('avatar_' + profile.id, avatarData);
-              localStorage.setItem('avatar_' + profile.id, avatarData);
-              loadAvatar();
-              Toast.fire({ icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ' });
-            } catch (err) {
-              modernPopup.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message });
+          `,
+          didOpen: () => {
+            const container = document.getElementById('cropContainer');
+            const img = document.getElementById('swalAvatarPreview');
+            const zoomSlider = document.getElementById('zoomAvatar');
+            const zoomLabel = document.getElementById('zoomLabel');
+
+            const updateTransform = () => {
+              img.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentZoom})`;
+            };
+
+            zoomSlider.addEventListener('input', (ev) => {
+              currentZoom = parseFloat(ev.target.value);
+              zoomLabel.textContent = currentZoom.toFixed(1) + 'x';
+              updateTransform();
+            });
+
+            const onPointerDown = (ev) => {
+              isDragging = true;
+              startX = (ev.clientX || (ev.touches && ev.touches[0].clientX)) - currentX;
+              startY = (ev.clientY || (ev.touches && ev.touches[0].clientY)) - currentY;
+            };
+
+            const onPointerMove = (ev) => {
+              if (!isDragging) return;
+              ev.preventDefault(); 
+              const clientX = ev.clientX || (ev.touches && ev.touches[0].clientX);
+              const clientY = ev.clientY || (ev.touches && ev.touches[0].clientY);
+              currentX = clientX - startX;
+              currentY = clientY - startY;
+              updateTransform();
+            };
+
+            const onPointerUp = () => { isDragging = false; };
+
+            container.addEventListener('mousedown', onPointerDown);
+            window.addEventListener('mousemove', onPointerMove, {passive: false});
+            window.addEventListener('mouseup', onPointerUp);
+            
+            container.addEventListener('touchstart', onPointerDown, {passive: false});
+            window.addEventListener('touchmove', onPointerMove, {passive: false});
+            window.addEventListener('touchend', onPointerUp);
+
+            Swal.getPopup().addEventListener('remove', () => {
+               window.removeEventListener('mousemove', onPointerMove);
+               window.removeEventListener('mouseup', onPointerUp);
+               window.removeEventListener('touchmove', onPointerMove);
+               window.removeEventListener('touchend', onPointerUp);
+            });
+          },
+          showCancelButton: true, confirmButtonText: 'บันทึกรูปลงระบบ', cancelButtonText: 'ยกเลิก'
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            modernPopup.fire({title: 'กำลังบันทึกข้อมูล...', showConfirmButton: false, didOpen: () => Swal.showLoading()});
+            const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+            if (profile.id) {
+              const avatarData = JSON.stringify({ img: base64Compressed, x: currentX, y: currentY, zoom: currentZoom });
+              try {
+                await saveSystemSetting('avatar_' + profile.id, avatarData);
+                localStorage.setItem('avatar_' + profile.id, avatarData);
+                loadAvatar();
+                Toast.fire({ icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ' });
+              } catch (err) {
+                modernPopup.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message });
+              }
             }
           }
-        }
-      });
+        });
+      };
+      imgObj.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -468,25 +517,37 @@ async function openAvatarSettings() {
 async function loadAvatar() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (!profile.id) return;
+  
   let saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
+  
   if (!saved) {
     try {
       const dbAvatar = await getSystemSetting('avatar_' + profile.id);
-      if (dbAvatar) { saved = JSON.parse(dbAvatar); localStorage.setItem('avatar_' + profile.id, dbAvatar); }
+      if (dbAvatar) {
+        saved = JSON.parse(dbAvatar);
+        localStorage.setItem('avatar_' + profile.id, dbAvatar);
+      }
     } catch(e) {}
   }
+
   if (saved && saved.img) {
     const imgEl = document.getElementById('avatarImg');
     const txtEl = document.getElementById('avatarInitials');
     imgEl.src = saved.img;
-    imgEl.style.objectPosition = `${saved.posX || 50}% ${saved.posY || 50}%`;
-    imgEl.style.transform = `scale(${saved.zoom || 1})`;
+    // 🌟 ดึงค่า X, Y จากที่ถูกเลื่อนมาแสดง 🌟
+    if (saved.x !== undefined) {
+       imgEl.style.transform = `translate(${saved.x}px, ${saved.y}px) scale(${saved.zoom || 1})`;
+       imgEl.style.objectPosition = 'center'; 
+    } else {
+       imgEl.style.objectPosition = saved.pos || 'center';
+       imgEl.style.transform = 'none';
+    }
     imgEl.classList.remove('hidden');
     txtEl.classList.add('hidden');
   }
 }
 
-// ── โลโก้โรงเรียน (แสดงหน้า Login) ───────────────────────────────
+// ── โลโก้โรงเรียน (ระบบอัปโหลดและบันทึก) ───────────────────────────────
 let newSchoolLogoBase64 = null;
 function handleLogoPreview(event) {
   const file = event.target.files[0];
@@ -503,14 +564,16 @@ function handleLogoPreview(event) {
 }
 
 async function saveSchoolLogo() {
-  if(!newSchoolLogoBase64) return Toast.fire({ icon: 'warning', title: 'กรุณาเลือกรูปภาพก่อนบันทึก' });
-  modernPopup.fire({title: 'กำลังอัปโหลดโลโก้...', showConfirmButton: false, didOpen: () => Swal.showLoading()});
+  if(!newSchoolLogoBase64) {
+    return Swal.fire({ toast:true, position:'bottom-end', icon:'warning', title:'กรุณาเลือกรูปภาพก่อนบันทึก', showConfirmButton:false, timer:2500 });
+  }
+  Swal.fire({title:'กำลังอัปโหลดโลโก้โรงเรียน...', showConfirmButton:false, didOpen:()=>Swal.showLoading()});
   try {
     await saveSystemSetting('school_logo', newSchoolLogoBase64);
-    modernPopup.close();
-    Toast.fire({ icon: 'success', title: 'อัปเดตโลโก้โรงเรียนในระบบแล้ว!' });
+    Swal.close();
+    Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:'อัปเดตโลโก้โรงเรียนในระบบแล้ว! จะแสดงในหน้าเข้าสู่ระบบอัตโนมัติ', showConfirmButton:false, timer:3500 });
   } catch(e) {
-    modernPopup.fire({ icon: 'error', title: 'ขัดข้อง', text: e.message });
+    Swal.fire({ icon:'error', title:'บันทึกล้มเหลว', text:e.message });
   }
 }
 
@@ -522,42 +585,57 @@ function showPage(name) {
   const navBtn = document.getElementById('nav-' + name);
   navBtn.classList.add('active'); navBtn.classList.remove('text-indigo-300');
   document.getElementById('pageTitle').textContent = PAGE_TITLES[name] || '';
-  if (name === 'users') loadUserTable();
+  
+  // 🌟 ไม่ต้องไปยิงโหลดข้อมูลใหม่ทุกรอบแล้ว เพราะมีอยู่ใน Memory 🌟
+  if (name === 'users') renderUserTable(globalUsers);
   if (name === 'settings') loadSettings();
-  if (name === 'integrate') loadIntegrations();
+  if (name === 'integrate') {
+      if(gasUrlGlobal) {
+          document.getElementById('gasUrlInput').value = gasUrlGlobal;
+          document.getElementById('apiStatusText').textContent = 'เชื่อมต่อแล้ว';
+          document.getElementById('apiStatusText').classList.replace('text-gray-800', 'text-green-600');
+      }
+  }
   if (name === 'overview') loadOverviewStats();
 }
 
-// ── Users (แก้ไขการ Edit / Delete / Reset Pwd ของจริง และการโหลดแบบ Concurrent) ─────────
-let allUsers = [];
-let globalAvatars = {};
-
-async function loadUserTable() {
-  const tbody = document.getElementById('userTableBody');
-  tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2 text-lg"></i>กำลังดึงข้อมูลผู้ใช้งานและรูปโปรไฟล์...</td></tr>`;
+// 🌟 GLOBAL DATA FETCHER: โหลดข้อมูลทั้งหมดเก็บไว้ในระบบให้เปิดหน้าเว็บได้ลื่นไหล 🌟
+async function refreshGlobalData() {
   try {
-    // 🌟 โหลดฐานข้อมูลทั้งหมดแบบคู่ขนาน (Concurrent Fetch) 🌟
-    const [usersList, { data: settings }] = await Promise.all([
-       getAllUsers(),
-       db.from('system_settings').select('key, value').like('key', 'avatar_%')
+    const [usersRes, plansRes, avatarsRes, gasUrlRes] = await Promise.all([
+      getAllUsers(),
+      db.from('lesson_plans').select('id, status, created_at, updated_at, subject_name, week_number, users(name)'),
+      db.from('system_settings').select('key, value').like('key', 'avatar_%'),
+      getSystemSetting('gas_url')
     ]);
+
+    globalUsers = usersRes || [];
+    globalPlans = plansRes.data || [];
+    gasUrlGlobal = gasUrlRes || '';
     
-    allUsers = usersList;
     globalAvatars = {};
-    if (settings) {
-       settings.forEach(s => {
+    if (avatarsRes.data) {
+       avatarsRes.data.forEach(s => {
           const uid = s.key.replace('avatar_', '');
           try { globalAvatars[uid] = JSON.parse(s.value); } catch(e){}
        });
     }
-
-    renderUserTable(allUsers);
   } catch (err) {
-    console.error(err);
-    tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูล: ${err.message}</td></tr>`;
+    console.error("Failed to fetch global data:", err);
   }
 }
 
+async function forceRefreshData() {
+    Swal.fire({title: 'กำลังอัปเดตข้อมูลจริงจากระบบ...', showConfirmButton: false, didOpen: () => Swal.showLoading() });
+    await refreshGlobalData();
+    Swal.close();
+    
+    const currentPage = document.querySelector('section:not(.section-hidden)').id;
+    if (currentPage === 'page-dashboard') loadOverviewStats();
+    if (currentPage === 'page-users') renderUserTable(globalUsers);
+}
+
+// ── Users (Optimized rendering from Memory) ────────────────────────
 function renderUserTable(users) {
   const tbody = document.getElementById('userTableBody');
   if (users.length === 0) {
@@ -574,7 +652,7 @@ function renderUserTable(users) {
     const av = globalAvatars[u.id];
     let avatarHtml = initials;
     if (av && av.img) {
-        avatarHtml = `<img src="${av.img}" onclick="viewAvatar('${av.img}')" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" title="คลิกเพื่อดูรูปขยายแบบเต็ม">`;
+        avatarHtml = `<img src="${av.img}" onclick="viewAvatar('${av.img}')" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" style="transform:translate(${av.x||0}px,${av.y||0}px) scale(${av.zoom||1});" title="คลิกเพื่อดูรูปขยายแบบเต็ม">`;
     }
 
     let actions = '';
@@ -597,7 +675,10 @@ function renderUserTable(users) {
       <td class="py-4 px-4">
         <div class="flex items-center gap-3">
           <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;overflow:hidden;border:1px solid rgba(0,0,0,0.05);">${avatarHtml}</div>
-          <div><p class="font-semibold text-gray-800 text-sm">${u.name}</p><p class="text-gray-500 text-xs">${idLabel}</p></div>
+          <div>
+            <p class="font-semibold text-gray-800 text-sm">${u.name}</p>
+            <p class="text-gray-500 text-xs">${idLabel}</p>
+          </div>
         </div>
       </td>
       <td class="py-4 px-4"><span class="${badgeClass} text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wide">${roleLabel}</span></td>
@@ -622,7 +703,7 @@ function viewAvatar(imgSrc) {
 
 function filterUsers() {
   const q = document.getElementById('userSearch').value.toLowerCase();
-  const filtered = allUsers.filter(u =>
+  const filtered = globalUsers.filter(u =>
     (u.name || '').toLowerCase().includes(q) ||
     (u.role || '').toLowerCase().includes(q) ||
     (u.subject_group || '').toLowerCase().includes(q) ||
@@ -633,7 +714,7 @@ function filterUsers() {
 
 // ── ฟังก์ชันจัดการผู้ใช้งานของจริง (Edit / Delete / Reset) ──
 function editUser(userId) {
-  const user = allUsers.find(u => u.id === userId);
+  const user = globalUsers.find(u => u.id === userId);
   if (!user) return;
 
   modernPopup.fire({
@@ -668,10 +749,10 @@ function editUser(userId) {
       }
       return true;
     }
-  }).then((res) => {
+  }).then(async (res) => {
     if (res.isConfirmed) {
       Toast.fire({ icon: 'success', title: 'อัปเดตข้อมูลสำเร็จเรียบร้อย' });
-      loadUserTable();
+      await forceRefreshData();
     }
   });
 }
@@ -719,10 +800,10 @@ function deleteUser(userId, userName) {
       }
       return true;
     }
-  }).then((res) => {
+  }).then(async (res) => {
     if (res.isConfirmed) {
       Toast.fire({ icon: 'success', title: `ลบบัญชี ${userName} เรียบร้อย` });
-      loadUserTable();
+      await forceRefreshData();
     }
   });
 }
@@ -768,37 +849,64 @@ function openAddUserModal() {
       try { await addNewUser(newUser); } catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
       return newUser;
     }
-  }).then(result => {
+  }).then(async (result) => {
     if (result.isConfirmed) {
       modernPopup.fire({ icon:'success', title:'สร้างบัญชีสำเร็จ', text:`บัญชี ${result.value.username} ถูกสร้างลงในระบบแล้ว` });
-      loadUserTable();
+      await forceRefreshData();
     }
   });
 }
 
-// ── Overview stats (Logs & Drive) พร้อม Concurrent Fetch ────────
+// ── Overview stats (Logs & Drive จาก Memory) ────────
 async function loadOverviewStats() {
   try {
-    const logBody = document.getElementById('logTableBody');
-    logBody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>`;
+    if(globalUsers.length === 0) {
+        await refreshGlobalData();
+    }
+    
+    document.getElementById('totalUsers').textContent = globalUsers.length;
+    document.getElementById('totalPlans').textContent = globalPlans ? globalPlans.length : "0";
 
-    // 🌟 โหลดข้อมูลทั้งหมดแบบคู่ขนาน (Concurrent Fetch) ให้หน้าเว็บโชว์เร็วปรี๊ด! 🌟
-    const [users, { data: plans }, gasUrl] = await Promise.all([
-        getAllUsers(),
-        db.from('lesson_plans').select('id, status, created_at, updated_at, subject_name, subject, week_number, users(name)'),
-        getSystemSetting('gas_url')
-    ]);
+    const driveStatus = document.getElementById('driveStatus');
+    const driveSub    = document.getElementById('driveSubtext');
+    const driveWrapper = document.getElementById('driveStorageWrapper');
+    const driveBarFill = document.getElementById('driveBarFill');
+    const driveStorageText = document.getElementById('driveStorageText');
 
-    document.getElementById('totalUsers').textContent = users.length;
-    document.getElementById('totalPlans').textContent = plans ? plans.length : "0";
-
-    // 🌟 แยกส่วนตรวจ Drive ไปทำงานเบื้องหลัง (Background Fetch) ไม่ให้บล็อกหน้าเว็บ 🌟
-    checkDriveQuota(gasUrl);
+    // 🌟 ดึงข้อมูลพื้นที่ใช้งานจริงจาก Google Apps Script แบบ Background 🌟
+    if (gasUrlGlobal) {
+        driveStatus.innerHTML = `<span class="text-blue-600">เชื่อมต่อแล้ว</span>`;
+        driveSub.textContent  = `API: เชื่อมต่อสำเร็จ`;
+        driveWrapper.classList.remove('hidden');
+        driveStorageText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบพื้นที่จาก Google Drive...';
+        
+        try {
+            fetch(gasUrlGlobal + '?action=getQuota').then(res => res.json()).then(quota => {
+                if(quota && quota.limit) {
+                    const usedGB = (quota.used / (1024*1024*1024)).toFixed(2);
+                    const limitGB = (quota.limit / (1024*1024*1024)).toFixed(2);
+                    const percent = Math.min(100, (quota.used / quota.limit) * 100);
+                    driveStorageText.innerHTML = `ใช้พื้นที่ไป <span class="font-bold text-gray-800">${usedGB} GB</span> จาก ${limitGB} GB`;
+                    driveBarFill.style.width = percent + '%';
+                    if (percent > 90) driveBarFill.classList.replace('bg-blue-500', 'bg-red-500');
+                    else if (percent > 70) driveBarFill.classList.replace('bg-blue-500', 'bg-amber-500');
+                } else {
+                     driveStorageText.innerHTML = `<span class="text-red-500 text-[10px]">⚠️ ไม่สามารถดึงพื้นที่ได้</span>`;
+                     driveBarFill.style.width = '0%';
+                }
+            }).catch(e => {
+                 driveStorageText.innerHTML = `<span class="text-red-500 text-[10px]">⚠️ ไม่สามารถดึงพื้นที่ได้ (โปรดเช็ค URL หรือโค้ด doGet)</span>`;
+                 driveBarFill.style.width = '0%';
+            });
+        } catch(e) {}
+    } else {
+        driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
+        driveSub.textContent  = "กรุณาตั้งค่า Web App URL ในเมนูเชื่อมต่อ API";
+        driveWrapper.classList.add('hidden');
+    }
 
     let logs = [];
-    
-    // 1. เพิ่ม Log ฝั่งผู้ใช้
-    users.forEach(u => {
+    globalUsers.forEach(u => {
         let uTime;
         try {
             uTime = u.created_at ? new Date(u.created_at) : new Date();
@@ -808,19 +916,17 @@ async function loadOverviewStats() {
         logs.push({
             time: uTime,
             typeText: 'NEW USER', color: 'text-blue-500',
-            msg: `เพิ่มบัญชีใหม่: ${u.name} (${u.role})`
+            msg: `เพิ่มผู้ใช้ใหม่: ${u.name} (${u.role})`
         });
     });
 
-    // 2. เพิ่ม Log ฝั่งแผนการสอน (อัปเดตให้รองรับทุกสถานะและชื่อวิชาเป๊ะๆ)
-    if (plans) {
-        plans.forEach(p => {
+    if (globalPlans) {
+        globalPlans.forEach(p => {
             let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
             let logTime;
             
-            // 🌟 ดักจับปัญหา Date NaN ที่ทำให้เรียงลำดับพัง 🌟
+            // ดักจับ Date NaN
             try {
-                // ถ้าตรวจแล้วให้ใช้วันที่ตรวจ (updated_at) ถ้ายังไม่ตรวจใช้วันที่ส่ง (created_at)
                 const dateStr = (p.status !== 'Pending' && p.updated_at) ? p.updated_at : p.created_at;
                 logTime = dateStr ? new Date(dateStr) : new Date();
                 if (isNaN(logTime.getTime())) logTime = new Date();
@@ -828,18 +934,19 @@ async function loadOverviewStats() {
                 logTime = new Date();
             }
 
+            // ใช้ชื่อวิชาจริงจากฐานข้อมูล
             const subjectInfo = p.subject_name || p.subject || 'แผนการสอน';
             const teacherName = p.users?.name || 'ไม่ทราบชื่อ';
             const weekInfo = p.week_number ? ` (สัปดาห์ที่ ${p.week_number})` : '';
 
             if (p.status === 'Pending') {
-                msg = `คุณครู ${teacherName} ส่ง${subjectInfo}${weekInfo} เข้าสู่ระบบ`;
+                msg = `คุณครู ${teacherName} ส่งวิชา ${subjectInfo}${weekInfo} เข้าสู่ระบบ`;
                 color = 'text-blue-500'; typeText = 'SUBMIT';
             } else if (p.status === 'Approved') {
-                msg = `ผู้อำนวยการ อนุมัติ${subjectInfo}${weekInfo} ของ ${teacherName}`;
+                msg = `ผู้อำนวยการ อนุมัติวิชา ${subjectInfo}${weekInfo} ของ ${teacherName}`;
                 color = 'text-emerald-500'; typeText = 'APPROVE';
             } else if (p.status === 'Revision Needed') {
-                msg = `ผู้อำนวยการ ตีกลับ${subjectInfo}${weekInfo} ของ ${teacherName} ให้ปรับปรุง`;
+                msg = `ผู้อำนวยการ ตีกลับวิชา ${subjectInfo}${weekInfo} ของ ${teacherName} ให้ปรับปรุง`;
                 color = 'text-red-500'; typeText = 'REVISION';
             } else {
                 msg = `อัปเดตสถานะ ${subjectInfo} ของ ${teacherName}`;
@@ -850,9 +957,10 @@ async function loadOverviewStats() {
         });
     }
 
-    // 3. เรียงลำดับจากใหม่สุดไปเก่าสุด
-    logs.sort((a,b) => b.time - a.time);
-    const topLogs = logs.slice(0, 8); // ดึงมาแค่ 8 รายการล่าสุด
+    // เรียงเวลาจากใหม่ไปเก่า (รองรับเวลาที่เท่ากัน)
+    logs.sort((a,b) => b.time.getTime() - a.time.getTime()); 
+    const topLogs = logs.slice(0, 8);
+    const logBody = document.getElementById('logTableBody');
 
     if (topLogs.length > 0) {
         logBody.innerHTML = topLogs.map(l => `
@@ -872,49 +980,6 @@ async function loadOverviewStats() {
     console.error(err);
     document.getElementById('logTableBody').innerHTML = `<tr><td colspan="3" class="py-6 text-center text-red-500">เกิดข้อผิดพลาดในการดึงข้อมูล Log: ${err.message}</td></tr>`;
   }
-}
-
-// 🌟 ฟังก์ชันแยกเพื่อไม่ให้บล็อกการทำงานหลัก (Background Task) 🌟
-async function checkDriveQuota(gasUrl) {
-    const driveStatus = document.getElementById('driveStatus');
-    const driveSub    = document.getElementById('driveSubtext');
-    const driveWrapper = document.getElementById('driveStorageWrapper');
-    const driveBarFill = document.getElementById('driveBarFill');
-    const driveStorageText = document.getElementById('driveStorageText');
-
-    if (gasUrl) {
-        driveStatus.innerHTML = `<span class="text-blue-600">เชื่อมต่อแล้ว</span>`;
-        driveSub.textContent  = `API: เชื่อมต่อสำเร็จ`;
-        driveWrapper.classList.remove('hidden');
-        driveStorageText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบพื้นที่จาก Google Drive...';
-        
-        try {
-            const res = await fetch(gasUrl + '?action=getQuota');
-            if(res.ok) {
-                const quota = await res.json();
-                if(quota && quota.limit) {
-                    const usedGB = (quota.used / (1024*1024*1024)).toFixed(2);
-                    const limitGB = (quota.limit / (1024*1024*1024)).toFixed(2);
-                    const percent = Math.min(100, (quota.used / quota.limit) * 100);
-                    driveStorageText.innerHTML = `ใช้พื้นที่ไป <span class="font-bold text-gray-800">${usedGB} GB</span> จาก ${limitGB} GB`;
-                    driveBarFill.style.width = percent + '%';
-                    if (percent > 90) driveBarFill.classList.replace('bg-blue-500', 'bg-red-500');
-                    else if (percent > 70) driveBarFill.classList.replace('bg-blue-500', 'bg-amber-500');
-                } else {
-                    throw new Error("No limit data");
-                }
-            } else {
-                throw new Error("Fetch failed");
-            }
-        } catch(e) {
-             driveStorageText.innerHTML = `<span class="text-red-500 text-[10px]">⚠️ ไม่สามารถดึงพื้นที่ได้ (โปรดเช็ค URL หรือโค้ด doGet)</span>`;
-             driveBarFill.style.width = '0%';
-        }
-    } else {
-        driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
-        driveSub.textContent  = "กรุณาตั้งค่า Web App URL ในเมนูเชื่อมต่อ API";
-        driveWrapper.classList.add('hidden');
-    }
 }
 
 // ── Settings System ──
@@ -960,14 +1025,7 @@ async function loadSettings() {
 }
 
 async function loadIntegrations() {
-  try {
-    const url = await getSystemSetting('gas_url');
-    if (url) {
-      document.getElementById('gasUrlInput').value = url;
-      document.getElementById('apiStatusText').textContent = 'เชื่อมต่อแล้ว';
-      document.getElementById('apiStatusText').classList.replace('text-gray-800', 'text-green-600');
-    }
-  } catch (_) {}
+  // ไม่ต้องโหลดจาก DB แล้ว เพราะโหลดไว้ตอนต้นแล้ว
 }
 
 async function saveTerm() {
@@ -983,7 +1041,9 @@ async function saveTerm() {
 async function saveKey(type) {
   try {
     if (type === 'drive') {
-      await saveSystemSetting('gas_url', document.getElementById('gasUrlInput').value.trim());
+      const newUrl = document.getElementById('gasUrlInput').value.trim();
+      await saveSystemSetting('gas_url', newUrl);
+      gasUrlGlobal = newUrl;
       document.getElementById('apiStatusText').textContent = 'บันทึกสำเร็จ';
       document.getElementById('apiStatusText').classList.replace('text-gray-800', 'text-green-600');
     }
@@ -1027,10 +1087,10 @@ function factoryReset() {
       try { await resetDatabase(); } catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
       return true;
     }
-  }).then(r => {
+  }).then(async r => {
     if (r.isConfirmed) {
       modernPopup.fire({ icon:'success', title:'Reset เสร็จสิ้น', text:'ระบบถูกล้างข้อมูลเรียบร้อยแล้ว' });
-      loadOverviewStats();
+      await forceRefreshData();
     }
   });
 }
@@ -1038,8 +1098,10 @@ function factoryReset() {
 // ── Auth ──
 function logout() { window.location.href = 'index.html'; }
 
-// Init
-loadOverviewStats();
+// Init: โหลดข้อมูลเข้า Memory ก่อน แล้วค่อยโชว์หน้าจอ
+refreshGlobalData().then(() => {
+    loadOverviewStats();
+});
 </script>
 </body>
 </html>
