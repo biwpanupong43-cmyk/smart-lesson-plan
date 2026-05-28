@@ -11,438 +11,411 @@
 <style>
   * { font-family:'Sarabun',sans-serif; }
   h1,h2,.kn { font-family:'Kanit',sans-serif; }
-
-  /* ── Layout ── */
-  body { background:#f3f4f6; color:#1f2937; min-height:100vh; }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    background: linear-gradient(180deg, #1e1b4b 0%, #1a1748 60%, #111130 100%);
-    width: 240px;
-    flex-shrink: 0;
-  }
-  .sidebar-label { color:#8b8db8; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding: 0 16px; margin-bottom:6px; }
-
-  /* Nav items */
+  body { background:#09090b; color:#e4e4e7; min-height:100vh; }
+  .sidebar { background:linear-gradient(180deg,#18181b 0%,#09090b 100%); border-right:1px solid rgba(139,92,246,.15); }
   .nav-item { transition:all .2s; border-radius:10px; }
-  .nav-item:hover { background:rgba(255,255,255,.07); }
-  .nav-item.active {
-    background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    color:#fff !important;
-  }
-  .nav-item.active i { color:#fff !important; }
-
-  /* ── Cards ── */
-  .card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; }
-  .stat-card { background:#fff; border-radius:14px; border:1px solid #e5e7eb; overflow:hidden; }
-  .stat-card .top-bar { height:4px; }
-
-  /* ── Role badges ── */
-  .badge-admin    { background:#ede9fe; color:#7c3aed; border:1px solid #c4b5fd; }
-  .badge-director { background:#fce7f3; color:#be185d; border:1px solid #fbcfe8; }
-  .badge-teacher  { background:#dbeafe; color:#1d4ed8; border:1px solid #bfdbfe; }
-
-  /* ── Status chip ── */
-  .chip-online { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; }
-
-  /* ── Table ── */
-  table thead th { color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #f3f4f6; }
-  table tbody tr { border-bottom:1px solid #f9fafb; transition:background .15s; }
-  table tbody tr:hover { background:#f9fafb; }
-
-  /* ── Inputs ── */
-  input, select, textarea {
-    background:#f9fafb !important;
-    color:#1f2937 !important;
-    border-color:#e5e7eb !important;
-    outline:none !important;
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color:#7c3aed !important;
-    box-shadow:0 0 0 3px rgba(124,58,237,.1) !important;
-    background:#fff !important;
-  }
-
-  /* ── Animation ── */
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-  .page { animation:fadeIn .25s ease; }
-  .section-hidden { display:none !important; }
-
-  /* ── Log table ── */
-  .log-row { border-bottom:1px solid #f3f4f6; }
-  .log-row:last-child { border-bottom:none; }
-
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:2px; }
-
-  /* ── Logout button ── */
-  .btn-logout {
-    background:#0f0e2e;
-    color:#e5e7eb;
-    border-radius:10px;
-    transition:background .2s;
-  }
-  .btn-logout:hover { background:#1e1b4b; }
-
-  /* ── Avatar ── */
-  .avatar-circle {
-    width:38px; height:38px; border-radius:50%;
-    background:linear-gradient(135deg,#7c3aed,#4f46e5);
-    display:flex; align-items:center; justify-content:center;
-    color:#fff; font-weight:700; font-size:13px;
-  }
-
-  /* ── Integration card borders ── */
-  .integ-gemini { border:2px solid #a78bfa; }
-  .integ-drive  { border:2px solid #93c5fd; }
-
-  /* ── Danger zone ── */
-  .danger-card { background:#fff5f5; border:1px solid #fecaca; border-radius:14px; }
-
-  /* ── Toggle ── */
+  .nav-item:hover { background:rgba(139,92,246,.1); }
+  .nav-item.active { background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(109,40,217,.15)); border-left:3px solid #a78bfa; color:#a78bfa!important; }
+  .nav-item.active i { color:#a78bfa!important; }
+  .card { background:rgba(24,24,27,.9); border:1px solid rgba(63,63,70,.8); border-radius:16px; }
+  .badge-admin    { background:rgba(139,92,246,.15); color:#a78bfa; border:1px solid rgba(139,92,246,.3); }
+  .badge-director { background:rgba(59,130,246,.15); color:#60a5fa; border:1px solid rgba(59,130,246,.3); }
+  .badge-teacher  { background:rgba(34,197,94,.15);  color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+  .page { animation:fadeIn .3s ease; }
+  .section-hidden { display:none!important; }
+  table thead th { color:#71717a; font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
+  table tbody tr { border-bottom:1px solid rgba(63,63,70,.5); transition:background .15s; }
+  table tbody tr:hover { background:rgba(139,92,246,.05); }
+  input,select,textarea { background:#09090b!important; color:#e4e4e7!important; border-color:rgba(63,63,70,.8)!important; outline:none!important; }
+  input:focus,select:focus,textarea:focus { border-color:rgba(139,92,246,.6)!important; box-shadow:0 0 0 3px rgba(139,92,246,.1)!important; }
+  
+  /* Toggle */
   .toggle-track { width:48px; height:26px; border-radius:13px; position:relative; cursor:pointer; transition:background .2s; }
   .toggle-thumb { position:absolute; top:3px; left:3px; width:20px; height:20px; background:#fff; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .2s; }
+  
+  /* Log timeline */
+  .log-item::before { content:''; position:absolute; left:-1px; top:50%; width:8px; height:8px; border-radius:50%; transform:translate(-50%,-50%); }
+  .log-info::before  { background:#60a5fa; }
+  .log-warn::before  { background:#fbbf24; }
+  .log-ok::before    { background:#4ade80; }
+  ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#3f3f46; border-radius:2px; }
 
-  /* ── Drive usage bar ── */
-  .drive-bar { height:6px; border-radius:3px; background:#e5e7eb; overflow:hidden; }
-  .drive-fill { height:100%; background:linear-gradient(90deg,#3b82f6,#06b6d4); border-radius:3px; transition: width 0.5s; }
+  /* Avatar */
+  .avatar-circle { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#7c3aed,#4f46e5); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; position:relative; overflow:hidden; border: 2px solid rgba(255,255,255,0.1); cursor:pointer; }
+  .avatar-circle:hover::after { content: '\f030'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+
+  input[type=range] { accent-color: #7c3aed; cursor: pointer; }
 </style>
 </head>
 <body>
 <div class="flex h-screen overflow-hidden">
 
-  <!-- ════════════════════ SIDEBAR ════════════════════ -->
-  <aside class="sidebar flex flex-col p-5 overflow-y-auto">
-
-    <!-- Brand -->
-    <div class="mb-7 mt-1 flex items-center gap-3">
-      <div class="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center">
-        <i class="fa-solid fa-border-all text-white text-base"></i>
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-64 flex-shrink-0 flex flex-col p-5 overflow-y-auto">
+    <div class="mb-8 mt-2 flex items-center gap-3">
+      <div class="w-10 h-10 bg-violet-900/50 border border-violet-500/30 rounded-xl flex items-center justify-center">
+        <i class="fa-solid fa-shield-halved text-violet-400"></i>
       </div>
-      <p class="font-bold text-white text-base" style="font-family:Kanit"><span class="font-black">Admin</span>Panel</p>
+      <div>
+        <p class="kn font-bold text-white text-sm">Admin Console</p>
+        <p class="text-xs text-zinc-500">Smart Lesson Plan</p>
+      </div>
     </div>
 
-    <!-- Nav -->
-    <div class="mb-2">
-      <p class="sidebar-label">เมนูหลัก (MAIN MENU)</p>
+    <!-- User Profile with Upload -->
+    <div class="card p-3 mb-5 flex items-center gap-3">
+      <div class="avatar-circle flex-shrink-0" onclick="openAvatarSettings()" title="เปลี่ยนรูปโปรไฟล์">
+        <span id="avatarInitials">IT</span>
+        <img id="avatarImg" class="hidden absolute inset-0 w-full h-full object-cover" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <p id="adminName" class="text-sm font-semibold text-white leading-tight truncate">IT Support</p>
+        <span class="badge-admin text-[10px] px-2 py-0.5 rounded-full font-medium">Administrator</span>
+      </div>
     </div>
+
     <nav class="space-y-1 flex-1">
-      <button onclick="showPage('overview')"  id="nav-overview"
-        class="nav-item active w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-200">
-        <i class="fa-solid fa-chart-pie w-4 text-center"></i> ภาพรวมระบบ
-      </button>
-      <button onclick="showPage('users')"     id="nav-users"
-        class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
-        <i class="fa-solid fa-users w-4 text-center"></i> จัดการผู้ใช้งาน
-      </button>
-      <button onclick="showPage('integrate')" id="nav-integrate"
-        class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
-        <i class="fa-solid fa-plug w-4 text-center"></i> การเชื่อมต่อ (API)
-      </button>
-      <button onclick="showPage('settings')"  id="nav-settings"
-        class="nav-item w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-indigo-300">
-        <i class="fa-solid fa-sliders w-4 text-center"></i> ตั้งค่าระบบ
-      </button>
+      <button onclick="showPage('overview')"  id="nav-overview"  class="nav-item active w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-server w-4 text-center text-violet-400"></i> ภาพรวมระบบ</button>
+      <button onclick="showPage('users')"     id="nav-users"     class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-users-gear w-4 text-center text-zinc-500"></i> จัดการผู้ใช้งาน</button>
+      <button onclick="showPage('integrate')" id="nav-integrate" class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-plug-circle-bolt w-4 text-center text-zinc-500"></i> เชื่อมต่อ API</button>
+      <button onclick="showPage('settings')"  id="nav-settings"  class="nav-item w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-zinc-400"><i class="fa-solid fa-sliders w-4 text-center text-zinc-500"></i> ตั้งค่าระบบ</button>
     </nav>
-
-    <!-- User info + logout -->
-    <div class="pt-4 mt-4 border-t border-white/10">
-      <div class="flex items-center gap-3 mb-3">
-        <div id="avatarInitials" class="avatar-circle text-sm">IT</div>
-        <div>
-          <p id="adminName" class="text-sm font-semibold text-white leading-tight">IT Support</p>
-          <p class="text-xs text-indigo-300">Super Admin</p>
-        </div>
+    <div class="pt-4 border-t border-zinc-800">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <p class="text-xs text-zinc-500">All systems operational</p>
       </div>
-      <button onclick="window._signOut()"
-        class="btn-logout w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium">
-        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i> ออกจากระบบ
+      <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-2 mt-2 text-left text-sm text-red-400 hover:bg-red-500/20 hover:text-white rounded-lg transition-colors">
+        <i class="fa-solid fa-power-off"></i> ออกจากระบบ
       </button>
     </div>
   </aside>
 
-  <!-- ════════════════════ MAIN ════════════════════ -->
-  <main class="flex-1 overflow-y-auto">
+  <!-- MAIN -->
+  <main class="flex-1 overflow-y-auto p-6">
 
-    <!-- Top bar -->
-    <div class="bg-white border-b border-gray-200 px-7 py-4 flex items-center justify-between sticky top-0 z-10">
-      <h1 id="pageTitle" class="kn text-xl font-bold text-gray-800">ภาพรวมระบบ (Dashboard)</h1>
-      <div class="flex items-center gap-3">
-        <span class="chip-online text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
-          <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse inline-block"></span> System Online
-        </span>
-        <button class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">
-          <i class="fa-regular fa-bell text-base"></i>
+    <!-- ─── OVERVIEW ─── -->
+    <section id="page-overview" class="page">
+      <div class="mb-6">
+        <h1 class="kn text-2xl font-bold text-white">System Overview</h1>
+        <p class="text-zinc-500 text-sm mt-1">สถานะระบบและกิจกรรมล่าสุด</p>
+      </div>
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="card p-4">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-violet-900/40 rounded-lg flex items-center justify-center"><i class="fa-solid fa-users text-violet-400"></i></div>
+            <p class="text-zinc-400 text-xs">Total Users</p>
+          </div>
+          <p id="totalUsers" class="kn text-3xl font-bold text-white">-</p>
+        </div>
+        <div class="card p-4">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-blue-900/30 rounded-lg flex items-center justify-center"><i class="fa-solid fa-database text-blue-400"></i></div>
+            <p class="text-zinc-400 text-xs">Database Plans</p>
+          </div>
+          <p id="totalPlans" class="kn text-3xl font-bold text-white">-</p>
+        </div>
+        <div class="card p-4 col-span-2">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-amber-900/30 rounded-lg flex items-center justify-center"><i class="fa-brands fa-google-drive text-amber-400"></i></div>
+            <p class="text-zinc-400 text-xs">Google Drive Status</p>
+          </div>
+          <p id="driveStatus" class="text-green-400 font-semibold text-sm flex items-center gap-1">ตรวจสอบสถานะ...</p>
+          <p id="driveSubtext" class="text-zinc-500 text-xs mt-1 truncate">Folder ID: -</p>
+        </div>
+      </div>
+      
+      <!-- System Log -->
+      <div class="card p-5">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="kn font-semibold text-white"><i class="fa-solid fa-terminal text-violet-400 mr-2"></i>System Log</h2>
+          <button onclick="loadOverviewStats()" class="text-xs text-zinc-500 hover:text-violet-400"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
+        </div>
+        <div class="relative border-l border-zinc-700/60 ml-4 space-y-4 pl-6" id="logTableBody">
+          <div class="text-zinc-500 text-sm py-4 text-center">กำลังโหลดข้อมูล...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── USERS ─── -->
+    <section id="page-users" class="page section-hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="kn text-2xl font-bold text-white">User Management</h1>
+          <p class="text-zinc-500 text-sm">จัดการบัญชีผู้ใช้งานทั้งหมด</p>
+        </div>
+        <button onclick="openAddUserModal()" class="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl flex items-center gap-2 transition-colors">
+          <i class="fa-solid fa-plus"></i> เพิ่มผู้ใช้
         </button>
       </div>
-    </div>
-
-    <div class="p-7">
-
-      <!-- ─── OVERVIEW ─── -->
-      <section id="page-overview" class="page">
-        <!-- Stat cards -->
-        <div class="grid grid-cols-3 gap-5 mb-6">
-
-          <!-- Total Users -->
-          <div class="stat-card p-5">
-            <div class="top-bar bg-violet-500 -mx-5 -mt-5 mb-4" style="margin-top:-20px;margin-left:-20px;margin-right:-20px;height:4px;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-gray-500 text-xs font-medium mb-1">บัญชีผู้ใช้งานทั้งหมด</p>
-                <p id="totalUsers" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
-                <p class="text-green-600 text-xs mt-2 flex items-center gap-1">
-                  ดึงข้อมูลจริงจากระบบ
-                </p>
-              </div>
-              <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-users text-violet-500 text-base"></i>
-              </div>
-            </div>
-          </div>
-
-          <!-- Total Lesson Plans -->
-          <div class="stat-card p-5">
-            <div style="height:4px;background:linear-gradient(90deg,#f59e0b,#fbbf24);margin:-20px -20px 16px"></div>
-            <div class="flex items-start justify-between">
-              <div>
-                <p class="text-gray-500 text-xs font-medium mb-1">แผนการสอนในระบบ</p>
-                <p id="totalPlans" class="kn text-3xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
-                <p class="text-gray-400 text-xs mt-2">รวมทุกสถานะ</p>
-              </div>
-              <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                <i class="fa-solid fa-file-pdf text-amber-500 text-base"></i>
-              </div>
-            </div>
-          </div>
-
-          <!-- Google Drive -->
-          <div class="stat-card p-5">
-            <div style="height:4px;background:linear-gradient(90deg,#3b82f6,#60a5fa);margin:-20px -20px 16px"></div>
-            <div class="flex items-start justify-between">
-              <div class="flex-1 mr-3">
-                <p class="text-gray-500 text-xs font-medium mb-1">สถานะ Google Drive</p>
-                <p id="driveStatus" class="kn text-xl font-bold text-gray-900 mt-1"><i class="fa-solid fa-spinner fa-spin text-sm"></i></p>
-                <p id="driveSubtext" class="text-gray-400 text-[10px] mt-1 break-all font-mono leading-tight">กำลังตรวจสอบ...</p>
-                
-                <!-- ส่วนแสดงความจุ Drive แบบในรูป -->
-                <div id="driveStorageWrapper" class="hidden border-t border-gray-100 pt-2 mt-2">
-                  <p id="driveStorageText" class="text-gray-600 text-[11px] font-medium mb-1">ใช้ไป -- GB จาก -- TB</p>
-                  <div class="drive-bar">
-                    <div id="driveBarFill" class="drive-fill" style="width:0%"></div>
-                  </div>
-                </div>
-
-              </div>
-              <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <i class="fa-brands fa-google-drive text-blue-500 text-base"></i>
-              </div>
-            </div>
+      <div class="card p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
+            <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="ค้นหาชื่อ, Username..." class="pl-9 pr-4 py-2 w-full rounded-xl border border-zinc-700 text-sm focus:border-violet-500"/>
           </div>
         </div>
-
-        <!-- System Logs -->
-        <div class="card p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="kn font-semibold text-gray-800 text-base">บันทึกกิจกรรมล่าสุด (Real-time Logs)</h2>
-            <button onclick="loadOverviewStats()" class="text-xs text-gray-500 hover:text-indigo-600"><i class="fa-solid fa-rotate-right mr-1"></i>รีเฟรช</button>
-          </div>
+        <div class="overflow-x-auto">
           <table class="w-full text-sm">
-            <tbody id="logTableBody">
-              <tr><td colspan="3" class="py-4 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</td></tr>
+            <thead><tr>
+              <th class="text-left py-3 px-3">ชื่อ</th>
+              <th class="text-left py-3 px-3">บทบาท</th>
+              <th class="text-left py-3 px-3">กลุ่มสาระ</th>
+              <th class="text-left py-3 px-3">Username</th>
+              <th class="text-left py-3 px-3">วันที่สร้าง</th>
+              <th class="text-left py-3 px-3">Action</th>
+            </tr></thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="6" class="py-8 text-center text-zinc-500">กำลังโหลด...</td></tr>
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- ─── USERS ─── -->
-      <section id="page-users" class="page section-hidden">
-        <div class="card p-6">
-          <div class="flex items-center justify-between mb-5">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-users text-violet-500"></i>
-              <h2 class="kn font-semibold text-gray-800 text-base">รายชื่อบัญชีผู้ใช้งาน</h2>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="ค้นหาชื่อ, ตำแหน่ง..."
-                  class="pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-sm w-60 focus:outline-none focus:border-violet-400"/>
-              </div>
-              <button onclick="openAddUserModal()"
-                class="bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium px-4 py-2 rounded-xl flex items-center gap-2 transition-colors">
-                <i class="fa-solid fa-plus text-xs"></i> สร้างบัญชีใหม่
-              </button>
-            </div>
+    <!-- ─── INTEGRATIONS ─── -->
+    <section id="page-integrate" class="page section-hidden">
+      <div class="mb-6">
+        <h1 class="kn text-2xl font-bold text-white">Integrations</h1>
+        <p class="text-zinc-500 text-sm">ตั้งค่าการเชื่อมต่อ API ภายนอก</p>
+      </div>
+      <div class="space-y-4">
+        <!-- Drive -->
+        <div class="card p-6 col-span-2 md:col-span-1">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-amber-900/30 rounded-xl flex items-center justify-center"><i class="fa-brands fa-google-drive text-amber-400 text-lg"></i></div>
+            <div><p class="font-semibold text-white">Google Drive</p><p class="text-zinc-500 text-xs">Storage folder for lesson plans</p></div>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr>
-                  <th class="text-left py-3 px-3">ชื่อ-สกุล</th>
-                  <th class="text-left py-3 px-3">ตำแหน่ง / สิทธิ์</th>
-                  <th class="text-left py-3 px-3">กลุ่มสาระฯ</th>
-                  <th class="text-left py-3 px-3">สร้างเมื่อ</th>
-                  <th class="text-left py-3 px-3">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody id="userTableBody">
-                <tr><td colspan="5" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>
-              </tbody>
-            </table>
+          <label class="block text-xs text-zinc-400 mb-2">Folder ID (อ้างอิงจาก URL ของ Google Drive)</label>
+          <div class="flex gap-2">
+            <input type="text" id="driveFolder" value="" class="flex-1 bg-black/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm font-mono" placeholder="ใส่รหัส Folder ID ที่ต้องการให้เก็บไฟล์ PDF"/>
+            <button onclick="saveKey('drive')" class="px-5 py-2 bg-violet-700 hover:bg-violet-600 text-white text-sm rounded-lg font-medium transition-colors">บันทึก</button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- ─── INTEGRATIONS ─── -->
-      <section id="page-integrate" class="page section-hidden">
-        <div class="grid grid-cols-2 gap-5">
-
-          <!-- Google Drive -->
-          <div class="card integ-drive p-6 col-span-2 md:col-span-1">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
-                <i class="fa-brands fa-google-drive text-blue-500 text-lg"></i>
-              </div>
-              <div>
-                <p class="font-semibold text-gray-800">Google Drive Storage</p>
-                <p class="text-gray-500 text-xs">พื้นที่จัดเก็บไฟล์ PDF แผนการสอน</p>
-              </div>
+    <!-- ─── SETTINGS ─── -->
+    <section id="page-settings" class="page section-hidden">
+      <div class="mb-6">
+        <h1 class="kn text-2xl font-bold text-white">Settings</h1>
+        <p class="text-zinc-500 text-sm">ตั้งค่าทั่วไปของระบบ</p>
+      </div>
+      
+      <div class="space-y-4">
+        
+        <!-- School Logo Settings -->
+        <div class="card p-6 border-zinc-800">
+          <h2 class="kn font-semibold text-white mb-5 flex items-center gap-2">
+            <i class="fa-solid fa-image text-violet-400"></i> ตั้งค่าโลโก้โรงเรียน (แสดงในหน้า Login)
+          </h2>
+          <div class="flex flex-col sm:flex-row items-center gap-6">
+            <!-- กรอบพรีวิวรูปโลโก้ -->
+            <div class="w-24 h-24 bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-700 overflow-hidden relative shadow-inner">
+              <img id="previewSchoolLogo" src="" class="hidden w-full h-full object-contain p-2">
+              <i id="placeholderSchoolLogo" class="fa-solid fa-school text-3xl text-zinc-600 absolute"></i>
             </div>
-            <label class="block text-xs text-gray-500 mb-2 font-medium">Folder ID (โฟลเดอร์หลัก)</label>
-            <div class="relative mb-4">
-              <input type="text" id="driveFolder" value=""
-                class="w-full border rounded-xl px-4 py-2.5 text-sm font-mono pr-10" placeholder="1A2B3C4D5E_xxxxxxxxx"/>
-              <button onclick="openDriveFolder()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
-              </button>
-            </div>
-            <div class="flex items-center justify-between">
-              <div>
-                <span class="text-xs text-gray-500">รูปแบบการบันทึก:</span>
-                <span class="text-xs font-semibold text-gray-800 ml-1">แยกโฟลเดอร์ตามกลุ่มสาระฯ</span>
+            <div class="flex-1 space-y-2 text-center sm:text-left">
+              <p class="text-sm font-medium text-zinc-300">อัปโหลดภาพโลโก้ประจำโรงเรียน</p>
+              <p class="text-xs text-zinc-500">แนะนำขนาด 200x200 px ขึ้นไป รูปแบบไฟล์ PNG แบบพื้นหลังโปร่งใสจะสวยงามที่สุด</p>
+              <input type="file" id="schoolLogoInput" accept="image/png, image/jpeg" class="hidden" onchange="handleLogoPreview(event)">
+              <div class="flex gap-2 justify-center sm:justify-start mt-2">
+                <button onclick="document.getElementById('schoolLogoInput').click()" class="px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-sm font-medium hover:bg-zinc-700 transition-colors text-zinc-300">
+                  <i class="fa-solid fa-folder-open mr-1"></i> เลือกรูปภาพ
+                </button>
+                <button onclick="saveSchoolLogo()" class="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-medium transition-colors shadow-md">
+                  <i class="fa-solid fa-save mr-1"></i> ยืนยันบันทึกโลโก้
+                </button>
               </div>
-              <button onclick="saveKey('drive')"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-lg font-medium transition-colors">
-                บันทึก
-              </button>
             </div>
           </div>
-          
         </div>
-      </section>
 
-      <!-- ─── SETTINGS ─── -->
-      <section id="page-settings" class="page section-hidden">
-        <div class="grid grid-cols-2 gap-5">
-
-          <!-- Academic year settings -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Term Settings -->
           <div class="card p-6">
-            <h2 class="kn font-semibold text-gray-800 mb-5 flex items-center gap-2">
-              <i class="fa-regular fa-calendar-days text-violet-500"></i> ตั้งค่าปีการศึกษา
-            </h2>
-            <label class="block text-xs text-gray-500 font-medium mb-2">ปีการศึกษาปัจจุบันที่ใช้งานระบบ</label>
-            <select id="termSelect" class="w-full border rounded-xl px-4 py-2.5 text-sm mb-5">
-              <option value="1/2567">ภาคเรียนที่ 1 / 2567</option>
-              <option value="2/2567">ภาคเรียนที่ 2 / 2567</option>
-              <option value="1/2568">ภาคเรียนที่ 1 / 2568</option>
-              <option value="2/2568">ภาคเรียนที่ 2 / 2568</option>
-              <option value="1/2569" selected>ภาคเรียนที่ 1 / 2569</option>
-              <option value="2/2569">ภาคเรียนที่ 2 / 2569</option>
-            </select>
-
-            <div class="flex items-center justify-between py-4 border-t border-gray-100">
-              <div>
-                <p class="text-sm font-medium text-gray-800">เปิดระบบรับแผนการสอน</p>
-                <p class="text-xs text-gray-400 mt-0.5">หากปิด ครูจะไม่สามารถอัปโหลดไฟล์ใหม่ได้</p>
-              </div>
-              <div id="toggleTrack" onclick="toggleUpload()"
-                class="toggle-track bg-green-500">
-                <div id="toggleThumb" class="toggle-thumb"></div>
-              </div>
+            <h2 class="font-semibold text-white mb-4">ภาคเรียนปัจจุบัน</h2>
+            <div class="flex gap-3">
+              <select id="termSelect" class="bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm flex-1">
+                <option>1/2567</option><option>2/2567</option><option>1/2568</option><option>2/2568</option>
+                <option>1/2569</option><option>2/2569</option>
+              </select>
+              <button onclick="saveTerm()" class="px-4 py-2 bg-violet-700 hover:bg-violet-600 text-white text-sm rounded-lg font-medium transition-colors">อัปเดต</button>
             </div>
-
-            <button onclick="saveTerm()"
-              class="w-full mt-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium py-3 rounded-xl transition-colors">
-              บันทึกการเปลี่ยนแปลง
-            </button>
           </div>
 
-          <!-- Danger Zone -->
-          <div class="danger-card p-6">
-            <h2 class="kn font-semibold text-red-600 mb-2 flex items-center gap-2">
-              <i class="fa-solid fa-triangle-exclamation"></i> พื้นที่อันตราย (Danger Zone)
-            </h2>
-            <p class="text-gray-500 text-xs mb-5">
-              ฟังก์ชันในส่วนนี้จะส่งผลกระทบต่อข้อมูลจำนวนมากในฐานข้อมูล กรุณาใช้งานด้วยความระมัดระวัง
-            </p>
-
-            <!-- Archive -->
-            <div class="bg-white border border-red-100 rounded-xl p-4 flex items-center justify-between mb-3">
+          <!-- Upload Toggle Settings -->
+          <div class="card p-6">
+            <div class="flex items-center justify-between h-full">
               <div>
-                <p class="text-sm font-semibold text-red-700">Archive ข้อมูลสิ้นปี</p>
-                <p class="text-xs text-gray-500 mt-0.5">ย้ายแผนการสอนปีปัจจุบันไปเก็บใน Archive</p>
+                <p class="font-semibold text-white">เปิดรับการส่งแผนการสอน</p>
+                <p class="text-zinc-500 text-xs mt-1">หากปิด ครูจะไม่สามารถอัปโหลดแผนใหม่ได้</p>
               </div>
-              <button onclick="archiveData()"
-                class="px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 text-xs font-medium rounded-lg transition-colors whitespace-nowrap ml-4">
-                รันคำสั่ง
-              </button>
-            </div>
-
-            <!-- Factory Reset -->
-            <div class="bg-white border border-red-100 rounded-xl p-4 flex items-center justify-between">
-              <div>
-                <p class="text-sm font-semibold text-red-700">ล้างฐานข้อมูล (Factory Reset)</p>
-                <p class="text-xs text-gray-500 mt-0.5">ลบแผนการสอนทั้งหมดแบบถาวร</p>
+              <div id="toggleTrack" onclick="toggleUpload()" class="w-12 h-6 bg-violet-600 rounded-full relative transition-colors cursor-pointer flex-shrink-0">
+                <div id="toggleThumb" class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform translate-x-[24px]"></div>
               </div>
-              <button onclick="factoryReset()"
-                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap ml-4">
-                ลบข้อมูล
-              </button>
             </div>
           </div>
         </div>
-      </section>
 
-    </div><!-- /p-7 -->
+        <!-- Danger Zone -->
+        <div class="card p-6 border-red-900/40">
+          <h2 class="kn font-semibold text-red-400 mb-1"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Danger Zone</h2>
+          <p class="text-zinc-500 text-sm mb-4">การกระทำเหล่านี้จะส่งผลกระทบต่อข้อมูลอย่างถาวร กรุณาใช้งานด้วยความระมัดระวัง</p>
+          <button onclick="factoryReset()" class="border border-red-800 text-red-400 hover:bg-red-950 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors">
+            <i class="fa-solid fa-bomb mr-2"></i>Factory Reset — ล้างข้อมูลแผนและผู้ใช้ทั้งหมด
+          </button>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
+<!-- ================= เชื่อม Backend ================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase_integration.js"></script>
-<script>
-// ── Page titles (Thai) ────────────────────────────────────────
-const PAGE_TITLES = {
-  overview:  'ภาพรวมระบบ (Dashboard)',
-  users:     'จัดการบัญชีผู้ใช้งาน (User Management)',
-  integrate: 'การเชื่อมต่อระบบ (Integrations)',
-  settings:  'ตั้งค่าระบบ (System Settings)',
-};
 
-// ── Load Profile ──────────────────────────────────────────────
+<script>
+'use strict';
+
+const PAGE_TITLES = { overview: 'ภาพรวมระบบ (Dashboard)', users: 'จัดการบัญชีผู้ใช้งาน', integrate: 'การเชื่อมต่อระบบ', settings: 'ตั้งค่าระบบ' };
+
+// ── Profile & Avatar Init ──────────────────────────────────────────────
 (function initProfile() {
   const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
   if (profile.name) {
     document.getElementById('adminName').textContent = profile.name;
     const initials = profile.name.trim().split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
     document.getElementById('avatarInitials').textContent = initials || 'AD';
+    loadAvatar();
   }
 })();
+
+// ระบบอัปโหลดและปรับแต่งรูปโปรไฟล์
+async function openAvatarSettings() {
+  const { value: file } = await Swal.fire({
+    title: '<span class="font-display">อัปโหลดรูปโปรไฟล์</span>',
+    input: 'file',
+    inputAttributes: { accept: 'image/png, image/jpeg', 'aria-label': 'อัปโหลดรูปโปรไฟล์' },
+    background: '#18181b', color: '#e4e4e7', confirmButtonColor: '#7c3aed'
+  });
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result;
+      
+      await Swal.fire({
+        title: '<span class="font-display">จัดตำแหน่งรูปภาพ</span>',
+        html: `
+          <div class="flex flex-col items-center">
+            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-violet-500/30 shadow-inner mb-5 relative bg-zinc-900">
+              <img id="swalAvatarPreview" src="${base64}" style="width:100%; height:100%; object-fit:cover; object-position:50% 50%; transform:scale(1); transform-origin:center;" />
+            </div>
+            <div class="w-full text-left space-y-4 px-2">
+              <div><label class="text-xs text-zinc-400 flex justify-between"><span>ซูมขยาย</span><span id="valZ" class="text-violet-400">1x</span></label><input type="range" id="zoomAvatar" min="1" max="3" step="0.05" value="1" class="w-full"></div>
+              <div><label class="text-xs text-zinc-400 flex justify-between"><span>เลื่อนแนวนอน</span><span id="valX" class="text-violet-400">50%</span></label><input type="range" id="posXAvatar" min="0" max="100" value="50" class="w-full"></div>
+              <div><label class="text-xs text-zinc-400 flex justify-between"><span>เลื่อนแนวตั้ง</span><span id="valY" class="text-violet-400">50%</span></label><input type="range" id="posYAvatar" min="0" max="100" value="50" class="w-full"></div>
+            </div>
+          </div>
+        `,
+        didOpen: () => {
+          const img = document.getElementById('swalAvatarPreview'), z = document.getElementById('zoomAvatar'), x = document.getElementById('posXAvatar'), y = document.getElementById('posYAvatar');
+          const vz = document.getElementById('valZ'), vx = document.getElementById('valX'), vy = document.getElementById('valY');
+          const updateImg = () => { img.style.transform = `scale(${z.value})`; img.style.objectPosition = `${x.value}% ${y.value}%`; vz.textContent = z.value + 'x'; vx.textContent = x.value + '%'; vy.textContent = y.value + '%'; };
+          z.oninput = updateImg; x.oninput = updateImg; y.oninput = updateImg;
+        },
+        showCancelButton: true, confirmButtonText: 'บันทึกรูปโปรไฟล์', cancelButtonText: 'ยกเลิก',
+        background: '#18181b', color: '#e4e4e7', confirmButtonColor: '#7c3aed'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          Swal.fire({title: 'กำลังบันทึก...', background: '#18181b', color: '#e4e4e7', showConfirmButton: false, didOpen: () => Swal.showLoading()});
+          const z = document.getElementById('zoomAvatar').value, x = document.getElementById('posXAvatar').value, y = document.getElementById('posYAvatar').value;
+          const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+          if (profile.id) {
+            const avatarData = JSON.stringify({ img: base64, zoom: z, posX: x, posY: y });
+            try {
+              await saveSystemSetting('avatar_' + profile.id, avatarData);
+              localStorage.setItem('avatar_' + profile.id, avatarData);
+              loadAvatar();
+              Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'อัปเดตรูปโปรไฟล์สำเร็จ', showConfirmButton: false, timer: 2000, background: '#18181b', color: '#e4e4e7' });
+            } catch (err) {
+              Swal.fire({ icon: 'error', title: 'ขัดข้อง', text: err.message, background: '#18181b', color: '#e4e4e7' });
+            }
+          }
+        }
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function loadAvatar() {
+  const profile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+  if (!profile.id) return;
+  
+  let saved = JSON.parse(localStorage.getItem('avatar_' + profile.id));
+  if (!saved) {
+    try {
+      const dbAvatar = await getSystemSetting('avatar_' + profile.id);
+      if (dbAvatar) {
+        saved = JSON.parse(dbAvatar);
+        localStorage.setItem('avatar_' + profile.id, dbAvatar);
+      }
+    } catch(e) {}
+  }
+
+  if (saved && saved.img) {
+    const imgEl = document.getElementById('avatarImg');
+    const txtEl = document.getElementById('avatarInitials');
+    imgEl.src = saved.img;
+    imgEl.style.objectPosition = `${saved.posX || 50}% ${saved.posY || 50}%`;
+    imgEl.style.transform = `scale(${saved.zoom || 1})`;
+    imgEl.classList.remove('hidden');
+    txtEl.classList.add('hidden');
+  }
+}
+
+// ── โลโก้โรงเรียน (ระบบอัปโหลดและบันทึก) ───────────────────────────────
+let newSchoolLogoBase64 = null;
+function handleLogoPreview(event) {
+  const file = event.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      newSchoolLogoBase64 = e.target.result;
+      document.getElementById('previewSchoolLogo').src = newSchoolLogoBase64;
+      document.getElementById('previewSchoolLogo').classList.remove('hidden');
+      document.getElementById('placeholderSchoolLogo').classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveSchoolLogo() {
+  if(!newSchoolLogoBase64) {
+    return Swal.fire({ toast:true, position:'bottom-end', icon:'warning', title:'กรุณาเลือกรูปภาพก่อนบันทึก', showConfirmButton:false, timer:2500, background:'#18181b', color:'#e4e4e7' });
+  }
+  Swal.fire({title:'กำลังอัปโหลดโลโก้โรงเรียน...', background:'#18181b', color:'#e4e4e7', showConfirmButton:false, didOpen:()=>Swal.showLoading()});
+  try {
+    // บันทึกลงฐานข้อมูล Supabase ภายใต้ key 'school_logo'
+    await saveSystemSetting('school_logo', newSchoolLogoBase64);
+    Swal.close();
+    Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:'อัปเดตโลโก้โรงเรียนในระบบแล้ว! จะแสดงในหน้าเข้าสู่ระบบอัตโนมัติ', showConfirmButton:false, timer:3500, background:'#18181b', color:'#e4e4e7' });
+  } catch(e) {
+    Swal.fire({ icon:'error', title:'บันทึกล้มเหลว', text:e.message, background:'#18181b', color:'#e4e4e7' });
+  }
+}
 
 // ── Navigation ────────────────────────────────────────────────
 function showPage(name) {
   document.querySelectorAll('section[id^="page-"]').forEach(s => s.classList.add('section-hidden'));
-  document.querySelectorAll('button[id^="nav-"]').forEach(b => {
-    b.classList.remove('active');
-    b.classList.add('text-indigo-300');
-  });
+  document.querySelectorAll('button[id^="nav-"]').forEach(b => { b.classList.remove('active'); b.classList.add('text-zinc-400'); });
   document.getElementById('page-' + name).classList.remove('section-hidden');
   const navBtn = document.getElementById('nav-' + name);
-  navBtn.classList.add('active');
-  navBtn.classList.remove('text-indigo-300');
+  navBtn.classList.add('active'); navBtn.classList.remove('text-zinc-400');
   document.getElementById('pageTitle').textContent = PAGE_TITLES[name] || '';
   if (name === 'users') loadUserTable();
   if (name === 'settings') loadSettings();
@@ -450,387 +423,194 @@ function showPage(name) {
   if (name === 'overview') loadOverviewStats();
 }
 
-// ── Load User Table ───────────────────────────────────────────
+// ── Users ─────────────────────────────────────────────────────
 let allUsers = [];
 async function loadUserTable() {
   const tbody = document.getElementById('userTableBody');
-  tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
-  try {
-    allUsers = await getAllUsers();
-    renderUserTable(allUsers);
-  } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-400">${err.message}</td></tr>`;
-  }
+  tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-zinc-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลด...</td></tr>`;
+  try { allUsers = await getAllUsers(); renderUserTable(allUsers); } 
+  catch (err) { tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-red-400">${err.message}</td></tr>`; }
 }
 
 function renderUserTable(users) {
   const tbody = document.getElementById('userTableBody');
-  if (users.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-gray-400">ไม่พบผู้ใช้งาน</td></tr>`;
-    return;
-  }
+  if (users.length === 0) return tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-zinc-500">ไม่พบผู้ใช้งาน</td></tr>`;
   tbody.innerHTML = users.map(u => {
     const badgeClass = u.role === 'admin' ? 'badge-admin' : u.role === 'director' ? 'badge-director' : 'badge-teacher';
     const roleLabel  = u.role === 'admin' ? 'Admin' : u.role === 'director' ? 'Director' : 'Teacher';
     const createdAt  = u.created_at ? new Date(u.created_at).toLocaleDateString('th-TH', { year:'2-digit', month:'short', day:'numeric' }) : '—';
     const initials   = u.name.trim().split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
-    const idLabel    = u.username ? `ID: ${u.username.toLowerCase()}` : '';
-
-    let actions = '';
-    if (u.role === 'admin') {
-      actions = `<button class="text-gray-300 cursor-not-allowed" disabled><i class="fa-solid fa-lock text-xs"></i></button>`;
-    } else {
-      actions = `
-        <button onclick="editUser('${u.id}','${u.name}')"
-          class="w-8 h-8 rounded-lg bg-violet-100 hover:bg-violet-200 text-violet-600 flex items-center justify-center transition-colors" title="แก้ไข">
-          <i class="fa-solid fa-pen text-xs"></i>
-        </button>
-        <button onclick="resetUserPassword('${u.id}','${u.name}')"
-          class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-600 flex items-center justify-center transition-colors" title="รีเซ็ตรหัสผ่าน">
-          <i class="fa-solid fa-key text-xs"></i>
-        </button>
-        <button onclick="deleteUser('${u.id}','${u.name}')"
-          class="w-8 h-8 rounded-lg bg-red-100 hover:bg-red-200 text-red-500 flex items-center justify-center transition-colors" title="ลบ">
-          <i class="fa-solid fa-trash text-xs"></i>
-        </button>`;
-    }
+    
+    let actions = u.role === 'admin' ? `<button class="text-zinc-600 text-xs cursor-not-allowed" disabled><i class="fa-solid fa-lock"></i> Protected</button>` : `
+        <button onclick="editUser('${u.id}','${u.name}')" class="text-violet-400 hover:text-violet-300 text-xs mr-3"><i class="fa-solid fa-pen-to-square mr-1"></i>แก้ไข</button>
+        <button onclick="deleteUser('${u.id}','${u.name}')" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash mr-1"></i>ลบ</button>`;
 
     return `<tr>
-      <td class="py-3.5 px-3">
+      <td class="py-3 px-3">
         <div class="flex items-center gap-3">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0">${initials}</div>
-          <div>
-            <p class="font-semibold text-gray-800 text-sm">${u.name}</p>
-            <p class="text-gray-400 text-xs">${idLabel}</p>
-          </div>
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">${initials}</div>
+          <p class="font-medium text-white text-sm">${u.name}</p>
         </div>
       </td>
-      <td class="py-3.5 px-3"><span class="${badgeClass} text-xs px-2.5 py-1 rounded-full font-medium">${roleLabel}</span></td>
-      <td class="py-3.5 px-3 text-gray-500 text-sm">${u.subject_group || '—'}</td>
-      <td class="py-3.5 px-3 text-gray-500 text-xs">${createdAt}</td>
-      <td class="py-3.5 px-3"><div class="flex items-center gap-1.5">${actions}</div></td>
+      <td class="py-3 px-3"><span class="${badgeClass} text-[10px] px-2 py-0.5 rounded-full font-medium">${roleLabel}</span></td>
+      <td class="py-3 px-3 text-zinc-400 text-xs">${u.subject_group || '—'}</td>
+      <td class="py-3 px-3 text-zinc-400 font-mono text-xs">${u.username}</td>
+      <td class="py-3 px-3 text-zinc-500 text-xs">${createdAt}</td>
+      <td class="py-3 px-3">${actions}</td>
     </tr>`;
   }).join('');
 }
 
 function filterUsers() {
   const q = document.getElementById('userSearch').value.toLowerCase();
-  const filtered = allUsers.filter(u =>
-    u.name.toLowerCase().includes(q) ||
-    (u.role || '').toLowerCase().includes(q) ||
-    (u.subject_group || '').toLowerCase().includes(q) ||
-    (u.username || '').toLowerCase().includes(q)
-  );
-  renderUserTable(filtered);
+  renderUserTable(allUsers.filter(u => u.name.toLowerCase().includes(q) || (u.role || '').toLowerCase().includes(q) || (u.username || '').toLowerCase().includes(q)));
 }
 
-// ── Overview stats (ดึงข้อมูลจริง) ───────────────────────────────
+// ── Overview ──────────────────────────────────────────────────
 async function loadOverviewStats() {
   try {
-    // 1. โหลดจำนวนผู้ใช้
     const users = await getAllUsers();
     document.getElementById('totalUsers').textContent = users.length;
-
-    // 2. โหลดจำนวนแผนการสอน
-    // ✅ เรียกใช้คอลัมน์ created_at และ updated_at สำหรับทำ Logs
+    
     const { data: plans } = await db.from('lesson_plans').select('id, status, created_at, updated_at, users(name)');
-    if (plans) {
-        document.getElementById('totalPlans').textContent = plans.length;
-    } else {
-        document.getElementById('totalPlans').textContent = "0";
-    }
+    document.getElementById('totalPlans').textContent = plans ? plans.length : "0";
 
-    // 3. ตรวจสอบ API Keys จาก Setting
     const dKey = await getSystemSetting('drive_folder_id');
-
     const driveStatus = document.getElementById('driveStatus');
-    const driveSub    = document.getElementById('driveSubtext');
-    const driveWrapper = document.getElementById('driveStorageWrapper');
-    const driveStorageText = document.getElementById('driveStorageText');
-    const driveBarFill = document.getElementById('driveBarFill');
-
+    const driveSub = document.getElementById('driveSubtext');
     if (dKey) {
-        driveStatus.innerHTML = `<span class="text-blue-500">เชื่อมต่อแล้ว</span>`;
+        driveStatus.innerHTML = `<i class="fa-solid fa-circle-check text-xs"></i> Connected`;
+        driveStatus.className = 'text-green-400 font-semibold text-sm flex items-center gap-1';
         driveSub.textContent  = `Folder ID: ${dKey}`;
-        
-        // โชว์ความจุ (เป็นค่าจำลองหน้าตา UI ตามที่ร้องขอ เพื่อให้แสดงหลอด GB/TB)
-        driveWrapper.classList.remove('hidden');
-        driveStorageText.textContent = 'ใช้ไป 8.6 GB จาก 5 TB';
-        driveBarFill.style.width = '15%'; // เปอร์เซ็นต์ความจุ
-        driveBarFill.className = 'drive-fill bg-blue-500';
     } else {
-        driveStatus.innerHTML = `<span class="text-red-500">ยังไม่เชื่อมต่อ</span>`;
-        driveSub.textContent  = "กรุณาใส่ Folder ID";
-        driveWrapper.classList.add('hidden');
+        driveStatus.innerHTML = `<i class="fa-solid fa-circle-exclamation text-xs"></i> Disconnected`;
+        driveStatus.className = 'text-red-400 font-semibold text-sm flex items-center gap-1';
+        driveSub.textContent  = "ยังไม่ได้ตั้งค่า Google Drive Folder ID";
     }
 
-    // 4. สร้างบันทึกกิจกรรมล่าสุดแบบ Real-time (ดึงจากผู้ใช้และแผน)
     let logs = [];
-    users.forEach(u => {
-        logs.push({
-            time: new Date(u.created_at || Date.now()),
-            typeText: 'NEW USER', color: 'text-blue-500',
-            msg: `เพิ่มผู้ใช้ใหม่: ${u.name} (${u.role})`
-        });
-    });
-
+    users.forEach(u => logs.push({ time: new Date(u.created_at || Date.now()), type: 'ok', msg: `New user created: ${u.name} (${u.role})` }));
     if (plans) {
         plans.forEach(p => {
-            let msg = '', color = 'text-emerald-500', typeText = 'SUBMIT';
-            let logTime = new Date(p.created_at || Date.now()); // ใช้ created_at เป็น default
-
-            if (p.status === 'Pending') {
-                msg = `คุณครู ${p.users?.name || 'ไม่ทราบชื่อ'} ส่งแผนการสอนเข้าสู่ระบบ`;
-                color = 'text-blue-500'; typeText = 'SUBMIT';
-            } else if (p.status === 'Approved') {
-                msg = `ผู้อำนวยการ อนุมัติแผนการสอนของ ${p.users?.name || 'ไม่ทราบชื่อ'} แล้ว`;
-                color = 'text-emerald-500'; typeText = 'APPROVE';
-                if(p.updated_at) logTime = new Date(p.updated_at);
-            } else if (p.status === 'Revision Needed') {
-                msg = `ผู้อำนวยการ ตีกลับแผนของ ${p.users?.name || 'ไม่ทราบชื่อ'} ให้แก้ไขใหม่`;
-                color = 'text-red-500'; typeText = 'REVISION';
-                if(p.updated_at) logTime = new Date(p.updated_at);
-            }
-            
-            logs.push({
-                time: logTime,
-                typeText: typeText, color: color, msg: msg
-            });
+            let logTime = new Date(p.created_at || Date.now());
+            if (p.status === 'Pending') logs.push({ time: logTime, type: 'info', msg: `User ${p.users?.name} uploaded a lesson plan` });
+            else if (p.status === 'Approved') logs.push({ time: p.updated_at ? new Date(p.updated_at) : logTime, type: 'ok', msg: `Director approved lesson plan from ${p.users?.name}` });
+            else if (p.status === 'Revision Needed') logs.push({ time: p.updated_at ? new Date(p.updated_at) : logTime, type: 'warn', msg: `Director requested revision for ${p.users?.name}` });
         });
     }
-
-    // เรียงลำดับเวลาจากใหม่ไปเก่า
+    
     logs.sort((a,b) => b.time - a.time);
-    const topLogs = logs.slice(0, 6);
     const logBody = document.getElementById('logTableBody');
-
-    if (topLogs.length > 0) {
-        logBody.innerHTML = topLogs.map(l => `
-          <tr class="log-row">
-            <td class="py-3 pr-4 text-gray-400 text-[11px] whitespace-nowrap w-24">
-              ${l.time.toLocaleDateString('th-TH', {day:'numeric', month:'short'})} <br/>
-              ${l.time.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}
-            </td>
-            <td class="py-3 pr-5 w-24"><span class="${l.color} font-bold text-[10px] tracking-wider">${l.typeText}</span></td>
-            <td class="py-3 text-gray-700 text-sm">${l.msg}</td>
-          </tr>
+    if (logs.length > 0) {
+        logBody.innerHTML = logs.slice(0, 6).map(l => `
+          <div class="log-item log-${l.type} relative">
+            <span class="text-xs text-zinc-500 mr-3">${l.time.toLocaleDateString('th-TH',{day:'numeric',month:'short'})} ${l.time.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}</span>
+            <span class="text-zinc-300 text-sm">${l.msg}</span>
+          </div>
         `).join('');
     } else {
-        logBody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400">ยังไม่มีบันทึกระบบ</td></tr>`;
+        logBody.innerHTML = `<div class="text-zinc-500 text-sm py-4 text-center">ยังไม่มีบันทึกระบบ</div>`;
     }
-
-  } catch (err) {
-    console.error(err);
-  }
+  } catch (err) {}
 }
-loadOverviewStats();
 
-// ── Toggle upload ─────────────────────────────────────────────
+// ── Settings ──────────────────────────────────────────────────
 let uploadOpen = true;
-async function toggleUpload() {
+function toggleUpload() {
   uploadOpen = !uploadOpen;
-  const track = document.getElementById('toggleTrack');
-  const thumb = document.getElementById('toggleThumb');
-  if (uploadOpen) {
-    track.style.background = '#22c55e';
-    thumb.style.transform  = 'translateX(0)';
-  } else {
-    track.style.background = '#d1d5db';
-    thumb.style.transform  = 'translateX(22px)';
-  }
-  try { await saveSystemSetting('upload_open', uploadOpen ? 'true' : 'false'); } catch (_) {}
-  Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-    title: uploadOpen ? 'เปิดรับการส่งแผนแล้ว' : 'ปิดรับการส่งแผนแล้ว',
-    showConfirmButton:false, timer:2000 });
+  const track = document.getElementById('toggleTrack'), thumb = document.getElementById('toggleThumb');
+  if (uploadOpen) { track.classList.add('bg-violet-600'); track.classList.remove('bg-zinc-700'); thumb.style.transform='translateX(24px)'; }
+  else { track.classList.remove('bg-violet-600'); track.classList.add('bg-zinc-700'); thumb.style.transform='translateX(0)'; }
+  saveSystemSetting('upload_open', uploadOpen ? 'true' : 'false').catch(()=>{});
+  Swal.fire({ toast:true, position:'bottom-end', icon:'success', title: uploadOpen ? 'เปิดรับการส่งแผนแล้ว' : 'ปิดรับการส่งแผนแล้ว', showConfirmButton:false, timer:2000, background:'#18181b', color:'#e4e4e7' });
 }
 
-// ── Load Settings ─────────────────────────────────────────────
 async function loadSettings() {
   try {
-    const termVal   = await getSystemSetting('current_term');
+    // โหลดโลโก้โรงเรียนมาแสดงพรีวิว
+    const logo = await getSystemSetting('school_logo');
+    if (logo) {
+      document.getElementById('previewSchoolLogo').src = logo;
+      document.getElementById('previewSchoolLogo').classList.remove('hidden');
+      document.getElementById('placeholderSchoolLogo').classList.add('hidden');
+    }
+
+    const termVal = await getSystemSetting('current_term');
+    if (termVal) document.getElementById('termSelect').value = termVal;
+
     const uploadVal = await getSystemSetting('upload_open');
-    if (termVal) {
-      const sel = document.getElementById('termSelect');
-      for (const opt of sel.options) { if (opt.value === termVal || opt.text === termVal) { opt.selected = true; break; } }
-    }
-    if (uploadVal !== null) {
-      uploadOpen = uploadVal === 'true';
-      const track = document.getElementById('toggleTrack');
-      const thumb = document.getElementById('toggleThumb');
-      track.style.background = uploadOpen ? '#22c55e' : '#d1d5db';
-      thumb.style.transform  = uploadOpen ? 'translateX(0)' : 'translateX(22px)';
+    if (uploadVal !== null) { 
+      uploadOpen = (uploadVal === 'true'); 
+      const track = document.getElementById('toggleTrack'), thumb = document.getElementById('toggleThumb'); 
+      if (uploadOpen) { track.classList.add('bg-violet-600'); track.classList.remove('bg-zinc-700'); thumb.style.transform='translateX(24px)'; }
+      else { track.classList.remove('bg-violet-600'); track.classList.add('bg-zinc-700'); thumb.style.transform='translateX(0)'; }
     }
   } catch (_) {}
 }
 
-// ── Load Integrations ─────────────────────────────────────────
 async function loadIntegrations() {
-  try {
-    const dKey = await getSystemSetting('drive_folder_id');
-    if (dKey) document.getElementById('driveFolder').value = dKey;
-  } catch (_) {}
+  try { const dKey = await getSystemSetting('drive_folder_id'); if (dKey) document.getElementById('driveFolder').value = dKey; } catch (_) {}
 }
 
-// ── Save Term ─────────────────────────────────────────────────
 async function saveTerm() {
   const term = document.getElementById('termSelect').value;
-  try {
-    await saveSystemSetting('current_term', term);
-    Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-      title:`บันทึกภาคเรียน ${term} เรียบร้อย`, showConfirmButton:false, timer:2500 });
-  } catch (err) {
-    Swal.fire({ toast:true, position:'bottom-end', icon:'error', title:err.message, showConfirmButton:false, timer:3000 });
-  }
-}
-
-// ── Save Key ──────────────────────────────────────────────────
-function toggleVisibility(id, btn) {
-  const input = document.getElementById(id);
-  const show  = input.type === 'password';
-  input.type  = show ? 'text' : 'password';
+  try { await saveSystemSetting('current_term', term); Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:`บันทึกภาคเรียน ${term} เรียบร้อย`, showConfirmButton:false, timer:2500, background:'#18181b', color:'#e4e4e7' }); } 
+  catch (err) { Swal.fire({ icon:'error', title:err.message, background:'#18181b', color:'#e4e4e7' }); }
 }
 
 async function saveKey(type) {
   try {
-    if (type === 'drive') {
-      await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
-    }
-    Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-      title:`บันทึก ${type === 'gemini' ? 'Gemini API Key' : 'Drive Folder ID'} เรียบร้อย`,
-      showConfirmButton:false, timer:2500 });
-  } catch (err) {
-    Swal.fire({ toast:true, position:'bottom-end', icon:'error', title:err.message, showConfirmButton:false, timer:3000 });
-  }
+    if (type === 'drive') await saveSystemSetting('drive_folder_id', document.getElementById('driveFolder').value);
+    Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:`บันทึก Folder ID เรียบร้อย`, showConfirmButton:false, timer:2500, background:'#18181b', color:'#e4e4e7' });
+  } catch (err) { Swal.fire({ icon:'error', title:err.message, background:'#18181b', color:'#e4e4e7' }); }
 }
 
-function openDriveFolder() {
-  const folderId = document.getElementById('driveFolder').value.trim();
-  if (folderId) window.open(`https://drive.google.com/drive/folders/${folderId}`, '_blank');
-}
-
-// ── Add User Modal ────────────────────────────────────────────
+// ── Modals & Actions ──────────────────────────────────────────
 function openAddUserModal() {
   Swal.fire({
-    width: 520,
-    title: '<span style="font-family:Kanit">สร้างบัญชีผู้ใช้งานใหม่</span>',
-    html: `<div style="font-family:Sarabun;text-align:left;font-size:14px;display:grid;gap:12px">
-      <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">ชื่อ-นามสกุล *</label>
-        <input id="su-name" type="text" placeholder="นายตัวอย่าง ชื่อนี้"
-          style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px"/></div>
+    width:520, background:'#18181b', color:'#e4e4e7', title:'<span style="font-family:Kanit">เพิ่มผู้ใช้งานใหม่</span>',
+    html:`<div style="font-family:Sarabun;text-align:left;font-size:14px;display:grid;gap:12px">
+      <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">ชื่อ-นามสกุล *</label><input id="su-name" type="text" placeholder="นายตัวอย่าง ชื่อนี้" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;outline:none"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">บทบาท *</label>
-          <select id="su-role"
-            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px">
-            <option value="teacher">Teacher (ครู)</option>
-            <option value="director">Director (ผู้อำนวยการ)</option>
-          </select></div>
-        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">กลุ่มสาระ</label>
-          <input id="su-group" type="text" placeholder="คณิตศาสตร์..."
-            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:Sarabun;font-size:13px"/></div>
+        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">บทบาท *</label><select id="su-role" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;outline:none"><option value="teacher">teacher</option><option value="director">director</option></select></div>
+        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">กลุ่มสาระ</label><input id="su-group" type="text" placeholder="วิทยาศาสตร์..." style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;outline:none"/></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">Username *</label>
-          <input id="su-username" type="text" placeholder="teacher03"
-            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:monospace;font-size:13px"/></div>
-        <div><label style="color:#6b7280;font-size:12px;display:block;margin-bottom:4px">รหัสผ่านชั่วคราว *</label>
-          <input id="su-pass" type="text" placeholder="Teacher@0000"
-            style="width:100%;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:monospace;font-size:13px"/></div>
+        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">Username *</label><input id="su-username" type="text" placeholder="teacher03" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:monospace;outline:none"/></div>
+        <div><label style="color:#71717a;font-size:12px;display:block;margin-bottom:4px">Temp Password *</label><input id="su-pass" type="text" placeholder="Teacher@0000" style="width:100%;background:#09090b;border:1px solid rgba(63,63,70,.8);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:monospace;outline:none"/></div>
       </div>
     </div>`,
-    showCancelButton: true, cancelButtonText: 'ยกเลิก',
-    confirmButtonText: '<i class="fa-solid fa-plus mr-1"></i> สร้างบัญชี',
-    confirmButtonColor: '#7c3aed', cancelButtonColor: '#6b7280',
+    showCancelButton:true, cancelButtonText:'ยกเลิก', confirmButtonText:'<i class="fa-solid fa-plus mr-1"></i>สร้างบัญชี',
+    confirmButtonColor:'#7c3aed', cancelButtonColor:'#3f3f46',
     preConfirm: async () => {
-      const name     = document.getElementById('su-name').value.trim();
-      const username = document.getElementById('su-username').value.trim();
-      const pass     = document.getElementById('su-pass').value;
-      if (!name || !username || !pass) {
-        Swal.showValidationMessage('กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); return false;
-      }
-      const newUser = { name, role: document.getElementById('su-role').value,
-        subject_group: document.getElementById('su-group').value, username, temp_password: pass };
-      try { await addNewUser(newUser); } catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
-      return newUser;
+      const name = document.getElementById('su-name').value, username = document.getElementById('su-username').value, pass = document.getElementById('su-pass').value;
+      if (!name||!username||!pass) { Swal.showValidationMessage('กรุณากรอกข้อมูลที่จำเป็นให้ครบ'); return false; }
+      const newUser = { name: name, role: document.getElementById('su-role').value, subject_group: document.getElementById('su-group').value, username: username, temp_password: pass };
+      await addNewUser(newUser); return newUser;
     }
-  }).then(result => {
-    if (result.isConfirmed) {
-      Swal.fire({ icon:'success', title:'<span style="font-family:Kanit">สร้างบัญชีสำเร็จ</span>',
-        text:`บัญชี ${result.value.username} ถูกสร้างแล้ว`, confirmButtonColor:'#7c3aed' });
-      loadUserTable();
-    }
-  });
+  }).then(result => { if (result.isConfirmed) { Swal.fire({icon:'success',background:'#18181b',color:'#e4e4e7',title:'<span style="font-family:Kanit">สร้างบัญชีสำเร็จ</span>',text:`บัญชี ${result.value.username} ถูกสร้างแล้ว`,confirmButtonColor:'#7c3aed'}); loadUserTable(); } });
 }
 
-// ── Edit User ─────────────────────────────────────────────────
-function editUser(userId, userName) {
-  Swal.fire({ toast:true, position:'bottom-end', icon:'info',
-    title:`แก้ไขผู้ใช้: ${userName}`, showConfirmButton:false, timer:2000 });
-}
+function editUser(username) { Swal.fire({ toast:true, position:'bottom-end', icon:'info', title:`แก้ไขผู้ใช้ยังไม่เปิดใช้งาน`, showConfirmButton:false, timer:2000, background:'#18181b', color:'#e4e4e7' }); }
+function deleteUser(id, name) { Swal.fire({ toast:true, position:'bottom-end', icon:'info', title:`ลบผู้ใช้ยังไม่เปิดใช้งาน`, showConfirmButton:false, timer:2000, background:'#18181b', color:'#e4e4e7' }); }
 
-// ── Reset Password ────────────────────────────────────────────
-function resetUserPassword(userId, userName) {
-  Swal.fire({ toast:true, position:'bottom-end', icon:'info',
-    title:`รีเซ็ตรหัสผ่าน: ${userName}`, showConfirmButton:false, timer:2000 });
-}
-
-// ── Delete User ───────────────────────────────────────────────
-function deleteUser(userId, userName) {
-  Swal.fire({
-    icon:'warning', title:`<span style="font-family:Kanit">ลบผู้ใช้งาน?</span>`,
-    text:`คุณต้องการลบบัญชี "${userName}" หรือไม่?`,
-    showCancelButton:true, confirmButtonText:'ลบ', cancelButtonText:'ยกเลิก',
-    confirmButtonColor:'#dc2626', cancelButtonColor:'#6b7280',
-  }).then(async r => {
-    if (r.isConfirmed) {
-      Swal.fire({ toast:true, position:'bottom-end', icon:'success',
-        title:`ลบบัญชี ${userName} เรียบร้อย`, showConfirmButton:false, timer:2000 });
-      loadUserTable();
-    }
-  });
-}
-
-// ── Archive Data ──────────────────────────────────────────────
-function archiveData() {
-  Swal.fire({
-    icon:'question', title:'<span style="font-family:Kanit">Archive ข้อมูลสิ้นปี?</span>',
-    text:'ระบบจะย้ายแผนการสอนปีปัจจุบันไปเก็บใน Archive คุณต้องการดำเนินการหรือไม่?',
-    showCancelButton:true, confirmButtonText:'ดำเนินการ', cancelButtonText:'ยกเลิก',
-    confirmButtonColor:'#7c3aed', cancelButtonColor:'#6b7280',
-  }).then(r => {
-    if (r.isConfirmed) {
-      Swal.fire({ icon:'success', title:'<span style="font-family:Kanit">Archive เสร็จสิ้น</span>',
-        text:'ข้อมูลถูกย้ายไปยัง Archive เรียบร้อยแล้ว', confirmButtonColor:'#7c3aed' });
-    }
-  });
-}
-
-// ── Factory Reset ─────────────────────────────────────────────
 function factoryReset() {
   Swal.fire({
-    icon:'warning', iconColor:'#ef4444',
-    title:'<span style="font-family:Kanit;color:#dc2626">⚠️ Factory Reset</span>',
-    html:`<div style="font-family:Sarabun;font-size:14px">
-      <p style="color:#6b7280;margin-bottom:12px">การกระทำนี้จะ<strong style="color:#dc2626">ลบข้อมูลทั้งหมด</strong>ออกจากระบบ รวมถึงแผนการสอนและการตั้งค่าทั้งหมด</p>
-      <p style="color:#6b7280;margin-bottom:16px">พิมพ์ <code style="background:#fef2f2;padding:2px 6px;border-radius:4px;color:#dc2626;font-size:12px">RESET CONFIRM</code> เพื่อยืนยัน</p>
-      <input id="resetConfirm" type="text" placeholder="RESET CONFIRM"
-        style="width:100%;background:#f9fafb;border:1px solid #fca5a5;border-radius:10px;padding:10px 12px;color:#1f2937;font-family:monospace;font-size:13px;text-align:center"/>
-    </div>`,
-    showCancelButton:true, cancelButtonText:'ยกเลิก', confirmButtonText:'ลบข้อมูล',
-    confirmButtonColor:'#dc2626', cancelButtonColor:'#6b7280',
-    preConfirm: async () => {
-      if (document.getElementById('resetConfirm').value !== 'RESET CONFIRM') {
-        Swal.showValidationMessage('ข้อความยืนยันไม่ถูกต้อง'); return false;
-      }
-      try { await resetDatabase(); } catch (err) { Swal.showValidationMessage(`❌ ${err.message}`); return false; }
-      return true;
+    background:'#18181b', color:'#e4e4e7', icon:'warning', iconColor:'#ef4444', title:'<span style="font-family:Kanit;color:#f87171">⚠️ Factory Reset</span>',
+    html:`<div style="font-family:Sarabun;font-size:14px"><p style="color:#a1a1aa;margin-bottom:12px">การกระทำนี้จะลบข้อมูลแผนการสอนทั้งหมดออกจากระบบ</p><p style="color:#a1a1aa;margin-bottom:16px">พิมพ์ <code style="background:#09090b;padding:2px 6px;border-radius:4px;color:#f87171;font-size:12px">RESET CONFIRM</code> เพื่อยืนยัน</p><input id="resetConfirm" type="text" placeholder="RESET CONFIRM" style="width:100%;background:#09090b;border:1px solid rgba(239,68,68,.4);border-radius:8px;padding:10px 12px;color:#e4e4e7;font-family:monospace;font-size:13px;text-align:center;outline:none"/></div>`,
+    showCancelButton:true, cancelButtonText:'ยกเลิก', confirmButtonText:'ล้างข้อมูล', confirmButtonColor:'#dc2626', cancelButtonColor:'#3f3f46',
+    preConfirm: async () => { 
+      if (document.getElementById('resetConfirm').value !== 'RESET CONFIRM') { Swal.showValidationMessage('ข้อความยืนยันไม่ถูกต้อง'); return false; } 
+      // await resetDatabase(); // TODO: เปิดใช้งานเมื่อต้องการล้างฐานข้อมูลจริงๆ
+      return true; 
     }
-  }).then(r => {
-    if (r.isConfirmed) {
-      Swal.fire({ icon:'success', title:'Reset เสร็จสิ้น', text:'ระบบถูกรีเซ็ตเรียบร้อยแล้ว', confirmButtonColor:'#7c3aed' });
-      loadOverviewStats();
-    }
-  });
+  }).then(r => { if (r.isConfirmed) Swal.fire({ icon:'success', background:'#18181b', color:'#e4e4e7', title:'Reset เสร็จสิ้น', text:'จำลองการรีเซ็ตระบบเรียบร้อยแล้ว', confirmButtonColor:'#7c3aed' }); });
 }
+
+function logout() { window.location.href = 'index.html'; }
+
+// Init
+loadOverviewStats();
 </script>
 </body>
 </html>
